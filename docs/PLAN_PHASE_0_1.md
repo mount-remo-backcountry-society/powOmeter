@@ -15,10 +15,26 @@ sheet, Looker, Avalanche Canada). Nothing is published.
 | D1 | Repo location | **Decided:** this folder |
 | D2 | Private until phase 2 | **Decided:** yes. Going public can't be undone, so develop privately, scan the full history, then transfer to the MRBS organization and make it public at the start of phase 2 |
 | D3 | Firmware eras | **Decided (2026-10-03):** no deployment record exists; **every firmware before v1.3 sent the minimum.** So there are two eras: before 2026-09-26 `min`, from 2026-09-26 `median` |
-| D4 | Past sensor heights | **Answered:** Julian **raised the sensor several times during the season as snow built up.** The Field-tab values (2025-01-26 4.10 m, 2025-09-30 4.45 m, 2026-03-07 5.09 m, 2026-09-26 3.82 m) are therefore references for different mounting periods, not one sensor height, and **some re-mounts may be unrecorded.** Plan: task 1f detects re-mounts in the SD data and Julian confirms them |
+| D4 | Past sensor heights | **Answered:** Julian **raised the sensor several times during the season as snow built up**, and at each visit **adjusted the sheet's offset so the computed snow depth matched the depth he probed under the sensor**. So the Field-tab values are back-calculated offsets. Phase 1 records the probed depths and lets the pipeline compute each reference. The Field-tab values (2025-01-26 4.10 m, 2025-09-30 4.45 m, 2026-03-07 5.09 m, 2026-09-26 3.82 m) are therefore references for different mounting periods, not one sensor height, and **some re-mounts may be unrecorded.** Plan: task 1f detects re-mounts in the SD data and Julian confirms them |
 | D5 | Python dependencies | Python 3.12 with `pandas`, `pyyaml` and `pytest`, at fixed versions (explained to Julian 2026-10-03; awaiting his OK) |
 
 ## Phase 0: Foundations (about 1–2 sessions)
+
+**Progress (2026-10-03):**
+- **Done:** 0.2–0.9. Local repo initialised; first commit `bb74719`. The
+  privacy hook is installed, and the full-history scan is clean. Tested:
+  - fake secrets are blocked: IMEI, email address, sheet ID, published-sheet
+    ID, coordinates near a dummy home location
+  - harmless strings pass
+  - the check catches the **real** IMEI and sheet ID in the local deployed
+    script. A Luhn filter was removed after it let the real IMEI through
+  - the raw-immutability check, in a throwaway clone (add passes; modify and
+    delete fail)
+- **Open:**
+  - 0.1: MRBS request (Julian)
+  - 0.10: backup of the local-only files (Julian)
+  - 0.11: private GitHub repo and first push (needs Julian's go-ahead)
+  - Julian to create `.private/home_coords.txt`
 
 | # | Task | Who | Done when |
 |---|---|---|---|
