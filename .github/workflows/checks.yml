@@ -1,0 +1,45 @@
+name: checks
+
+# Runs on every push and pull request.
+#  - privacy: rejects IMEIs, spreadsheet IDs and email addresses in any
+#    tracked file and in the full history (patterns only; the home-location
+#    check runs locally in the pre-commit hook).
+#  - raw-immutable: rejects changes to existing files under raw/.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  privacy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Tracked files
+        run: python tools/privacy_check.py
+      - name: Full history
+        run: python tools/privacy_check.py --history
+
+  raw-immutable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Existing raw files unchanged
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python tools/raw_immutable.py "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"
+          else
+            python tools/raw_immutable.py "${{ github.event.before }}" "${{ github.sha }}"
+          fi

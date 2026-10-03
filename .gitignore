@@ -1,0 +1,51 @@
+# POW-O-METER: files that must NEVER be committed.
+# This repository will become public. Anything committed stays in history
+# forever, so this list was written before the first commit.
+# See docs/DATA_PIPELINE_DESIGN.md §10 and docs/PLAN_PHASE_0_1.md task 0.2.
+# (Comments must be on their own line: in .gitignore a trailing "# ..." is
+# part of the pattern.)
+
+# --- Private or third-party material (local only) -------------------------
+# Email threads with third parties
+misc/
+# Vendor PDFs; notes and an email with a personal address
+resources/
+# Employer's (work) data
+data/Aquarius/
+# Sheet exports: contain full email bodies
+data/Google Sheet/
+# BC MoTI observations: "Access Only" licence, no reproduction without permission
+data/PCDS/
+# Licensing evidence: a BC government web page and catalogue records that
+# list named government staff. Kept local; docs/research/evidence/README.md
+# describes and links them.
+docs/research/evidence/*.html
+docs/research/evidence/*.json
+# Original RockBLOCK export: Approx Lat/Lng locates a private address
+data/RockBLOCK/messages-export-*.csv
+# Old Apps Script: contains a personal email address
+scripts/Google Apps script.txt
+# Deployed Apps Script copy: contains the IMEI and spreadsheet ID
+scripts/Google Apps script v2.js
+# Claude session notes
+claude resume session *.txt
+# Local secrets, e.g. home coordinates for the privacy hook
+.private/
+
+# --- Derived output (rebuilt by the pipeline, never committed) ------------
+data/Cleaned/
+out/
+tests/reference/
+
+# --- Not yet imported (phase 1 moves these to raw/sd/) ---------------------
+data/Site Visits/
+
+# --- Tooling ---------------------------------------------------------------
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.xlsx
+~$*
+.DS_Store
+Thumbs.db

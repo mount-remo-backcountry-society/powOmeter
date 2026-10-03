@@ -1,0 +1,4 @@
+# Email addresses that may appear in committed files: published ROLE
+# addresses only, never a named person. One per line, case-insensitive.
+TTWebmaster@gov.bc.ca
+research@avalanche.ca

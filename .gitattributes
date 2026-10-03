@@ -1,0 +1,16 @@
+# Raw and data files are stored byte-for-byte: no line-ending conversion.
+# This machine has core.autocrlf=true; without these rules git would rewrite
+# CR/LF in CSV files, breaking raw immutability and recorded SHA-256 checksums.
+raw/**      -text
+*.csv       -text
+*.CSV       -text
+*.jsonl     -text
+*.json      -text
+
+# Firmware and scripts: normal text handling.
+*.ino       text eol=lf
+*.py        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.md        text eol=lf
+*.sh        text eol=lf
