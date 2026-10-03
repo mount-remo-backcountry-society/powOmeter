@@ -33,7 +33,9 @@ sheet, Looker, Avalanche Canada). Nothing is published.
 - **Open:**
   - 0.1: MRBS request (Julian)
   - 0.10: backup of the local-only files (Julian)
-  - 0.11: private GitHub repo and first push (needs Julian's go-ahead)
+  - ~~0.11~~ **done 2026-10-03:** private repo `j-krick/powOmeter` created and
+    pushed. The first CI run is green: privacy scan of the tracked files and
+    the full history clean; raw-immutability check passed
   - Julian to create `.private/home_coords.txt`
 
 | # | Task | Who | Done when |
