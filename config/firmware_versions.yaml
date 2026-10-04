@@ -1,0 +1,19 @@
+# Firmware eras: what the station's RADIO message carried.
+# The SD card always logs the burst minimum, maximum and median; only the
+# radio's single distance value changed. Mixing minimum and median in one
+# series would put a ~7 cm step into snow depth (independent review F5).
+
+eras:
+  - name: pre-v1.3
+    from: 2025-01-26T18:58:34Z
+    until: 2026-09-26T20:45:00Z
+    radio_distance_statistic: min
+    notes: "Individual versions (v1.1, the 2026-01-23 field patch) are not recorded; all sent the minimum (Julian, 2026-10-03)."
+
+  - name: v1.3
+    from: 2026-09-26T20:45:00Z
+    until: null
+    radio_distance_statistic: median
+    notes: "scripts/POW_O_METER_v1_3.ino"
+
+no_echo_cm: [498, 499, 500]     # radio values meaning "no echo"

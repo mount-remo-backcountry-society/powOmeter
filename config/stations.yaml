@@ -1,0 +1,43 @@
+# Stations whose data this repository processes.
+# type   = which decoder reads it (one module per type in powometer/decoders/)
+# publish = whether its values may appear in published files and on the site
+#
+# The BC Ministry of Transportation & Infrastructure (MoTI) stations are listed
+# but NOT enabled: their observations are "Access Only" (reproduction needs
+# written permission). See docs/DATA_PIPELINE_DESIGN.md §10.
+
+stations:
+  - id: powometer
+    name: POW-O-METER
+    operator: Mount Remo Backcountry Society
+    type: powometer
+    enabled: true
+    publish: true
+    licence: CC-BY-4.0
+
+  - id: avcan_56
+    name: Kasiks High
+    operator: BC Ministry of Transportation & Infrastructure
+    type: avalanche_canada
+    source: {avalanche_canada_id: 56, pcds_native_id: "52322"}
+    enabled: false
+    publish: false
+    licence: "Access Only (BC MoTI); permission requested 2026-10"
+
+  - id: avcan_57
+    name: Kasiks Low
+    operator: BC Ministry of Transportation & Infrastructure
+    type: avalanche_canada
+    source: {avalanche_canada_id: 57, pcds_native_id: "52325"}
+    enabled: false
+    publish: false
+    licence: "Access Only (BC MoTI); permission requested 2026-10"
+
+  - id: avcan_58
+    name: Shames (bottom of the hill)
+    operator: BC Ministry of Transportation & Infrastructure
+    type: avalanche_canada
+    source: {avalanche_canada_id: 58}
+    enabled: false
+    publish: false
+    licence: "Access Only (BC MoTI); permission requested 2026-10"

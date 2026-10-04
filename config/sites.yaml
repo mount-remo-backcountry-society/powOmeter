@@ -1,0 +1,25 @@
+# Physical sites. Snow depth is never combined across sites.
+# Times are UTC. A reading belongs to the site whose [from, until) contains it;
+# readings between sites (during a move) belong to none and are not published
+# as station data.
+
+sites:
+  - id: shames_top_a
+    station: powometer
+    name: Shames top, original site (wind-affected)
+    latitude: 54.49837
+    longitude: -128.96421
+    elevation_m: 1150
+    from: 2025-01-26T18:58:34Z      # deployment (pressure step in the SD record)
+    until: 2026-09-26T18:15:00Z     # move started 11:15 local (UTC-7)
+    notes: "Wind scouring and loading affected snow depth."
+
+  - id: shames_top_b
+    station: powometer
+    name: Shames top, current site
+    latitude: 54.49819
+    longitude: -128.96317
+    elevation_m: 1150
+    from: 2026-09-26T20:45:00Z      # in place by 13:45 local; v1.3 started after
+    until: null
+    notes: "About 70 m from site A, same elevation, less wind-affected."

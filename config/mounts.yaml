@@ -1,0 +1,94 @@
+# Sensor mounting periods and their snow-depth reference.
+#
+#   snow depth = reference - measured distance
+#
+# reference = distance from the sensor face to BARE GROUND for that mounting.
+# It changes every time the sensor is re-mounted (it was raised during
+# seasons as snow built up, and lowered in June 2026).
+#
+# How a reference is obtained, best first:
+#   bare_ground  - median distance while the ground under the sensor was bare
+#   tape         - measured directly at a visit
+#   chained      - previous reference + the distance step at the re-mount
+#                  (snow cannot change within minutes)
+#   field_offset - the offset typed into the Google Sheet "Field" tab at a
+#                  visit (back-calculated to match a probed snow depth)
+#
+# quality: good | estimate. Snow depth from an "estimate" mounting is labelled
+# quality "estimate" and stays unapproved until reviewed.
+# Analysis behind these values: docs/PLAN_PHASE_0_1.md §1f (2026-10-04).
+
+mounts:
+  - id: M1
+    site: shames_top_a
+    from: 2025-01-26T18:58:34Z
+    until: 2025-09-28T18:03:32Z
+    reference_m: 4.51
+    method: bare_ground
+    uncertainty_m: 0.08
+    quality: good
+    notes: >
+      Median distance over bare ground 2025-07-10..09-27 (6,752 readings).
+      The installation offset in the Field tab was 4.10 (2.6 above snow +
+      1.5 probed): about 0.4 m too small, the cause of the old -0.5 m
+      snow-depth floor.
+
+  - id: M2
+    site: shames_top_a
+    from: 2025-09-28T20:37:41Z
+    until: 2025-12-30T00:00:00Z
+    reference_m: 4.60
+    method: bare_ground
+    uncertainty_m: 0.10
+    quality: estimate
+    notes: >
+      Re-mounted 2025-09-28 (probably; distance steps +0.15..0.18 m).
+      Bare-ground median right after the re-mount. Labelled estimate because
+      the 2025-26 season does not reconcile (see M3). Field-tab offset 4.45.
+
+  - id: M2b
+    site: shames_top_a
+    from: 2025-12-30T00:00:00Z
+    until: 2026-03-07T19:33:07Z
+    reference_m: 4.60
+    method: chained
+    uncertainty_m: 0.6
+    quality: estimate
+    notes: >
+      Visit 2025-12-30 after a logging gap (station issue); re-mount unknown.
+      Carried from M2. Chaining back from summer 2026 suggests about 4.0 m,
+      so something may have changed here (re-mount, or the mast tilting).
+      To be resolved in the season review.
+
+  - id: M3
+    site: shames_top_a
+    from: 2026-03-07T20:39:40Z
+    until: 2026-06-19T18:55:39Z
+    reference_m: 5.09
+    method: field_offset
+    uncertainty_m: 0.6
+    quality: estimate
+    notes: >
+      Raised 2026-03-07 (distance step +0.76 m). Never saw bare ground.
+      Back-chained from M4: 3.12 + 1.64 = 4.76; forward-chained from M2:
+      4.60 + 0.76 = 5.36; the Field-tab value 5.09 is used until reviewed.
+
+  - id: M4
+    site: shames_top_a
+    from: 2026-06-19T19:45:33Z
+    until: 2026-09-26T18:15:00Z
+    reference_m: 3.12
+    method: bare_ground
+    uncertainty_m: 0.08
+    quality: good
+    notes: "Lowered 2026-06-19 (step -1.64 m). Bare-ground median 2026-07-10..09-25 (6,667 readings)."
+
+  - id: M5
+    site: shames_top_b
+    from: 2026-09-26T20:45:00Z
+    until: null
+    reference_m: 3.82
+    method: tape
+    uncertainty_m: 0.02
+    quality: good
+    notes: "New site. Tape 3.82 m on bare ground; v1.3 reads 3.81-3.84 m."

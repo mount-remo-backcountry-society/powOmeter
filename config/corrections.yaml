@@ -1,0 +1,43 @@
+# Manual corrections: an ordered list of operations applied to the data
+# after automatic quality control. Raw data is never changed.
+#
+# Each entry needs: id, op, station, variable (or "all"), a target
+# (message: transmit time of one satellite message, or from/until: a UTC
+# window), reason, by (initials) and date.
+#
+# op: delete        value kept but marked quality "poor" (excluded from best.csv)
+#     spike_filter  params: {max_step, window}
+#     threshold     params: {min, max}
+#     gap_fill      params: {max_gap}
+#     offset        params: {value}          (added to the value)
+#     drift         params: {start, end}     (linear, added from 'from' to 'until')
+# Units follow the variable (snow depth in cm).
+
+corrections:
+  - id: C001
+    op: delete
+    station: powometer
+    variable: all
+    message: 2025-01-26T19:01:45Z
+    reason: "First message from the mountain still carries readings queued at home before installation (distance about 1.00 m)."
+    by: JK
+    date: 2026-09-29
+
+  - id: C002
+    op: delete
+    station: powometer
+    variable: all
+    message: 2026-09-26T20:39:40Z
+    reason: "MOMSN 3128: bundle queued during the 2026-09-26 move; readings disturbed and mistimed."
+    by: JK
+    date: 2026-09-29
+
+  - id: C003
+    op: delete
+    station: powometer
+    variable: all
+    from: 2026-09-26T18:15:00Z
+    until: 2026-09-26T20:45:00Z
+    reason: "Station being moved to the new site."
+    by: JK
+    date: 2026-10-04

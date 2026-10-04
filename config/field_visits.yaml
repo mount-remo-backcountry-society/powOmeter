@@ -1,0 +1,104 @@
+# Site visits: what was OBSERVED and DONE. One entry per visit.
+# Readings inside `disturbed` (UTC) are labelled `site_visit` (quality suspect)
+# because people were at the station. People are recorded by initials only
+# (this repository is public).
+#
+# For a new visit, record at least: date, who, disturbed window (start and
+# end, UTC), whether the sensor was re-mounted, the snow depth probed under
+# the sensor, and (if the ground is bare) a tape measurement sensor-to-ground.
+# A re-mount also needs a new entry in mounts.yaml.
+
+visits:
+  - date: 2025-01-26
+    who: JK
+    work: [installation]
+    remount: true
+    probed_snow_depth_m: 1.5
+    notes: "Sensor 2.6 m above snow + 1.5 m probed = 4.10 m offset (about 0.4 m too small, see mounts.yaml M1)."
+
+  - date: 2025-01-31
+    who: JK
+    work: [sd_download]
+    remount: false
+
+  - date: 2025-02-07
+    who: JK
+    work: [sd_download, maintenance]
+    remount: false
+    disturbed: {from: 2025-02-07T18:20:00Z, until: 2025-02-07T19:45:00Z}
+    notes: "Station power-cycled repeatedly: about 120 readings logged in an hour (frozen-clock period)."
+
+  - date: 2025-02-17
+    who: JK
+    work: [sd_download]
+    remount: false
+
+  - date: 2025-07-06
+    who: JK
+    work: [sd_download]
+    remount: false
+
+  - date: 2025-09-28
+    who: JK
+    work: [sd_download, remount]
+    remount: probable
+    disturbed: {from: 2025-09-28T18:03:32Z, until: 2025-09-28T20:37:41Z}
+
+  - date: 2025-09-30
+    who: JK
+    work: [sd_download]
+    remount: false
+    notes: "Field-tab offset set to 4.45 m."
+
+  - date: 2025-10-12
+    who: JK
+    work: [sd_download]
+    remount: false
+
+  - date: 2025-10-17
+    who: JK
+    work: [sd_download]
+    remount: false
+
+  - date: 2025-12-30
+    who: JK
+    work: [sd_download]
+    remount: unknown
+    notes: "Logging gap before this visit, probably a station issue."
+
+  - date: 2026-01-16
+    who: JK
+    work: [sd_download]
+    remount: false
+
+  - date: 2026-01-23
+    who: JK
+    work: [sd_download, firmware_patch]
+    remount: false
+
+  - date: 2026-03-07
+    who: JK
+    work: [remount]
+    remount: true
+    disturbed: {from: 2026-03-07T19:33:07Z, until: 2026-03-07T20:39:40Z}
+    notes: "Sensor raised. Field-tab offset set to 5.09 m."
+
+  - date: 2026-03-08
+    who: JK
+    work: [sd_download]
+    remount: false
+
+  - date: 2026-06-19
+    who: JK
+    work: [sd_download, remount, modem_disconnected]
+    remount: true
+    disturbed: {from: 2026-06-19T18:55:39Z, until: 2026-06-19T19:45:33Z}
+    notes: "Sensor lowered. Modem negative terminal disconnected for the summer."
+
+  - date: 2026-09-26
+    who: JK
+    work: [sd_download, relocation, firmware_v1_3, rtc_set]
+    remount: true
+    disturbed: {from: 2026-09-26T18:15:00Z, until: 2026-09-26T20:45:00Z}
+    tape_sensor_to_ground_m: 3.82
+    notes: "Station moved about 70 m (11:15-13:45 local). Old firmware logged during the move; v1.3 started once in place. RTC battery check not done."

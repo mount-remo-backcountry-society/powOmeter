@@ -1,0 +1,15 @@
+# Approved periods. Approving a period freezes it: the build publishes the
+# snapshot file named here, and any later difference raises an alarm instead
+# of silently changing approved data (design §8.3).
+#
+# Example:
+#   - station: powometer
+#     variable: snow_depth
+#     from: 2025-01-26T18:58:34Z
+#     until: 2025-09-28T18:03:32Z
+#     snapshot: approved/powometer/2025-season/snow_depth.csv
+#     sha256: "<hash of the snapshot file>"
+#     by: JK
+#     date: 2026-11-01
+
+approvals: []

@@ -1,0 +1,12 @@
+# Health checks (used from phase 2). An alarm opens a GitHub Issue when it
+# starts and closes it when it clears.
+
+season:
+  start: "10-01"      # month-day; transmissions are expected in this window
+  end: "06-15"
+
+alarms:
+  no_message_hours: 12        # in season: no new satellite message for this long
+  clock_offset_minutes: 30    # station clock vs transmit time
+  battery_volts_below: 3.5
+  decode_errors: 1            # any payload that fails to decode
