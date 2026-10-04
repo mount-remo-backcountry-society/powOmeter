@@ -50,5 +50,6 @@ irreversible.
 - Run: `python -m powometer validate | build | approve …`; tests: `python -m pytest`.
 - Before firmware v1.3 (deployed 2026-09-26) the radio sent the burst
   **minimum**; since then, the **median**.
-- The station was relocated about 70 m on 2026-09-26T21:31Z: two sites; snow
-  depth is never pooled across them.
+- The station was relocated about 70 m on 2026-09-26, moved 18:15–20:45 UTC
+  (11:15–13:45 local): two sites (`config/sites.yaml`); snow depth is never
+  pooled across them. (powWX's 21:31Z is when firmware v1.3 started.)
