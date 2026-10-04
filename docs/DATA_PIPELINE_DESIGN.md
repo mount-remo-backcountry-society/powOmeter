@@ -88,7 +88,7 @@ season**; consumers switch in spring or summer.
 
 | Asset | Owner |
 |---|---|
-| Station repo, data and site | **MRBS GitHub organization**, at least two owners. **It must exist before anything is published (phase 2)**: GitHub redirects repo links after a transfer but **not Pages addresses**, so publishing under a personal account would break every consumer at handover (F1). Phases 0–1 may run under Julian's account |
+| Station repo, data and site | **MRBS GitHub organization `mount-remo-backcountry-society`** (created 2026-10-04; repo transferred; owner so far: Julian), at least two owners. **It must exist before anything is published (phase 2)**: GitHub redirects repo links after a transfer but **not Pages addresses**, so publishing under a personal account would break every consumer at handover (F1). Phases 0–1 may run under Julian's account |
 | The station's shared Gmail account (intake mailbox), Google Sheet, Apps Script | MRBS; a second person with access. Check the 5-min trigger is owned by this account. **Sign in at least once a year**: Google deletes accounts after 2 years without a human sign-in (F12) |
 | RockBLOCK account and billing | MRBS; a second person with access |
 | powWX | Julian personally |

@@ -39,6 +39,11 @@ published data, and the documentation** to run it.
 Code: MIT (`LICENSE`). Station data: CC BY 4.0, crediting MRBS
 (`LICENSE-DATA.md`). Both are drafts pending MRBS confirmation.
 
+## Repository
+
+`github.com/mount-remo-backcountry-society/powOmeter`, owned by the MRBS
+GitHub organization.
+
 ## Contact
 
 Mount Remo Backcountry Society. Maintainer: Julian Krick.

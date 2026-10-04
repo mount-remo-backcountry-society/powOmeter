@@ -31,7 +31,12 @@ sheet, Looker, Avalanche Canada). Nothing is published.
   - the raw-immutability check, in a throwaway clone (add passes; modify and
     delete fail)
 - **Open:**
-  - 0.1: MRBS request (Julian)
+  - ~~0.1~~ **done 2026-10-04:** GitHub organization
+    `mount-remo-backcountry-society` created (free plan; owner: j-krick). The
+    repo was transferred there and is now
+    `mount-remo-backcountry-society/powOmeter` (still private). **Still to
+    do:** a second owner (an MRBS board member with their own GitHub login),
+    and finishing the deletion of the leftover `mrbs-admin` user account
   - 0.10: backup made 2026-10-03 to a sibling folder **on the same laptop**.
     It still needs copying to separate media (USB drive or personal cloud) to
     protect against losing the laptop (Julian)
