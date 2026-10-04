@@ -39,9 +39,15 @@ irreversible.
 - Times in data files are **UTC**. The station's own log uses **fixed
   UTC−8** all year. BC civil time is UTC−7 all year. PCDS uses Pacific time
   **with** DST.
-- Snow depth = zero-depth distance − measured distance. The reference
-  changes **every time the sensor is re-mounted**, and the maintainer raised
-  it during seasons as snow built up.
+- Snow depth = mount reference − measured distance (`config/mounts.yaml`).
+  The reference changes **every time the sensor is re-mounted**: it was
+  raised during seasons as snow built up and lowered in June 2026. Prefer
+  bare-ground medians; at a re-mount, new = old + the distance step.
+- The station's real Iridium IMEI does **not** pass the Luhn check digit:
+  never filter IMEIs by Luhn in the privacy check.
+- Raw radio intake writes one NEW file per fetch (`raw/radio/messages_tab/`);
+  never append, because raw files are immutable.
+- Run: `python -m powometer validate | build | approve …`; tests: `python -m pytest`.
 - Before firmware v1.3 (deployed 2026-09-26) the radio sent the burst
   **minimum**; since then, the **median**.
 - The station was relocated about 70 m on 2026-09-26T21:31Z: two sites; snow

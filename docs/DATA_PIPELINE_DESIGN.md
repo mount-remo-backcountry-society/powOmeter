@@ -172,6 +172,7 @@ Known facts (`data/RockBLOCK/README.md`):
 | `stations.yaml` | Stations: id, name, operator, source type (selects the decoder, F16), variables, licence |
 | `sites.yaml` | Sites per station: coordinates, elevation, from/until. POW-O-METER: `shames_top_a` until 2026-09-26T21:31Z, then `shames_top_b` |
 | `firmware_versions.yaml` | Firmware eras: until 2026-09-26 (pre-v1.3; individual versions unrecorded), radio statistic `min`; from 2026-09-26 (v1.3), `median`. No-echo values 498/499/500 cm (F5) |
+| `mounts.yaml` | **Added in phase 1:** mounting periods, each with its snow-depth reference, method (bare_ground, tape, chained, field_offset), uncertainty and quality. Snow depth uses this file |
 | `field_visits.yaml` | Per visit, **what was observed**: date and time, initials; **snow depth probed under the sensor**; re-mount yes/no; a direct sensor-to-ground measurement if one was taken; photos; notes. **The pipeline computes the zero-depth reference itself:** distance reading at the visit + probed snow depth, from that visit until the next one. That's how Julian calibrated in practice (he adjusted the sheet's offset so the computed depth matched his probe), and how Aquarius uses field visits. The old Field-tab values were these back-calculated offsets, not tape measurements |
 | `corrections.yaml` | Operation log (§8.2) |
 | `approvals.yaml` | Approved periods, each pointing to its snapshot file (§8.3) |

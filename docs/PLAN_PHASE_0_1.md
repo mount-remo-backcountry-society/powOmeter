@@ -76,7 +76,14 @@ scan is clean; the backup is done; the MRBS request is sent.
 - **Frozen period:** radio anchors expose that the original mistimed rows
   607–934 by up to 20 h around the 2025-02-07 visit. Verified by the SD
   download made at that visit.
-- 2,612 tests pass.
+- 1c/1d/1e done (2026-10-04): config + validation; assembly with
+  value-matched radio gap-filling (74 readings); QC, snow depth from
+  `config/mounts.yaml`, corrections, approval snapshots, hourly series;
+  `python -m powometer build | validate | approve`; `SCHEMA.md`,
+  `CHANGELOG.md`, `docs/DIFFERENCES_v0.md`, `OPERATIONS.md` runbooks.
+- **2,643 tests pass, locally and in CI.** Exit criteria met: v0 reproduced
+  apart from documented differences; rebuilds byte-identical. Next: the
+  independent code review, then phase 2.
 
 ### 1a. Layout and raw import
 
