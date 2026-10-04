@@ -65,6 +65,19 @@ scan is clean; the backup is done; the MRBS request is sent.
 
 ## Phase 1: Record (about 4–6 sessions)
 
+**Progress (2026-10-04):**
+- 1a/1b done: raw SD archive (59 files, byte-identical); reference fixtures
+  from the original scripts.
+- 1c in progress: decoder and timing (match the deployed JavaScript on all
+  2,587 messages); radio loader (both sources agree on all 24 shared
+  messages); SD processing (reproduces all 41,554 original rows exactly).
+- **Recovered 8,579 summer-2026 rows** the original couldn't time: logs
+  without syncs continue their predecessor's clock (+2,879 min).
+- **Frozen period:** radio anchors expose that the original mistimed rows
+  607–934 by up to 20 h around the 2025-02-07 visit. Verified by the SD
+  download made at that visit.
+- 2,612 tests pass.
+
 ### 1a. Layout and raw import
 
 ```
@@ -129,6 +142,23 @@ powometer/ (package)  ·  tests/ (+ tests/fixtures/)  ·  approved/ (empty)
 | Two rebuilds byte-identical | Full build |
 
 ### 1f. Reconstruct the mounting history (needs Julian)
+
+**Detection result (2026-10-04)**, from the median distance 6 h before and
+after each visit (08:00–17:00 local):
+
+| Visit | Distance step | Field-tab offset | Reading |
+|---|---|---|---|
+| 2025-01-26 | (no data before; installation) | 4.10 (2.6 above snow + 1.5 probed) | Summer-2025 bare ground reads ~4.52 m, so this reference is ~0.4 m small: the old "−0.5 m floor" |
+| 2025-09-28 | +0.18 m | 4.45 (entered 09-30) | Likely re-mount |
+| 2026-03-07 | +0.76 m | 5.09 | Re-mount (raised) |
+| 2026-06-19 | −1.64 m | none | Sensor lowered at the visit? (asked) |
+| 2026-09-26 | – | 3.82 | Relocation; v1.3 reads 3.81–3.84 |
+| Other visits | no step (±0.1 m) | – | – |
+
+Questions to Julian: confirm 2025-09-28 and the June 2026 lowering; any
+re-mount on 2025-12-30 (SD has no data before that visit); the time of the
+2026-09-26 move (SD shows ~3.8 m readings from ~19:53 UTC; powWX's site
+history says 21:31 UTC).
 
 1. **Detect re-mounts in the SD record:** steps in distance at, or near,
    site-visit dates (17 download folders, 14 visit dates), plus the readings
