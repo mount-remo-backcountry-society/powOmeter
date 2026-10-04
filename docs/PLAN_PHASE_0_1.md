@@ -32,11 +32,14 @@ sheet, Looker, Avalanche Canada). Nothing is published.
     delete fail)
 - **Open:**
   - 0.1: MRBS request (Julian)
-  - 0.10: backup of the local-only files (Julian)
+  - 0.10: backup made 2026-10-03 to a sibling folder **on the same laptop**.
+    It still needs copying to separate media (USB drive or personal cloud) to
+    protect against losing the laptop (Julian)
   - ~~0.11~~ **done 2026-10-03:** private repo `j-krick/powOmeter` created and
     pushed. The first CI run is green: privacy scan of the tracked files and
     the full history clean; raw-immutability check passed
-  - Julian to create `.private/home_coords.txt`
+  - ~~home coordinates~~ done 2026-10-03; the home check passes on all
+    files and the full history
 
 | # | Task | Who | Done when |
 |---|---|---|---|
