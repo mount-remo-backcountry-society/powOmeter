@@ -69,7 +69,7 @@ scan is clean; the backup is done; the MRBS request is sent.
 
 ```
 raw/radio/rockblock-export-2026-09-29.csv     (sanitised, from 0.6)
-raw/radio/2026/09.jsonl, 10.jsonl …           (Messages-tab rows with MOMSN, from the latest sheet export, as a fixture)
+raw/radio/messages_tab/2026-09-29_sheet-export.jsonl   (Messages-tab rows with MOMSN; one new file per fetch, never appended)
 raw/sd/<visit-id>/…                           (moved from data/Site Visits/, names unchanged as visit IDs)
 config/stations.yaml, sites.yaml, firmware_versions.yaml, field_visits.yaml,
        corrections.yaml, approvals.yaml, monitoring.yaml

@@ -151,7 +151,7 @@ Rule: MRBS assets never depend on Julian's personal projects or tools
 
 | Path | Content |
 |---|---|
-| `raw/radio/YYYY/MM.jsonl` | One record per message: `transmit_utc, momsn?, session_status?, cep_km?, payload_hex, intake, received_at`. Key `(transmit_utc, payload)`; MOMSN where known |
+| `raw/radio/messages_tab/<fetch>.jsonl` | **One new file per fetch**, holding only messages not seen before: `transmit_utc, momsn, session_status, cep_km, payload_text, payload_hex, intake, received_utc`. Files are never appended to: messages can arrive months late (MOMSN 2430 from March 2026 was ingested on 2026-09-22), and the raw-immutability check rejects any change to an existing file. Key `(transmit_utc, payload)`; MOMSN where known. (Corrected 2026-10-04 from a monthly-file layout, which would have required appends) |
 | `raw/radio/rockblock-export-2026-09-29.csv` | Console history, 2,588 messages since 2024-04-18; **the `Approx Lat/Lng` column dropped for all rows** (F10). Original kept locally, with its checksum in `data/RockBLOCK/README.md` |
 | `raw/sd/<visit-id>/` | SD files as downloaded (17 download folders from 14 visit dates so far) |
 
