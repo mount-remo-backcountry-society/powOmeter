@@ -1,0 +1,11 @@
+[project]
+name = "powometer"
+version = "0.1.0"
+description = "POW-O-METER snow station data pipeline (Mount Remo Backcountry Society)"
+requires-python = ">=3.12"
+license = "MIT"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
