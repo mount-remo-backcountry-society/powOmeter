@@ -1,0 +1,1539 @@
+DATETIME, MESSAGE: 
+2025-09-28T12:35:52, Setup Complete
+2025-09-28T12:35:55, Data: 2025-09-28T12:35:52,3.97,25631,4395.00,4469.00,4410.50,7.18,75.86,9.05,876.28
+2025-09-28T12:35:55, Add row to /TRACKING.csv
+2025-09-28T12:35:55, Number of rows in /TRACKING.csv: 1
+2025-09-28T12:35:57, Done loop ...
+2025-09-28T12:35:57, ... powering down.
+2025-09-28T12:36:27, Setup Complete
+2025-09-28T12:36:29, Data: 2025-09-28T12:36:27,3.56,25631,4400.00,4598.00,4448.00,7.33,74.08,9.32,876.25
+2025-09-28T12:36:29, Add row to /TRACKING.csv
+2025-09-28T12:36:30, Number of rows in /TRACKING.csv: 2
+2025-09-28T12:36:32, Done loop ...
+2025-09-28T12:36:32, ... powering down.
+2025-09-28T12:37:41, Setup Complete
+2025-09-28T12:37:43, Data: 2025-09-28T12:37:41,3.59,25631,4464.00,4584.00,4567.50,7.46,74.44,9.08,876.34
+2025-09-28T12:37:43, Add row to /TRACKING.csv
+2025-09-28T12:37:43, Number of rows in /TRACKING.csv: 3
+2025-09-28T12:37:46, Done loop ...
+2025-09-28T12:37:46, ... powering down.
+2025-09-28T12:38:10, Setup Complete
+2025-09-28T12:38:13, Data: 2025-09-28T12:38:10,3.58,25631,4433.00,4583.00,4563.00,7.52,74.27,9.03,876.35
+2025-09-28T12:38:13, Add row to /TRACKING.csv
+2025-09-28T12:38:13, Number of rows in /TRACKING.csv: 4
+2025-09-28T12:38:16, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T12:38:16, Remove tracking
+2025-09-28T12:38:16, Write to /TRANSMIT.csv: 2025-09-28T12:38:10,3.58,4433.00,7.5,74
+2025-09-28T12:38:16, Number of rows in /TRANSMIT.csv: 1
+2025-09-28T12:38:16, Current hour = 12, Transmission hour = 1
+2025-09-28T12:38:16, Current hour = 12, Transmission hour = 6
+2025-09-28T12:38:16, Current hour = 12, Transmission hour = 8
+2025-09-28T12:38:16, Current hour = 12, Transmission hour = 10
+2025-09-28T12:38:16, Current hour = 12, Transmission hour = 15
+2025-09-28T12:38:17, Current hour = 12, Transmission hour = 20
+2025-09-28T12:38:17, Current hour = 12, Transmission hour = 22
+2025-09-28T12:38:17, Done loop ...
+2025-09-28T12:38:17, ... powering down.
+2025-09-28T12:39:22, Setup Complete
+2025-09-28T12:39:25, Data: 2025-09-28T12:39:22,3.60,25631,4420.00,4599.00,4576.00,7.43,72.87,8.15,876.31
+2025-09-28T12:39:25, Add row to /TRACKING.csv
+2025-09-28T12:39:25, Number of rows in /TRACKING.csv: 1
+2025-09-28T12:39:27, Done loop ...
+2025-09-28T12:39:27, ... powering down.
+2025-09-28T12:39:39, Setup Complete
+2025-09-28T12:39:41, Data: 2025-09-28T12:39:39,3.58,25631,4382.00,4590.00,4458.50,7.39,71.02,8.14,879.47
+2025-09-28T12:39:41, Add row to /TRACKING.csv
+2025-09-28T12:39:41, Number of rows in /TRACKING.csv: 2
+2025-09-28T12:39:44, Done loop ...
+2025-09-28T12:39:44, ... powering down.
+2025-09-28T12:56:25, Setup Complete
+2025-09-28T12:56:28, Data: 2025-09-28T12:56:25,3.66,25631,4517.00,4668.00,4604.50,6.32,75.33,10.63,876.16
+2025-09-28T12:56:28, Add row to /TRACKING.csv
+2025-09-28T12:56:28, Number of rows in /TRACKING.csv: 3
+2025-09-28T12:56:31, Done loop ...
+2025-09-28T12:56:31, ... powering down.
+2025-09-28T13:03:27, Setup Complete
+2025-09-28T13:03:29, Data: 2025-09-28T13:03:27,3.63,25631,4442.00,4617.00,4604.50,6.84,73.28,9.14,878.45
+2025-09-28T13:03:30, Add row to /TRACKING.csv
+2025-09-28T13:03:30, Number of rows in /TRACKING.csv: 4
+2025-09-28T13:03:33, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T13:03:33, Remove tracking
+2025-09-28T13:03:33, Write to /TRANSMIT.csv: 2025-09-28T13:03:27,3.63,4442.00,6.8,73
+2025-09-28T13:03:33, Number of rows in /TRANSMIT.csv: 2
+2025-09-28T13:03:33, Current hour = 13, Transmission hour = 1
+2025-09-28T13:03:33, Current hour = 13, Transmission hour = 6
+2025-09-28T13:03:33, Current hour = 13, Transmission hour = 8
+2025-09-28T13:03:33, Current hour = 13, Transmission hour = 10
+2025-09-28T13:03:33, Current hour = 13, Transmission hour = 15
+2025-09-28T13:03:33, Current hour = 13, Transmission hour = 20
+2025-09-28T13:03:33, Current hour = 13, Transmission hour = 22
+2025-09-28T13:03:33, Done loop ...
+2025-09-28T13:03:33, ... powering down.
+2025-09-28T13:22:49, Setup Complete
+2025-09-28T13:22:52, Data: 2025-09-28T13:22:49,3.94,25631,4479.00,4986.00,4531.50,5.74,77.43,9.15,876.14
+2025-09-28T13:22:52, Add row to /TRACKING.csv
+2025-09-28T13:22:52, Number of rows in /TRACKING.csv: 1
+2025-09-28T13:22:54, Done loop ...
+2025-09-28T13:22:54, ... powering down.
+2025-09-28T13:42:12, Setup Complete
+2025-09-28T13:42:14, Data: 2025-09-28T13:42:12,3.59,25631,4527.00,4986.00,4596.50,6.57,74.48,9.81,876.01
+2025-09-28T13:42:14, Add row to /TRACKING.csv
+2025-09-28T13:42:15, Number of rows in /TRACKING.csv: 2
+2025-09-28T13:42:17, Done loop ...
+2025-09-28T13:42:17, ... powering down.
+2025-09-28T14:01:34, Setup Complete
+2025-09-28T14:01:36, Data: 2025-09-28T14:01:34,3.56,25631,4603.00,4987.00,4651.50,6.05,73.15,9.63,875.93
+2025-09-28T14:01:36, Add row to /TRACKING.csv
+2025-09-28T14:01:36, Number of rows in /TRACKING.csv: 3
+2025-09-28T14:01:39, Done loop ...
+2025-09-28T14:01:39, ... powering down.
+2025-09-28T14:20:54, Setup Complete
+2025-09-28T14:20:57, Data: 2025-09-28T14:20:54,4.00,25631,4531.00,4986.00,4602.00,6.42,75.21,9.82,875.70
+2025-09-28T14:20:57, Add row to /TRACKING.csv
+2025-09-28T14:20:57, Number of rows in /TRACKING.csv: 4
+2025-09-28T14:21:00, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T14:21:00, Remove tracking
+2025-09-28T14:21:00, Write to /TRANSMIT.csv: 2025-09-28T14:20:54,4.00,4531.00,6.4,75
+2025-09-28T14:21:00, Number of rows in /TRANSMIT.csv: 3
+2025-09-28T14:21:00, Current hour = 14, Transmission hour = 1
+2025-09-28T14:21:00, Current hour = 14, Transmission hour = 6
+2025-09-28T14:21:00, Current hour = 14, Transmission hour = 8
+2025-09-28T14:21:00, Current hour = 14, Transmission hour = 10
+2025-09-28T14:21:01, Current hour = 14, Transmission hour = 15
+2025-09-28T14:21:01, Current hour = 14, Transmission hour = 20
+2025-09-28T14:21:01, Current hour = 14, Transmission hour = 22
+2025-09-28T14:21:01, Done loop ...
+2025-09-28T14:21:01, ... powering down.
+2025-09-28T14:40:16, Setup Complete
+2025-09-28T14:40:18, Data: 2025-09-28T14:40:16,3.62,25631,654.00,4986.00,4548.50,6.80,75.43,9.60,875.77
+2025-09-28T14:40:18, Add row to /TRACKING.csv
+2025-09-28T14:40:18, Number of rows in /TRACKING.csv: 1
+2025-09-28T14:40:20, Done loop ...
+2025-09-28T14:40:20, ... powering down.
+2025-09-28T14:59:37, Setup Complete
+2025-09-28T14:59:40, Data: 2025-09-28T14:59:38,3.56,25631,4575.00,4986.00,4632.00,6.01,78.77,8.71,875.56
+2025-09-28T14:59:40, Add row to /TRACKING.csv
+2025-09-28T14:59:40, Number of rows in /TRACKING.csv: 2
+2025-09-28T14:59:42, Done loop ...
+2025-09-28T14:59:43, ... powering down.
+2025-09-28T15:19:00, Setup Complete
+2025-09-28T15:19:02, Data: 2025-09-28T15:19:00,3.54,25631,4565.00,4986.00,4685.50,5.29,80.37,7.55,875.30
+2025-09-28T15:19:03, Add row to /TRACKING.csv
+2025-09-28T15:19:03, Number of rows in /TRACKING.csv: 3
+2025-09-28T15:19:06, Done loop ...
+2025-09-28T15:19:06, ... powering down.
+2025-09-28T15:38:23, Setup Complete
+2025-09-28T15:38:25, Data: 2025-09-28T15:38:23,3.57,25631,4445.00,4985.00,4611.50,5.40,79.26,7.29,875.11
+2025-09-28T15:38:25, Add row to /TRACKING.csv
+2025-09-28T15:38:25, Number of rows in /TRACKING.csv: 4
+2025-09-28T15:38:29, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T15:38:29, Remove tracking
+2025-09-28T15:38:29, Write to /TRANSMIT.csv: 2025-09-28T15:38:23,3.57,4445.00,5.4,79
+2025-09-28T15:38:29, Number of rows in /TRANSMIT.csv: 4
+2025-09-28T15:38:29, Current hour = 15, Transmission hour = 1
+2025-09-28T15:38:29, Current hour = 15, Transmission hour = 6
+2025-09-28T15:38:29, Current hour = 15, Transmission hour = 8
+2025-09-28T15:38:29, Current hour = 15, Transmission hour = 10
+2025-09-28T15:38:29, Current hour = 15, Transmission hour = 15
+2025-09-28T15:38:29, 2812382443+07574:444+06873:453+06475:445+05479
+2025-09-28T15:38:31,  - attempt to send message: 2812382443+07574:444+06873:453+06475:445+05479
+2025-09-28T15:39:02,  - Modem begin successful
+2025-09-28T15:39:02,  - Sending...
+2025-09-28T15:39:42, Send response: 
+2025-09-28T15:39:42,  - Retry...
+2025-09-28T15:39:42,    - Sending...
+2025-09-28T15:39:42,    - Send response: 10
+2025-09-28T15:40:12,  Sync clocks... 
+2025-09-28T15:40:12,  - Clock was not synced
+2025-09-28T15:40:12, Transmission failed. Error = 10
+2025-09-28T15:40:12, Done loop ...
+2025-09-28T15:40:12, ... powering down.
+2025-09-28T15:57:45, Setup Complete
+2025-09-28T15:57:48, Data: 2025-09-28T15:57:45,3.80,25631,656.00,4985.00,4668.50,5.23,80.61,7.04,875.00
+2025-09-28T15:57:48, Add row to /TRACKING.csv
+2025-09-28T15:57:48, Number of rows in /TRACKING.csv: 1
+2025-09-28T15:57:50, Done loop ...
+2025-09-28T15:57:50, ... powering down.
+2025-09-28T16:17:08, Setup Complete
+2025-09-28T16:17:10, Data: 2025-09-28T16:17:08,3.89,25631,648.00,4986.00,4580.50,5.04,80.10,6.75,874.85
+2025-09-28T16:17:10, Add row to /TRACKING.csv
+2025-09-28T16:17:11, Number of rows in /TRACKING.csv: 2
+2025-09-28T16:17:13, Done loop ...
+2025-09-28T16:17:13, ... powering down.
+2025-09-28T16:36:31, Setup Complete
+2025-09-28T16:36:33, Data: 2025-09-28T16:36:31,3.57,25631,4538.00,4987.00,4647.50,4.73,81.44,6.19,874.50
+2025-09-28T16:36:33, Add row to /TRACKING.csv
+2025-09-28T16:36:33, Number of rows in /TRACKING.csv: 3
+2025-09-28T16:36:36, Done loop ...
+2025-09-28T16:36:36, ... powering down.
+2025-09-28T16:55:54, Setup Complete
+2025-09-28T16:55:56, Data: 2025-09-28T16:55:54,3.81,25631,4483.00,4987.00,4614.00,4.92,81.86,6.08,874.72
+2025-09-28T16:55:56, Add row to /TRACKING.csv
+2025-09-28T16:55:56, Number of rows in /TRACKING.csv: 4
+2025-09-28T16:55:59, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T16:55:59, Remove tracking
+2025-09-28T16:55:59, Write to /TRANSMIT.csv: 2025-09-28T16:55:54,3.81,4483.00,4.9,82
+2025-09-28T16:55:59, Number of rows in /TRANSMIT.csv: 5
+2025-09-28T16:55:59, Current hour = 16, Transmission hour = 1
+2025-09-28T16:56:00, 2812385443+07574:444+06873:453+06475:445+05479:448+04982
+2025-09-28T16:56:02,  - attempt to send message: 2812385443+07574:444+06873:453+06475:445+05479:448+04982
+2025-09-28T16:56:32,  - Modem begin successful
+2025-09-28T16:56:32,  - Sending...
+2025-09-28T16:57:02, Send response: 
+2025-09-28T16:57:02,  - Retry...
+2025-09-28T16:57:03,    - Sending...
+2025-09-28T16:57:03,    - Send response: 10
+2025-09-28T16:57:33,  Sync clocks... 
+2025-09-28T16:57:33,  - Clock was not synced
+2025-09-28T16:57:33, Transmission failed. Error = 10
+2025-09-28T16:57:33, Done loop ...
+2025-09-28T16:57:33, ... powering down.
+2025-09-28T17:15:16, Setup Complete
+2025-09-28T17:15:18, Data: 2025-09-28T17:15:16,3.67,25631,4558.00,4986.00,4575.00,4.99,80.50,6.22,874.38
+2025-09-28T17:15:18, Add row to /TRACKING.csv
+2025-09-28T17:15:19, Number of rows in /TRACKING.csv: 1
+2025-09-28T17:15:21, Done loop ...
+2025-09-28T17:15:21, ... powering down.
+2025-09-28T17:34:39, Setup Complete
+2025-09-28T17:34:41, Data: 2025-09-28T17:34:39,3.58,25631,4577.00,4988.00,4715.50,4.56,81.59,5.71,874.31
+2025-09-28T17:34:41, Add row to /TRACKING.csv
+2025-09-28T17:34:41, Number of rows in /TRACKING.csv: 2
+2025-09-28T17:34:44, Done loop ...
+2025-09-28T17:34:44, ... powering down.
+2025-09-28T17:54:01, Setup Complete
+2025-09-28T17:54:04, Data: 2025-09-28T17:54:01,3.65,25631,4515.00,4987.00,4563.50,4.61,82.46,5.33,874.35
+2025-09-28T17:54:04, Add row to /TRACKING.csv
+2025-09-28T17:54:04, Number of rows in /TRACKING.csv: 3
+2025-09-28T17:54:07, Done loop ...
+2025-09-28T17:54:07, ... powering down.
+2025-09-28T18:13:24, Setup Complete
+2025-09-28T18:13:26, Data: 2025-09-28T18:13:24,3.66,25631,4552.00,4989.00,4613.50,4.26,83.69,4.66,874.21
+2025-09-28T18:13:26, Add row to /TRACKING.csv
+2025-09-28T18:13:26, Number of rows in /TRACKING.csv: 4
+2025-09-28T18:13:29, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T18:13:30, Remove tracking
+2025-09-28T18:13:30, Write to /TRANSMIT.csv: 2025-09-28T18:13:24,3.66,4552.00,4.3,84
+2025-09-28T18:13:30, Number of rows in /TRANSMIT.csv: 6
+2025-09-28T18:13:30, Current hour = 18, Transmission hour = 1
+2025-09-28T18:13:30, 2812383443+07574:444+06873:453+06475:445+05479:448+04982:455+04384
+2025-09-28T18:13:32,  - attempt to send message: 2812383443+07574:444+06873:453+06475:445+05479:448+04982:455+04384
+2025-09-28T18:14:03,  - Modem begin successful
+2025-09-28T18:14:03,  - Sending...
+2025-09-28T18:14:33, Send response: 
+2025-09-28T18:14:33,  - Retry...
+2025-09-28T18:14:33,    - Sending...
+2025-09-28T18:14:33,    - Send response: 10
+2025-09-28T18:15:03,  Sync clocks... 
+2025-09-28T18:15:03,  - Clock was not synced
+2025-09-28T18:15:03, Transmission failed. Error = 10
+2025-09-28T18:15:03, Done loop ...
+2025-09-28T18:15:03, ... powering down.
+2025-09-28T18:32:46, Setup Complete
+2025-09-28T18:32:48, Data: 2025-09-28T18:32:46,3.56,25631,4474.00,4725.00,4598.00,4.16,84.28,4.23,874.13
+2025-09-28T18:32:48, Add row to /TRACKING.csv
+2025-09-28T18:32:49, Number of rows in /TRACKING.csv: 1
+2025-09-28T18:32:51, Done loop ...
+2025-09-28T18:32:51, ... powering down.
+2025-09-28T18:52:09, Setup Complete
+2025-09-28T18:52:11, Data: 2025-09-28T18:52:09,3.79,25631,4454.00,4987.00,4585.00,3.99,84.70,3.96,874.09
+2025-09-28T18:52:11, Add row to /TRACKING.csv
+2025-09-28T18:52:11, Number of rows in /TRACKING.csv: 2
+2025-09-28T18:52:14, Done loop ...
+2025-09-28T18:52:14, ... powering down.
+2025-09-28T19:11:31, Setup Complete
+2025-09-28T19:11:33, Data: 2025-09-28T19:11:31,3.64,25631,4495.00,4988.00,4719.50,3.84,84.82,3.78,874.07
+2025-09-28T19:11:33, Add row to /TRACKING.csv
+2025-09-28T19:11:33, Number of rows in /TRACKING.csv: 3
+2025-09-28T19:11:36, Done loop ...
+2025-09-28T19:11:36, ... powering down.
+2025-09-28T19:30:53, Setup Complete
+2025-09-28T19:30:56, Data: 2025-09-28T19:30:53,3.56,25631,4592.00,4986.00,4696.50,3.85,85.78,3.67,873.88
+2025-09-28T19:30:56, Add row to /TRACKING.csv
+2025-09-28T19:30:56, Number of rows in /TRACKING.csv: 4
+2025-09-28T19:30:59, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T19:30:59, Remove tracking
+2025-09-28T19:30:59, Write to /TRANSMIT.csv: 2025-09-28T19:30:53,3.56,4592.00,3.8,86
+2025-09-28T19:30:59, Number of rows in /TRANSMIT.csv: 7
+2025-09-28T19:30:59, Current hour = 19, Transmission hour = 1
+2025-09-28T19:30:59, 2812382443+07574:444+06873:453+06475:445+05479:448+04982:455+04384:459+03886
+2025-09-28T19:31:01,  - attempt to send message: 2812382443+07574:444+06873:453+06475:445+05479:448+04982:455+04384:459+03886
+2025-09-28T19:32:32,  - Modem begin successful
+2025-09-28T19:32:32,  - Sending...
+2025-09-28T19:33:02, Send response: 
+2025-09-28T19:33:02,  - Retry...
+2025-09-28T19:33:02,    - Sending...
+2025-09-28T19:33:02,    - Send response: 10
+2025-09-28T19:33:32,  Sync clocks... 
+2025-09-28T19:33:32,  - Clock was not synced
+2025-09-28T19:33:32, Transmission failed. Error = 10
+2025-09-28T19:33:32, Done loop ...
+2025-09-28T19:33:32, ... powering down.
+2025-09-28T19:50:16, Setup Complete
+2025-09-28T19:50:18, Data: 2025-09-28T19:50:16,3.54,25631,4563.00,4987.00,4612.00,3.68,87.08,3.61,873.77
+2025-09-28T19:50:18, Add row to /TRACKING.csv
+2025-09-28T19:50:18, Number of rows in /TRACKING.csv: 1
+2025-09-28T19:50:20, Done loop ...
+2025-09-28T19:50:20, ... powering down.
+2025-09-28T20:09:38, Setup Complete
+2025-09-28T20:09:40, Data: 2025-09-28T20:09:38,3.58,25631,4514.00,4988.00,4595.00,3.61,87.48,3.54,873.66
+2025-09-28T20:09:40, Add row to /TRACKING.csv
+2025-09-28T20:09:40, Number of rows in /TRACKING.csv: 2
+2025-09-28T20:09:43, Done loop ...
+2025-09-28T20:09:43, ... powering down.
+2025-09-28T20:29:00, Setup Complete
+2025-09-28T20:29:03, Data: 2025-09-28T20:29:00,3.55,25631,4457.00,4985.00,4636.00,3.56,88.44,3.45,873.53
+2025-09-28T20:29:03, Add row to /TRACKING.csv
+2025-09-28T20:29:03, Number of rows in /TRACKING.csv: 3
+2025-09-28T20:29:06, Done loop ...
+2025-09-28T20:29:06, ... powering down.
+2025-09-28T20:48:23, Setup Complete
+2025-09-28T20:48:25, Data: 2025-09-28T20:48:23,3.54,25631,4533.00,4988.00,4601.50,3.54,88.75,3.36,873.49
+2025-09-28T20:48:25, Add row to /TRACKING.csv
+2025-09-28T20:48:25, Number of rows in /TRACKING.csv: 4
+2025-09-28T20:48:28, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T20:48:28, Remove tracking
+2025-09-28T20:48:29, Write to /TRANSMIT.csv: 2025-09-28T20:48:23,3.54,4533.00,3.5,89
+2025-09-28T20:48:29, Number of rows in /TRANSMIT.csv: 8
+2025-09-28T20:48:29, Current hour = 20, Transmission hour = 1
+2025-09-28T20:48:29, 2812382443+07574:444+06873:453+06475:445+05479:448+04982:455+04384:459+03886:453+03589
+2025-09-28T20:48:31,  - attempt to send message: 2812382443+07574:444+06873:453+06475:445+05479:448+04982:455+04384:459+03886:453+03589
+2025-09-28T20:50:31,  - Modem begin successful
+2025-09-28T20:50:31,  - Sending...
+2025-09-28T20:51:01, Send response: 
+2025-09-28T20:51:01,  - Retry...
+2025-09-28T20:51:02,    - Sending...
+2025-09-28T20:51:02,    - Send response: 10
+2025-09-28T20:51:32,  Sync clocks... 
+2025-09-28T20:51:32,  - Clock was not synced
+2025-09-28T20:51:32, Transmission failed. Error = 10
+2025-09-28T20:51:32, Done loop ...
+2025-09-28T20:51:32, ... powering down.
+2025-09-28T21:07:45, Setup Complete
+2025-09-28T21:07:47, Data: 2025-09-28T21:07:45,3.55,25631,4569.00,4987.00,4600.00,3.66,88.14,3.44,873.52
+2025-09-28T21:07:47, Add row to /TRACKING.csv
+2025-09-28T21:07:47, Number of rows in /TRACKING.csv: 1
+2025-09-28T21:07:50, Done loop ...
+2025-09-28T21:07:50, ... powering down.
+2025-09-28T21:27:07, Setup Complete
+2025-09-28T21:27:10, Data: 2025-09-28T21:27:07,3.57,25631,4557.00,4987.00,4601.00,3.53,88.58,3.36,873.66
+2025-09-28T21:27:10, Add row to /TRACKING.csv
+2025-09-28T21:27:10, Number of rows in /TRACKING.csv: 2
+2025-09-28T21:27:12, Done loop ...
+2025-09-28T21:27:12, ... powering down.
+2025-09-28T21:46:30, Setup Complete
+2025-09-28T21:46:32, Data: 2025-09-28T21:46:30,3.64,25631,4574.00,4985.00,4616.00,3.50,88.79,3.34,873.47
+2025-09-28T21:46:32, Add row to /TRACKING.csv
+2025-09-28T21:46:32, Number of rows in /TRACKING.csv: 3
+2025-09-28T21:46:35, Done loop ...
+2025-09-28T21:46:35, ... powering down.
+2025-09-28T21:46:40, Setup Complete
+2025-09-28T21:46:42, Data: 2025-09-28T21:46:40,3.63,25631,4554.00,4569.00,4561.00,3.50,88.85,3.34,873.47
+2025-09-28T21:46:42, Add row to /TRACKING.csv
+2025-09-28T21:46:42, Number of rows in /TRACKING.csv: 4
+2025-09-28T21:46:45, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T21:46:45, Remove tracking
+2025-09-28T21:46:45, Write to /TRANSMIT.csv: 2025-09-28T21:46:40,3.63,4554.00,3.5,89
+2025-09-28T21:46:46, Number of rows in /TRANSMIT.csv: 9
+2025-09-28T21:46:46, Current hour = 21, Transmission hour = 1
+2025-09-28T21:46:46, 2812383443+07574:444+06873:453+06475:445+05479:448+04982:455+04384:459+03886:453+03589:455+03589
+2025-09-28T21:46:48,  - attempt to send message: 2812383443+07574:444+06873:453+06475:445+05479:448+04982:455+04384:459+03886:453+03589:455+03589
+2025-09-28T21:47:48,  - Modem begin successful
+2025-09-28T21:47:49,  - Sending...
+2025-09-28T21:48:19, Send response: 
+2025-09-28T21:48:19,  - Retry...
+2025-09-28T21:48:19,    - Sending...
+2025-09-28T21:48:19,    - Send response: 10
+2025-09-28T21:48:49,  Sync clocks... 
+2025-09-28T21:48:49,  - Clock was not synced
+2025-09-28T21:48:49, Transmission failed. Error = 10
+2025-09-28T21:48:49, Done loop ...
+2025-09-28T21:48:49, ... powering down.
+2025-09-28T22:03:25, Setup Complete
+2025-09-28T22:03:28, Data: 2025-09-28T22:03:25,3.60,25631,4434.00,4986.00,4574.50,3.41,88.41,3.32,873.35
+2025-09-28T22:03:28, Add row to /TRACKING.csv
+2025-09-28T22:03:28, Number of rows in /TRACKING.csv: 1
+2025-09-28T22:03:30, Done loop ...
+2025-09-28T22:03:30, ... powering down.
+2025-09-28T22:20:11, Setup Complete
+2025-09-28T22:20:13, Data: 2025-09-28T22:20:11,3.84,25631,498.00,4986.00,4564.00,3.34,87.59,3.23,873.33
+2025-09-28T22:20:13, Add row to /TRACKING.csv
+2025-09-28T22:20:13, Number of rows in /TRACKING.csv: 2
+2025-09-28T22:20:16, Done loop ...
+2025-09-28T22:20:16, ... powering down.
+2025-09-28T22:36:57, Setup Complete
+2025-09-28T22:36:59, Data: 2025-09-28T22:36:57,3.68,25631,644.00,4625.00,4565.50,3.46,86.42,3.18,873.14
+2025-09-28T22:36:59, Add row to /TRACKING.csv
+2025-09-28T22:36:59, Number of rows in /TRACKING.csv: 3
+2025-09-28T22:37:02, Done loop ...
+2025-09-28T22:37:02, ... powering down.
+2025-09-28T22:53:42, Setup Complete
+2025-09-28T22:53:44, Data: 2025-09-28T22:53:42,3.64,25631,4501.00,4986.00,4545.50,3.30,85.90,3.06,872.95
+2025-09-28T22:53:44, Add row to /TRACKING.csv
+2025-09-28T22:53:45, Number of rows in /TRACKING.csv: 4
+2025-09-28T22:53:48, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T22:53:48, Remove tracking
+2025-09-28T22:53:48, Write to /TRANSMIT.csv: 2025-09-28T22:53:42,3.64,4501.00,3.3,86
+2025-09-28T22:53:48, Number of rows in /TRANSMIT.csv: 10
+2025-09-28T22:53:48, Current hour = 22, Transmission hour = 1
+2025-09-28T22:53:48, 2812383443+07574:444+06873:453+06475:445+05479:448+04982:455+04384:459+03886:453+03589:455+03589:450+03386
+2025-09-28T22:53:50,  - attempt to send message: 2812383443+07574:444+06873:453+06475:445+05479:448+04982:455+04384:459+03886:453+03589:455+03589:450+03386
+2025-09-28T22:53:51,  - Modem begin successful
+2025-09-28T22:53:51,  - Sending...
+2025-09-28T22:54:21, Send response: 
+2025-09-28T22:54:21,  - Retry...
+2025-09-28T22:54:21,    - Sending...
+2025-09-28T22:54:21,    - Send response: 10
+2025-09-28T22:54:51,  Sync clocks... 
+2025-09-28T22:54:51,  - Clock was not synced
+2025-09-28T22:54:51, Transmission failed. Error = 10
+2025-09-28T22:54:52, n_transmit >= 10, too much to transmit, delete /TRANSMIT.csv
+2025-09-28T22:54:52, Done loop ...
+2025-09-28T22:54:52, ... powering down.
+2025-09-28T23:10:28, Setup Complete
+2025-09-28T23:10:30, Data: 2025-09-28T23:10:28,3.58,25631,4524.00,4987.00,4649.50,3.26,85.01,2.95,872.99
+2025-09-28T23:10:30, Add row to /TRACKING.csv
+2025-09-28T23:10:30, Number of rows in /TRACKING.csv: 1
+2025-09-28T23:10:33, Done loop ...
+2025-09-28T23:10:33, ... powering down.
+2025-09-28T23:27:13, Setup Complete
+2025-09-28T23:27:16, Data: 2025-09-28T23:27:13,3.63,25631,4573.00,4986.00,4878.50,3.19,84.31,2.77,872.89
+2025-09-28T23:27:16, Add row to /TRACKING.csv
+2025-09-28T23:27:16, Number of rows in /TRACKING.csv: 2
+2025-09-28T23:27:18, Done loop ...
+2025-09-28T23:27:18, ... powering down.
+2025-09-28T23:43:59, Setup Complete
+2025-09-28T23:44:01, Data: 2025-09-28T23:43:59,3.62,25631,4599.00,4987.00,4621.00,2.84,85.53,2.38,872.74
+2025-09-28T23:44:01, Add row to /TRACKING.csv
+2025-09-28T23:44:02, Number of rows in /TRACKING.csv: 3
+2025-09-28T23:44:05, Done loop ...
+2025-09-28T23:44:05, ... powering down.
+2025-09-29T00:00:45, Setup Complete
+2025-09-29T00:00:47, Data: 2025-09-29T00:00:45,3.57,25631,4548.00,4988.00,4649.50,2.84,85.86,2.26,872.57
+2025-09-29T00:00:47, Add row to /TRACKING.csv
+2025-09-29T00:00:47, Number of rows in /TRACKING.csv: 4
+2025-09-29T00:00:50, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T00:00:51, Remove tracking
+2025-09-29T00:00:51, Write to /TRANSMIT.csv: 2025-09-29T00:00:45,3.57,4548.00,2.8,86
+2025-09-29T00:00:51, Number of rows in /TRANSMIT.csv: 1
+2025-09-29T00:00:51, Current hour = 0, Transmission hour = 1
+2025-09-29T00:00:51, Current hour = 0, Transmission hour = 6
+2025-09-29T00:00:51, Current hour = 0, Transmission hour = 8
+2025-09-29T00:00:51, Current hour = 0, Transmission hour = 10
+2025-09-29T00:00:51, Current hour = 0, Transmission hour = 15
+2025-09-29T00:00:51, Current hour = 0, Transmission hour = 20
+2025-09-29T00:00:51, Current hour = 0, Transmission hour = 22
+2025-09-29T00:00:51, Done loop ...
+2025-09-29T00:00:51, ... powering down.
+2025-09-29T00:17:30, Setup Complete
+2025-09-29T00:17:33, Data: 2025-09-29T00:17:30,3.58,25631,4530.00,4986.00,4600.00,2.84,85.97,2.20,872.75
+2025-09-29T00:17:33, Add row to /TRACKING.csv
+2025-09-29T00:17:33, Number of rows in /TRACKING.csv: 1
+2025-09-29T00:17:35, Done loop ...
+2025-09-29T00:17:35, ... powering down.
+2025-09-29T00:34:16, Setup Complete
+2025-09-29T00:34:18, Data: 2025-09-29T00:34:16,3.61,25631,4527.00,4986.00,4613.00,2.57,86.59,1.98,872.68
+2025-09-29T00:34:18, Add row to /TRACKING.csv
+2025-09-29T00:34:18, Number of rows in /TRACKING.csv: 2
+2025-09-29T00:34:21, Done loop ...
+2025-09-29T00:34:21, ... powering down.
+2025-09-29T00:51:02, Setup Complete
+2025-09-29T00:51:04, Data: 2025-09-29T00:51:02,3.58,25631,4523.00,4986.00,4589.50,2.47,87.02,1.70,872.52
+2025-09-29T00:51:04, Add row to /TRACKING.csv
+2025-09-29T00:51:04, Number of rows in /TRACKING.csv: 3
+2025-09-29T00:51:07, Done loop ...
+2025-09-29T00:51:07, ... powering down.
+2025-09-29T01:07:47, Setup Complete
+2025-09-29T01:07:50, Data: 2025-09-29T01:07:47,3.60,25631,4496.00,4987.00,4570.00,2.54,87.38,1.72,872.43
+2025-09-29T01:07:50, Add row to /TRACKING.csv
+2025-09-29T01:07:50, Number of rows in /TRACKING.csv: 4
+2025-09-29T01:07:53, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T01:07:53, Remove tracking
+2025-09-29T01:07:53, Write to /TRANSMIT.csv: 2025-09-29T01:07:47,3.60,4496.00,2.5,87
+2025-09-29T01:07:53, Number of rows in /TRANSMIT.csv: 2
+2025-09-29T01:07:53, Current hour = 1, Transmission hour = 1
+2025-09-29T01:07:53, 2900002455+02886:450+02587
+2025-09-29T01:07:55,  - attempt to send message: 2900002455+02886:450+02587
+2025-09-29T01:08:26,  - Modem begin successful
+2025-09-29T01:08:26,  - Sending...
+2025-09-29T01:08:56, Send response: 
+2025-09-29T01:08:56,  - Retry...
+2025-09-29T01:08:56,    - Sending...
+2025-09-29T01:08:56,    - Send response: 10
+2025-09-29T01:09:26,  Sync clocks... 
+2025-09-29T01:09:26,  - Clock was not synced
+2025-09-29T01:09:26, Transmission failed. Error = 10
+2025-09-29T01:09:27, Done loop ...
+2025-09-29T01:09:27, ... powering down.
+2025-09-29T01:24:33, Setup Complete
+2025-09-29T01:24:35, Data: 2025-09-29T01:24:33,3.64,25631,4535.00,4987.00,4728.50,2.53,87.77,1.73,872.59
+2025-09-29T01:24:35, Add row to /TRACKING.csv
+2025-09-29T01:24:35, Number of rows in /TRACKING.csv: 1
+2025-09-29T01:24:38, Done loop ...
+2025-09-29T01:24:38, ... powering down.
+2025-09-29T01:41:18, Setup Complete
+2025-09-29T01:41:21, Data: 2025-09-29T01:41:18,3.60,25631,4429.00,4987.00,4570.00,2.62,87.47,1.85,872.66
+2025-09-29T01:41:21, Add row to /TRACKING.csv
+2025-09-29T01:41:21, Number of rows in /TRACKING.csv: 2
+2025-09-29T01:41:23, Done loop ...
+2025-09-29T01:41:23, ... powering down.
+2025-09-29T01:58:04, Setup Complete
+2025-09-29T01:58:06, Data: 2025-09-29T01:58:04,3.62,25631,4515.00,4986.00,4577.00,2.43,88.03,1.72,872.40
+2025-09-29T01:58:06, Add row to /TRACKING.csv
+2025-09-29T01:58:06, Number of rows in /TRACKING.csv: 3
+2025-09-29T01:58:09, Done loop ...
+2025-09-29T01:58:09, ... powering down.
+2025-09-29T02:14:50, Setup Complete
+2025-09-29T02:14:52, Data: 2025-09-29T02:14:50,3.60,25631,4434.00,4988.00,4557.00,2.53,88.08,1.73,872.48
+2025-09-29T02:14:52, Add row to /TRACKING.csv
+2025-09-29T02:14:52, Number of rows in /TRACKING.csv: 4
+2025-09-29T02:14:55, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T02:14:55, Remove tracking
+2025-09-29T02:14:55, Write to /TRANSMIT.csv: 2025-09-29T02:14:50,3.60,4434.00,2.5,88
+2025-09-29T02:14:55, Number of rows in /TRANSMIT.csv: 3
+2025-09-29T02:14:55, Current hour = 2, Transmission hour = 1
+2025-09-29T02:14:56, Current hour = 2, Transmission hour = 6
+2025-09-29T02:14:56, Current hour = 2, Transmission hour = 8
+2025-09-29T02:14:56, Current hour = 2, Transmission hour = 10
+2025-09-29T02:14:56, Current hour = 2, Transmission hour = 15
+2025-09-29T02:14:56, Current hour = 2, Transmission hour = 20
+2025-09-29T02:14:56, Current hour = 2, Transmission hour = 22
+2025-09-29T02:14:56, Done loop ...
+2025-09-29T02:14:56, ... powering down.
+2025-09-29T02:31:35, Setup Complete
+2025-09-29T02:31:37, Data: 2025-09-29T02:31:35,3.65,25631,4486.00,4987.00,4677.00,2.48,87.45,1.80,872.51
+2025-09-29T02:31:37, Add row to /TRACKING.csv
+2025-09-29T02:31:38, Number of rows in /TRACKING.csv: 1
+2025-09-29T02:31:40, Done loop ...
+2025-09-29T02:31:40, ... powering down.
+2025-09-29T02:48:21, Setup Complete
+2025-09-29T02:48:23, Data: 2025-09-29T02:48:21,3.54,25631,4489.00,4987.00,4583.00,2.25,88.25,1.67,872.41
+2025-09-29T02:48:23, Add row to /TRACKING.csv
+2025-09-29T02:48:23, Number of rows in /TRACKING.csv: 2
+2025-09-29T02:48:26, Done loop ...
+2025-09-29T02:48:26, ... powering down.
+2025-09-29T03:05:06, Setup Complete
+2025-09-29T03:05:09, Data: 2025-09-29T03:05:06,3.54,25631,4476.00,4736.00,4548.50,2.32,87.76,1.62,872.30
+2025-09-29T03:05:09, Add row to /TRACKING.csv
+2025-09-29T03:05:09, Number of rows in /TRACKING.csv: 3
+2025-09-29T03:05:12, Done loop ...
+2025-09-29T03:05:12, ... powering down.
+2025-09-29T03:21:52, Setup Complete
+2025-09-29T03:21:54, Data: 2025-09-29T03:21:52,3.58,25631,4514.00,4988.00,4633.00,2.10,88.70,1.51,872.21
+2025-09-29T03:21:54, Add row to /TRACKING.csv
+2025-09-29T03:21:54, Number of rows in /TRACKING.csv: 4
+2025-09-29T03:21:58, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T03:21:58, Remove tracking
+2025-09-29T03:21:58, Write to /TRANSMIT.csv: 2025-09-29T03:21:52,3.58,4514.00,2.1,89
+2025-09-29T03:21:58, Number of rows in /TRANSMIT.csv: 4
+2025-09-29T03:21:58, Current hour = 3, Transmission hour = 1
+2025-09-29T03:21:58, Current hour = 3, Transmission hour = 6
+2025-09-29T03:21:58, Current hour = 3, Transmission hour = 8
+2025-09-29T03:21:58, Current hour = 3, Transmission hour = 10
+2025-09-29T03:21:58, Current hour = 3, Transmission hour = 15
+2025-09-29T03:21:58, Current hour = 3, Transmission hour = 20
+2025-09-29T03:21:58, Current hour = 3, Transmission hour = 22
+2025-09-29T03:21:58, Done loop ...
+2025-09-29T03:21:58, ... powering down.
+2025-09-29T03:38:38, Setup Complete
+2025-09-29T03:38:40, Data: 2025-09-29T03:38:38,3.58,25631,4547.00,4988.00,4651.00,1.98,88.83,1.31,872.16
+2025-09-29T03:38:40, Add row to /TRACKING.csv
+2025-09-29T03:38:40, Number of rows in /TRACKING.csv: 1
+2025-09-29T03:38:42, Done loop ...
+2025-09-29T03:38:43, ... powering down.
+2025-09-29T03:55:23, Setup Complete
+2025-09-29T03:55:26, Data: 2025-09-29T03:55:23,3.56,25631,4458.00,4985.00,4694.50,2.12,88.20,1.36,872.15
+2025-09-29T03:55:26, Add row to /TRACKING.csv
+2025-09-29T03:55:26, Number of rows in /TRACKING.csv: 2
+2025-09-29T03:55:28, Done loop ...
+2025-09-29T03:55:28, ... powering down.
+2025-09-29T04:12:09, Setup Complete
+2025-09-29T04:12:11, Data: 2025-09-29T04:12:09,3.59,25631,4458.00,4987.00,4623.00,2.15,88.04,1.45,872.10
+2025-09-29T04:12:11, Add row to /TRACKING.csv
+2025-09-29T04:12:11, Number of rows in /TRACKING.csv: 3
+2025-09-29T04:12:14, Done loop ...
+2025-09-29T04:12:14, ... powering down.
+2025-09-29T04:28:54, Setup Complete
+2025-09-29T04:28:57, Data: 2025-09-29T04:28:54,3.74,25631,4528.00,4987.00,4595.50,2.20,87.13,1.54,871.92
+2025-09-29T04:28:57, Add row to /TRACKING.csv
+2025-09-29T04:28:57, Number of rows in /TRACKING.csv: 4
+2025-09-29T04:29:00, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T04:29:00, Remove tracking
+2025-09-29T04:29:00, Write to /TRANSMIT.csv: 2025-09-29T04:28:54,3.74,4528.00,2.2,87
+2025-09-29T04:29:00, Number of rows in /TRANSMIT.csv: 5
+2025-09-29T04:29:00, Current hour = 4, Transmission hour = 1
+2025-09-29T04:29:00, 2900004455+02886:450+02587:443+02588:451+02189:453+02287
+2025-09-29T04:29:02,  - attempt to send message: 2900004455+02886:450+02587:443+02588:451+02189:453+02287
+2025-09-29T04:29:33,  - Modem begin successful
+2025-09-29T04:29:33,  - Sending...
+2025-09-29T04:30:03, Send response: 
+2025-09-29T04:30:03,  - Retry...
+2025-09-29T04:30:03,    - Sending...
+2025-09-29T04:30:03,    - Send response: 10
+2025-09-29T04:30:33,  Sync clocks... 
+2025-09-29T04:30:33,  - Clock was not synced
+2025-09-29T04:30:34, Transmission failed. Error = 10
+2025-09-29T04:30:34, Done loop ...
+2025-09-29T04:30:34, ... powering down.
+2025-09-29T04:45:40, Setup Complete
+2025-09-29T04:45:42, Data: 2025-09-29T04:45:40,3.75,25631,4518.00,4988.00,4583.50,2.19,86.85,1.59,871.95
+2025-09-29T04:45:42, Add row to /TRACKING.csv
+2025-09-29T04:45:42, Number of rows in /TRACKING.csv: 1
+2025-09-29T04:45:45, Done loop ...
+2025-09-29T04:45:45, ... powering down.
+2025-09-29T05:02:25, Setup Complete
+2025-09-29T05:02:28, Data: 2025-09-29T05:02:25,3.58,25631,4477.00,4717.00,4554.00,2.10,87.61,1.63,872.06
+2025-09-29T05:02:28, Add row to /TRACKING.csv
+2025-09-29T05:02:28, Number of rows in /TRACKING.csv: 2
+2025-09-29T05:02:30, Done loop ...
+2025-09-29T05:02:31, ... powering down.
+2025-09-29T05:19:11, Setup Complete
+2025-09-29T05:19:13, Data: 2025-09-29T05:19:11,3.57,25631,4529.00,4987.00,4664.50,2.16,87.69,1.74,871.96
+2025-09-29T05:19:13, Add row to /TRACKING.csv
+2025-09-29T05:19:14, Number of rows in /TRACKING.csv: 3
+2025-09-29T05:19:17, Done loop ...
+2025-09-29T05:19:17, ... powering down.
+2025-09-29T05:35:57, Setup Complete
+2025-09-29T05:35:59, Data: 2025-09-29T05:35:57,3.56,25631,4425.00,4766.00,4561.50,2.32,87.34,1.88,871.89
+2025-09-29T05:35:59, Add row to /TRACKING.csv
+2025-09-29T05:35:59, Number of rows in /TRACKING.csv: 4
+2025-09-29T05:36:02, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T05:36:02, Remove tracking
+2025-09-29T05:36:03, Write to /TRANSMIT.csv: 2025-09-29T05:35:57,3.56,4425.00,2.3,87
+2025-09-29T05:36:03, Number of rows in /TRANSMIT.csv: 6
+2025-09-29T05:36:03, Current hour = 5, Transmission hour = 1
+2025-09-29T05:36:03, 2900002455+02886:450+02587:443+02588:451+02189:453+02287:443+02387
+2025-09-29T05:36:05,  - attempt to send message: 2900002455+02886:450+02587:443+02588:451+02189:453+02287:443+02387
+2025-09-29T05:36:35,  - Modem begin successful
+2025-09-29T05:36:36,  - Sending...
+2025-09-29T05:37:06, Send response: 
+2025-09-29T05:37:06,  - Retry...
+2025-09-29T05:37:06,    - Sending...
+2025-09-29T05:37:06,    - Send response: 10
+2025-09-29T05:37:36,  Sync clocks... 
+2025-09-29T05:37:36,  - Clock was not synced
+2025-09-29T05:37:36, Transmission failed. Error = 10
+2025-09-29T05:37:36, Done loop ...
+2025-09-29T05:37:36, ... powering down.
+2025-09-29T05:52:42, Setup Complete
+2025-09-29T05:52:44, Data: 2025-09-29T05:52:42,3.58,25631,4450.00,4987.00,4576.50,2.22,88.02,1.99,871.76
+2025-09-29T05:52:44, Add row to /TRACKING.csv
+2025-09-29T05:52:45, Number of rows in /TRACKING.csv: 1
+2025-09-29T05:52:47, Done loop ...
+2025-09-29T05:52:47, ... powering down.
+2025-09-29T06:09:28, Setup Complete
+2025-09-29T06:09:30, Data: 2025-09-29T06:09:28,3.76,25631,4481.00,4985.00,4571.00,2.30,87.58,2.01,871.85
+2025-09-29T06:09:30, Add row to /TRACKING.csv
+2025-09-29T06:09:30, Number of rows in /TRACKING.csv: 2
+2025-09-29T06:09:33, Done loop ...
+2025-09-29T06:09:33, ... powering down.
+2025-09-29T06:26:13, Setup Complete
+2025-09-29T06:26:16, Data: 2025-09-29T06:26:14,3.57,25631,4431.00,4774.00,4553.00,2.44,87.13,2.08,871.84
+2025-09-29T06:26:16, Add row to /TRACKING.csv
+2025-09-29T06:26:16, Number of rows in /TRACKING.csv: 3
+2025-09-29T06:26:19, Done loop ...
+2025-09-29T06:26:19, ... powering down.
+2025-09-29T06:42:59, Setup Complete
+2025-09-29T06:43:01, Data: 2025-09-29T06:42:59,3.58,25631,4459.00,4986.00,4645.50,2.50,87.10,2.13,871.76
+2025-09-29T06:43:01, Add row to /TRACKING.csv
+2025-09-29T06:43:01, Number of rows in /TRACKING.csv: 4
+2025-09-29T06:43:05, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T06:43:05, Remove tracking
+2025-09-29T06:43:05, Write to /TRANSMIT.csv: 2025-09-29T06:42:59,3.58,4459.00,2.5,87
+2025-09-29T06:43:05, Number of rows in /TRANSMIT.csv: 7
+2025-09-29T06:43:05, Current hour = 6, Transmission hour = 1
+2025-09-29T06:43:05, 2900002455+02886:450+02587:443+02588:451+02189:453+02287:443+02387:446+02587
+2025-09-29T06:43:07,  - attempt to send message: 2900002455+02886:450+02587:443+02588:451+02189:453+02287:443+02387:446+02587
+2025-09-29T06:44:08,  - Modem begin successful
+2025-09-29T06:44:08,  - Sending...
+2025-09-29T06:45:18, Send response: 
+2025-09-29T06:45:18,  - Retry...
+2025-09-29T06:45:18,    - Sending...
+2025-09-29T06:45:18,    - Send response: 10
+2025-09-29T06:45:48,  Sync clocks... 
+2025-09-29T06:45:48,  - Clock was not synced
+2025-09-29T06:45:48, Transmission failed. Error = 10
+2025-09-29T06:45:48, Done loop ...
+2025-09-29T06:45:48, ... powering down.
+2025-09-29T06:59:44, Setup Complete
+2025-09-29T06:59:47, Data: 2025-09-29T06:59:44,3.59,25631,4566.00,4987.00,4675.50,2.65,85.52,2.27,871.83
+2025-09-29T06:59:47, Add row to /TRACKING.csv
+2025-09-29T06:59:47, Number of rows in /TRACKING.csv: 1
+2025-09-29T06:59:49, Done loop ...
+2025-09-29T06:59:49, ... powering down.
+2025-09-29T07:16:30, Setup Complete
+2025-09-29T07:16:32, Data: 2025-09-29T07:16:30,3.81,25631,4502.00,4784.00,4584.50,2.53,85.66,2.29,871.80
+2025-09-29T07:16:32, Add row to /TRACKING.csv
+2025-09-29T07:16:32, Number of rows in /TRACKING.csv: 2
+2025-09-29T07:16:35, Done loop ...
+2025-09-29T07:16:35, ... powering down.
+2025-09-29T07:33:16, Setup Complete
+2025-09-29T07:33:18, Data: 2025-09-29T07:33:16,3.63,25631,4489.00,4988.00,4587.00,2.88,84.91,2.72,871.69
+2025-09-29T07:33:18, Add row to /TRACKING.csv
+2025-09-29T07:33:18, Number of rows in /TRACKING.csv: 3
+2025-09-29T07:33:21, Done loop ...
+2025-09-29T07:33:21, ... powering down.
+2025-09-29T07:50:02, Setup Complete
+2025-09-29T07:50:04, Data: 2025-09-29T07:50:02,3.66,25631,4537.00,4986.00,4620.50,3.44,84.54,3.99,871.83
+2025-09-29T07:50:04, Add row to /TRACKING.csv
+2025-09-29T07:50:05, Number of rows in /TRACKING.csv: 4
+2025-09-29T07:50:08, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T07:50:08, Remove tracking
+2025-09-29T07:50:08, Write to /TRANSMIT.csv: 2025-09-29T07:50:02,3.66,4537.00,3.4,85
+2025-09-29T07:50:08, Number of rows in /TRANSMIT.csv: 8
+2025-09-29T07:50:08, Current hour = 7, Transmission hour = 1
+2025-09-29T07:50:08, 2900003455+02886:450+02587:443+02588:451+02189:453+02287:443+02387:446+02587:454+03485
+2025-09-29T07:50:10,  - attempt to send message: 2900003455+02886:450+02587:443+02588:451+02189:453+02287:443+02387:446+02587:454+03485
+2025-09-29T07:50:11,  - Modem begin successful
+2025-09-29T07:50:11,  - Sending...
+2025-09-29T07:50:41, Send response: 
+2025-09-29T07:50:41,  - Retry...
+2025-09-29T07:50:41,    - Sending...
+2025-09-29T07:50:41,    - Send response: 10
+2025-09-29T07:51:11,  Sync clocks... 
+2025-09-29T07:51:11,  - Clock was not synced
+2025-09-29T07:51:11, Transmission failed. Error = 10
+2025-09-29T07:51:11, Done loop ...
+2025-09-29T07:51:11, ... powering down.
+2025-09-29T08:06:48, Setup Complete
+2025-09-29T08:06:50, Data: 2025-09-29T08:06:48,3.60,25631,650.00,4988.00,4578.00,4.25,81.40,6.31,872.02
+2025-09-29T08:06:50, Add row to /TRACKING.csv
+2025-09-29T08:06:50, Number of rows in /TRACKING.csv: 1
+2025-09-29T08:06:53, Done loop ...
+2025-09-29T08:06:53, ... powering down.
+2025-09-29T08:23:34, Setup Complete
+2025-09-29T08:23:36, Data: 2025-09-29T08:23:34,3.66,25631,4501.00,4986.00,4594.00,5.07,76.18,10.07,871.88
+2025-09-29T08:23:36, Add row to /TRACKING.csv
+2025-09-29T08:23:36, Number of rows in /TRACKING.csv: 2
+2025-09-29T08:23:39, Done loop ...
+2025-09-29T08:23:39, ... powering down.
+2025-09-29T08:40:20, Setup Complete
+2025-09-29T08:40:22, Data: 2025-09-29T08:40:20,3.62,25631,4476.00,4987.00,4682.00,4.28,76.84,8.18,871.42
+2025-09-29T08:40:22, Add row to /TRACKING.csv
+2025-09-29T08:40:22, Number of rows in /TRACKING.csv: 3
+2025-09-29T08:40:25, Done loop ...
+2025-09-29T08:40:25, ... powering down.
+2025-09-29T08:57:06, Setup Complete
+2025-09-29T08:57:08, Data: 2025-09-29T08:57:06,3.62,25631,4436.00,4644.00,4555.50,5.22,72.87,9.07,871.77
+2025-09-29T08:57:09, Add row to /TRACKING.csv
+2025-09-29T08:57:09, Number of rows in /TRACKING.csv: 4
+2025-09-29T08:57:12, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T08:57:12, Remove tracking
+2025-09-29T08:57:12, Write to /TRANSMIT.csv: 2025-09-29T08:57:06,3.62,4436.00,5.2,73
+2025-09-29T08:57:12, Number of rows in /TRANSMIT.csv: 9
+2025-09-29T08:57:12, Current hour = 8, Transmission hour = 1
+2025-09-29T08:57:12, 2900003455+02886:450+02587:443+02588:451+02189:453+02287:443+02387:446+02587:454+03485:444+05273
+2025-09-29T08:57:14,  - attempt to send message: 2900003455+02886:450+02587:443+02588:451+02189:453+02287:443+02387:446+02587:454+03485:444+05273
+2025-09-29T08:57:15,  - Modem begin successful
+2025-09-29T08:57:15,  - Sending...
+2025-09-29T08:58:32, Send response: 
+2025-09-29T08:58:32,  - Retry...
+2025-09-29T08:58:32,    - Sending...
+2025-09-29T08:58:32,    - Send response: 10
+2025-09-29T08:59:02,  Sync clocks... 
+2025-09-29T08:59:02,  - Clock was not synced
+2025-09-29T08:59:02, Transmission failed. Error = 10
+2025-09-29T08:59:02, Done loop ...
+2025-09-29T08:59:02, ... powering down.
+2025-09-29T09:13:51, Setup Complete
+2025-09-29T09:13:54, Data: 2025-09-29T09:13:51,3.66,25631,4524.00,4606.00,4594.00,5.42,72.70,9.35,871.69
+2025-09-29T09:13:54, Add row to /TRACKING.csv
+2025-09-29T09:13:54, Number of rows in /TRACKING.csv: 1
+2025-09-29T09:13:56, Done loop ...
+2025-09-29T09:13:56, ... powering down.
+2025-09-29T09:30:38, Setup Complete
+2025-09-29T09:30:40, Data: 2025-09-29T09:30:38,3.62,25631,652.00,4986.00,4609.00,4.40,76.41,7.74,871.58
+2025-09-29T09:30:40, Add row to /TRACKING.csv
+2025-09-29T09:30:40, Number of rows in /TRACKING.csv: 2
+2025-09-29T09:30:43, Done loop ...
+2025-09-29T09:30:43, ... powering down.
+2025-09-29T09:47:24, Setup Complete
+2025-09-29T09:47:26, Data: 2025-09-29T09:47:24,3.91,25631,647.00,4987.00,4607.50,4.25,79.74,6.52,871.70
+2025-09-29T09:47:26, Add row to /TRACKING.csv
+2025-09-29T09:47:26, Number of rows in /TRACKING.csv: 3
+2025-09-29T09:47:29, Done loop ...
+2025-09-29T09:47:29, ... powering down.
+2025-09-29T10:04:10, Setup Complete
+2025-09-29T10:04:12, Data: 2025-09-29T10:04:10,3.66,25631,4495.00,4620.00,4578.00,4.57,81.40,6.99,871.88
+2025-09-29T10:04:12, Add row to /TRACKING.csv
+2025-09-29T10:04:12, Number of rows in /TRACKING.csv: 4
+2025-09-29T10:04:15, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T10:04:15, Remove tracking
+2025-09-29T10:04:15, Write to /TRANSMIT.csv: 2025-09-29T10:04:10,3.66,4495.00,4.6,81
+2025-09-29T10:04:16, Number of rows in /TRANSMIT.csv: 10
+2025-09-29T10:04:16, Current hour = 10, Transmission hour = 1
+2025-09-29T10:04:16, 2900003455+02886:450+02587:443+02588:451+02189:453+02287:443+02387:446+02587:454+03485:444+05273:450+04681
+2025-09-29T10:04:18,  - attempt to send message: 2900003455+02886:450+02587:443+02588:451+02189:453+02287:443+02387:446+02587:454+03485:444+05273:450+04681
+2025-09-29T10:04:18,  - Modem begin successful
+2025-09-29T10:04:18,  - Sending...
+2025-09-29T10:04:49, Send response: 
+2025-09-29T10:04:49,  - Retry...
+2025-09-29T10:04:49,    - Sending...
+2025-09-29T10:04:49,    - Send response: 10
+2025-09-29T10:05:19,  Sync clocks... 
+2025-09-29T10:05:19,  - Clock was not synced
+2025-09-29T10:05:19, Transmission failed. Error = 10
+2025-09-29T10:05:19, n_transmit >= 10, too much to transmit, delete /TRANSMIT.csv
+2025-09-29T10:05:19, Done loop ...
+2025-09-29T10:05:19, ... powering down.
+2025-09-29T10:20:56, Setup Complete
+2025-09-29T10:20:58, Data: 2025-09-29T10:20:56,3.66,25631,4525.00,4989.00,4988.00,4.74,78.81,7.22,871.72
+2025-09-29T10:20:58, Add row to /TRACKING.csv
+2025-09-29T10:20:58, Number of rows in /TRACKING.csv: 1
+2025-09-29T10:21:01, Done loop ...
+2025-09-29T10:21:01, ... powering down.
+2025-09-29T10:37:42, Setup Complete
+2025-09-29T10:37:44, Data: 2025-09-29T10:37:42,3.63,25631,4542.00,4988.00,4588.00,5.22,75.33,7.75,871.69
+2025-09-29T10:37:44, Add row to /TRACKING.csv
+2025-09-29T10:37:44, Number of rows in /TRACKING.csv: 2
+2025-09-29T10:37:47, Done loop ...
+2025-09-29T10:37:47, ... powering down.
+2025-09-29T10:54:28, Setup Complete
+2025-09-29T10:54:31, Data: 2025-09-29T10:54:28,3.66,25631,4559.00,4987.00,4803.00,4.87,74.27,7.50,871.51
+2025-09-29T10:54:31, Add row to /TRACKING.csv
+2025-09-29T10:54:31, Number of rows in /TRACKING.csv: 3
+2025-09-29T10:54:34, Done loop ...
+2025-09-29T10:54:34, ... powering down.
+2025-09-29T11:11:15, Setup Complete
+2025-09-29T11:11:17, Data: 2025-09-29T11:11:15,3.67,25631,4473.00,4988.00,4528.00,4.54,76.32,6.65,871.66
+2025-09-29T11:11:17, Add row to /TRACKING.csv
+2025-09-29T11:11:17, Number of rows in /TRACKING.csv: 4
+2025-09-29T11:11:20, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T11:11:20, Remove tracking
+2025-09-29T11:11:20, Write to /TRANSMIT.csv: 2025-09-29T11:11:15,3.67,4473.00,4.5,76
+2025-09-29T11:11:21, Number of rows in /TRANSMIT.csv: 1
+2025-09-29T11:11:21, Current hour = 11, Transmission hour = 1
+2025-09-29T11:11:21, Current hour = 11, Transmission hour = 6
+2025-09-29T11:11:21, Current hour = 11, Transmission hour = 8
+2025-09-29T11:11:21, Current hour = 11, Transmission hour = 10
+2025-09-29T11:11:21, Current hour = 11, Transmission hour = 15
+2025-09-29T11:11:21, Current hour = 11, Transmission hour = 20
+2025-09-29T11:11:21, Current hour = 11, Transmission hour = 22
+2025-09-29T11:11:21, Done loop ...
+2025-09-29T11:11:21, ... powering down.
+2025-09-29T11:28:01, Setup Complete
+2025-09-29T11:28:03, Data: 2025-09-29T11:28:01,3.65,25631,4486.00,4632.00,4546.50,5.87,75.53,8.53,871.63
+2025-09-29T11:28:03, Add row to /TRACKING.csv
+2025-09-29T11:28:03, Number of rows in /TRACKING.csv: 1
+2025-09-29T11:28:06, Done loop ...
+2025-09-29T11:28:06, ... powering down.
+2025-09-29T11:44:47, Setup Complete
+2025-09-29T11:44:49, Data: 2025-09-29T11:44:47,3.65,25631,4502.00,4684.00,4592.00,5.28,76.06,8.64,871.65
+2025-09-29T11:44:49, Add row to /TRACKING.csv
+2025-09-29T11:44:50, Number of rows in /TRACKING.csv: 2
+2025-09-29T11:44:52, Done loop ...
+2025-09-29T11:44:52, ... powering down.
+2025-09-29T12:01:33, Setup Complete
+2025-09-29T12:01:35, Data: 2025-09-29T12:01:33,3.67,25631,4525.00,4988.00,4986.00,4.82,74.56,7.48,871.56
+2025-09-29T12:01:35, Add row to /TRACKING.csv
+2025-09-29T12:01:35, Number of rows in /TRACKING.csv: 3
+2025-09-29T12:01:38, Done loop ...
+2025-09-29T12:01:38, ... powering down.
+2025-09-29T12:18:19, Setup Complete
+2025-09-29T12:18:21, Data: 2025-09-29T12:18:19,3.66,25631,4561.00,4987.00,4986.00,5.01,73.68,7.62,871.27
+2025-09-29T12:18:21, Add row to /TRACKING.csv
+2025-09-29T12:18:21, Number of rows in /TRACKING.csv: 4
+2025-09-29T12:18:24, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T12:18:24, Remove tracking
+2025-09-29T12:18:25, Write to /TRANSMIT.csv: 2025-09-29T12:18:19,3.66,4561.00,5.0,74
+2025-09-29T12:18:25, Number of rows in /TRANSMIT.csv: 2
+2025-09-29T12:18:25, Current hour = 12, Transmission hour = 1
+2025-09-29T12:18:25, Current hour = 12, Transmission hour = 6
+2025-09-29T12:18:25, Current hour = 12, Transmission hour = 8
+2025-09-29T12:18:25, Current hour = 12, Transmission hour = 10
+2025-09-29T12:18:25, Current hour = 12, Transmission hour = 15
+2025-09-29T12:18:25, Current hour = 12, Transmission hour = 20
+2025-09-29T12:18:25, Current hour = 12, Transmission hour = 22
+2025-09-29T12:18:25, Done loop ...
+2025-09-29T12:18:25, ... powering down.
+2025-09-29T12:35:05, Setup Complete
+2025-09-29T12:35:07, Data: 2025-09-29T12:35:05,3.66,25631,654.00,4988.00,4986.50,5.07,73.34,6.98,871.38
+2025-09-29T12:35:07, Add row to /TRACKING.csv
+2025-09-29T12:35:07, Number of rows in /TRACKING.csv: 1
+2025-09-29T12:35:10, Done loop ...
+2025-09-29T12:35:10, ... powering down.
+2025-09-29T12:51:51, Setup Complete
+2025-09-29T12:51:53, Data: 2025-09-29T12:51:51,3.72,25631,4521.00,4987.00,4986.00,4.40,80.36,6.05,871.57
+2025-09-29T12:51:53, Add row to /TRACKING.csv
+2025-09-29T12:51:54, Number of rows in /TRACKING.csv: 2
+2025-09-29T12:51:56, Done loop ...
+2025-09-29T12:51:56, ... powering down.
+2025-09-29T13:08:37, Setup Complete
+2025-09-29T13:08:39, Data: 2025-09-29T13:08:37,3.58,25631,4575.00,4989.00,4671.00,3.70,86.00,4.96,871.84
+2025-09-29T13:08:40, Add row to /TRACKING.csv
+2025-09-29T13:08:40, Number of rows in /TRACKING.csv: 3
+2025-09-29T13:08:43, Done loop ...
+2025-09-29T13:08:43, ... powering down.
+2025-09-29T13:25:23, Setup Complete
+2025-09-29T13:25:26, Data: 2025-09-29T13:25:23,3.82,25631,4752.00,4987.00,4986.00,3.71,86.12,4.69,872.11
+2025-09-29T13:25:26, Add row to /TRACKING.csv
+2025-09-29T13:25:26, Number of rows in /TRACKING.csv: 4
+2025-09-29T13:25:29, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T13:25:29, Remove tracking
+2025-09-29T13:25:29, Write to /TRANSMIT.csv: 2025-09-29T13:25:23,3.82,4752.00,3.7,86
+2025-09-29T13:25:29, Number of rows in /TRANSMIT.csv: 3
+2025-09-29T13:25:29, Current hour = 13, Transmission hour = 1
+2025-09-29T13:25:29, Current hour = 13, Transmission hour = 6
+2025-09-29T13:25:29, Current hour = 13, Transmission hour = 8
+2025-09-29T13:25:29, Current hour = 13, Transmission hour = 10
+2025-09-29T13:25:30, Current hour = 13, Transmission hour = 15
+2025-09-29T13:25:30, Current hour = 13, Transmission hour = 20
+2025-09-29T13:25:30, Current hour = 13, Transmission hour = 22
+2025-09-29T13:25:30, Done loop ...
+2025-09-29T13:25:30, ... powering down.
+2025-09-29T13:42:09, Setup Complete
+2025-09-29T13:42:12, Data: 2025-09-29T13:42:10,3.84,25631,645.00,4989.00,4988.00,3.37,90.66,4.55,872.14
+2025-09-29T13:42:12, Add row to /TRACKING.csv
+2025-09-29T13:42:12, Number of rows in /TRACKING.csv: 1
+2025-09-29T13:42:14, Done loop ...
+2025-09-29T13:42:14, ... powering down.
+2025-09-29T13:58:56, Setup Complete
+2025-09-29T13:58:58, Data: 2025-09-29T13:58:56,3.60,25631,646.00,4986.00,4742.00,3.12,93.00,4.56,872.20
+2025-09-29T13:58:58, Add row to /TRACKING.csv
+2025-09-29T13:58:58, Number of rows in /TRACKING.csv: 2
+2025-09-29T13:59:01, Done loop ...
+2025-09-29T13:59:01, ... powering down.
+2025-09-29T14:15:42, Setup Complete
+2025-09-29T14:15:44, Data: 2025-09-29T14:15:42,3.56,25631,4484.00,4988.00,4625.00,2.82,94.44,3.92,872.51
+2025-09-29T14:15:44, Add row to /TRACKING.csv
+2025-09-29T14:15:44, Number of rows in /TRACKING.csv: 3
+2025-09-29T14:15:47, Done loop ...
+2025-09-29T14:15:47, ... powering down.
+2025-09-29T14:32:28, Setup Complete
+2025-09-29T14:32:30, Data: 2025-09-29T14:32:28,3.78,25631,4548.00,4987.00,4664.50,2.65,94.49,3.52,872.83
+2025-09-29T14:32:30, Add row to /TRACKING.csv
+2025-09-29T14:32:30, Number of rows in /TRACKING.csv: 4
+2025-09-29T14:32:33, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T14:32:34, Remove tracking
+2025-09-29T14:32:34, Write to /TRANSMIT.csv: 2025-09-29T14:32:28,3.78,4548.00,2.7,94
+2025-09-29T14:32:34, Number of rows in /TRANSMIT.csv: 4
+2025-09-29T14:32:34, Current hour = 14, Transmission hour = 1
+2025-09-29T14:32:34, Current hour = 14, Transmission hour = 6
+2025-09-29T14:32:34, Current hour = 14, Transmission hour = 8
+2025-09-29T14:32:34, Current hour = 14, Transmission hour = 10
+2025-09-29T14:32:34, Current hour = 14, Transmission hour = 15
+2025-09-29T14:32:34, Current hour = 14, Transmission hour = 20
+2025-09-29T14:32:34, Current hour = 14, Transmission hour = 22
+2025-09-29T14:32:34, Done loop ...
+2025-09-29T14:32:34, ... powering down.
+2025-09-29T14:49:14, Setup Complete
+2025-09-29T14:49:16, Data: 2025-09-29T14:49:14,3.65,25631,4607.00,4987.00,4986.00,2.73,95.33,3.76,873.07
+2025-09-29T14:49:16, Add row to /TRACKING.csv
+2025-09-29T14:49:16, Number of rows in /TRACKING.csv: 1
+2025-09-29T14:49:19, Done loop ...
+2025-09-29T14:49:19, ... powering down.
+2025-09-29T15:06:00, Setup Complete
+2025-09-29T15:06:02, Data: 2025-09-29T15:06:00,3.63,25631,4559.00,4986.00,4642.50,3.24,94.56,4.54,873.25
+2025-09-29T15:06:02, Add row to /TRACKING.csv
+2025-09-29T15:06:03, Number of rows in /TRACKING.csv: 2
+2025-09-29T15:06:05, Done loop ...
+2025-09-29T15:06:05, ... powering down.
+2025-09-29T15:22:42, Setup Complete
+2025-09-29T15:22:44, Data: 2025-09-29T15:22:42,3.64,25631,4527.00,4989.00,4614.50,3.50,94.29,5.33,873.57
+2025-09-29T15:22:44, Add row to /TRACKING.csv
+2025-09-29T15:22:44, Number of rows in /TRACKING.csv: 3
+2025-09-29T15:22:47, Done loop ...
+2025-09-29T15:22:47, ... powering down.
+2025-09-29T15:39:26, Setup Complete
+2025-09-29T15:39:28, Data: 2025-09-29T15:39:26,3.64,25631,650.00,4989.00,4850.00,4.57,89.93,7.21,873.37
+2025-09-29T15:39:28, Add row to /TRACKING.csv
+2025-09-29T15:39:29, Number of rows in /TRACKING.csv: 4
+2025-09-29T15:39:32, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T15:39:32, Remove tracking
+2025-09-29T15:39:32, Write to /TRANSMIT.csv: 2025-09-29T15:39:26,3.64,650.00,4.6,90
+2025-09-29T15:39:32, Number of rows in /TRANSMIT.csv: 5
+2025-09-29T15:39:32, Current hour = 15, Transmission hour = 1
+2025-09-29T15:39:32, 2911113447+04576:456+05074:475+03786:455+02794:065+04690
+2025-09-29T15:39:34,  - attempt to send message: 2911113447+04576:456+05074:475+03786:455+02794:065+04690
+2025-09-29T15:39:35,  - Modem begin successful
+2025-09-29T15:39:35,  - Sending...
+2025-09-29T15:40:05, Send response: 
+2025-09-29T15:40:05,  - Retry...
+2025-09-29T15:40:05,    - Sending...
+2025-09-29T15:40:05,    - Send response: 10
+2025-09-29T15:40:35,  Sync clocks... 
+2025-09-29T15:40:35,  - Clock was not synced
+2025-09-29T15:40:36, Transmission failed. Error = 10
+2025-09-29T15:40:36, Done loop ...
+2025-09-29T15:40:36, ... powering down.
+2025-09-29T15:56:11, Setup Complete
+2025-09-29T15:56:13, Data: 2025-09-29T15:56:11,3.67,25631,650.00,4990.00,4988.00,3.78,90.06,6.55,873.37
+2025-09-29T15:56:13, Add row to /TRACKING.csv
+2025-09-29T15:56:13, Number of rows in /TRACKING.csv: 1
+2025-09-29T15:56:15, Done loop ...
+2025-09-29T15:56:15, ... powering down.
+2025-09-29T16:12:57, Setup Complete
+2025-09-29T16:12:59, Data: 2025-09-29T16:12:57,3.65,25631,648.00,4988.00,4753.00,3.54,90.17,5.60,873.70
+2025-09-29T16:12:59, Add row to /TRACKING.csv
+2025-09-29T16:12:59, Number of rows in /TRACKING.csv: 2
+2025-09-29T16:13:02, Done loop ...
+2025-09-29T16:13:02, ... powering down.
+2025-09-29T16:29:41, Setup Complete
+2025-09-29T16:29:43, Data: 2025-09-29T16:29:41,3.54,25631,652.00,4988.00,4580.50,3.98,88.77,6.10,873.66
+2025-09-29T16:29:43, Add row to /TRACKING.csv
+2025-09-29T16:29:43, Number of rows in /TRACKING.csv: 3
+2025-09-29T16:29:46, Done loop ...
+2025-09-29T16:29:46, ... powering down.
+2025-09-29T16:46:27, Setup Complete
+2025-09-29T16:46:29, Data: 2025-09-29T16:46:27,3.75,25631,647.00,4988.00,4803.00,3.59,90.95,5.17,873.78
+2025-09-29T16:46:29, Add row to /TRACKING.csv
+2025-09-29T16:46:29, Number of rows in /TRACKING.csv: 4
+2025-09-29T16:46:32, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T16:46:32, Remove tracking
+2025-09-29T16:46:32, Write to /TRANSMIT.csv: 2025-09-29T16:46:27,3.75,647.00,3.6,91
+2025-09-29T16:46:33, Number of rows in /TRANSMIT.csv: 6
+2025-09-29T16:46:33, Current hour = 16, Transmission hour = 1
+2025-09-29T16:46:33, 2911114447+04576:456+05074:475+03786:455+02794:065+04690:065+03691
+2025-09-29T16:46:35,  - attempt to send message: 2911114447+04576:456+05074:475+03786:455+02794:065+04690:065+03691
+2025-09-29T16:46:36,  - Modem begin successful
+2025-09-29T16:46:36,  - Sending...
+2025-09-29T16:47:06, Send response: 
+2025-09-29T16:47:06,  - Retry...
+2025-09-29T16:47:06,    - Sending...
+2025-09-29T16:47:06,    - Send response: 10
+2025-09-29T16:47:36,  Sync clocks... 
+2025-09-29T16:47:36,  - Clock was not synced
+2025-09-29T16:47:36, Transmission failed. Error = 10
+2025-09-29T16:47:36, Done loop ...
+2025-09-29T16:47:36, ... powering down.
+2025-09-29T17:03:13, Setup Complete
+2025-09-29T17:03:15, Data: 2025-09-29T17:03:13,3.62,25631,4558.00,4987.00,4804.00,2.99,92.65,4.19,873.87
+2025-09-29T17:03:15, Add row to /TRACKING.csv
+2025-09-29T17:03:15, Number of rows in /TRACKING.csv: 1
+2025-09-29T17:03:17, Done loop ...
+2025-09-29T17:03:17, ... powering down.
+2025-09-29T17:19:59, Setup Complete
+2025-09-29T17:20:01, Data: 2025-09-29T17:19:59,3.86,25631,4565.00,4986.00,4572.50,2.81,93.33,3.69,873.95
+2025-09-29T17:20:01, Add row to /TRACKING.csv
+2025-09-29T17:20:01, Number of rows in /TRACKING.csv: 2
+2025-09-29T17:20:04, Done loop ...
+2025-09-29T17:20:04, ... powering down.
+2025-09-29T17:36:44, Setup Complete
+2025-09-29T17:36:47, Data: 2025-09-29T17:36:45,3.81,25631,4501.00,4986.00,4612.00,2.77,93.71,3.30,874.17
+2025-09-29T17:36:47, Add row to /TRACKING.csv
+2025-09-29T17:36:47, Number of rows in /TRACKING.csv: 3
+2025-09-29T17:36:50, Done loop ...
+2025-09-29T17:36:50, ... powering down.
+2025-09-29T17:53:30, Setup Complete
+2025-09-29T17:53:33, Data: 2025-09-29T17:53:30,3.62,25631,4542.00,4984.00,4603.50,2.75,94.51,3.00,874.34
+2025-09-29T17:53:33, Add row to /TRACKING.csv
+2025-09-29T17:53:33, Number of rows in /TRACKING.csv: 4
+2025-09-29T17:53:36, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T17:53:36, Remove tracking
+2025-09-29T17:53:36, Write to /TRANSMIT.csv: 2025-09-29T17:53:30,3.62,4542.00,2.8,95
+2025-09-29T17:53:36, Number of rows in /TRANSMIT.csv: 7
+2025-09-29T17:53:36, Current hour = 17, Transmission hour = 1
+2025-09-29T17:53:36, 2911113447+04576:456+05074:475+03786:455+02794:065+04690:065+03691:454+02895
+2025-09-29T17:53:38,  - attempt to send message: 2911113447+04576:456+05074:475+03786:455+02794:065+04690:065+03691:454+02895
+2025-09-29T17:53:39,  - Modem begin successful
+2025-09-29T17:53:39,  - Sending...
+2025-09-29T17:54:09, Send response: 
+2025-09-29T17:54:09,  - Retry...
+2025-09-29T17:54:09,    - Sending...
+2025-09-29T17:54:09,    - Send response: 10
+2025-09-29T17:54:39,  Sync clocks... 
+2025-09-29T17:54:40,  - Clock was not synced
+2025-09-29T17:54:40, Transmission failed. Error = 10
+2025-09-29T17:54:40, Done loop ...
+2025-09-29T17:54:40, ... powering down.
+2025-09-29T18:10:16, Setup Complete
+2025-09-29T18:10:18, Data: 2025-09-29T18:10:16,3.56,25631,4564.00,4635.00,4574.50,2.41,93.85,2.65,874.46
+2025-09-29T18:10:18, Add row to /TRACKING.csv
+2025-09-29T18:10:18, Number of rows in /TRACKING.csv: 1
+2025-09-29T18:10:21, Done loop ...
+2025-09-29T18:10:21, ... powering down.
+2025-09-29T18:27:01, Setup Complete
+2025-09-29T18:27:04, Data: 2025-09-29T18:27:01,3.57,25631,4530.00,4803.00,4598.00,2.18,94.80,2.28,874.54
+2025-09-29T18:27:04, Add row to /TRACKING.csv
+2025-09-29T18:27:04, Number of rows in /TRACKING.csv: 2
+2025-09-29T18:27:06, Done loop ...
+2025-09-29T18:27:07, ... powering down.
+2025-09-29T18:43:47, Setup Complete
+2025-09-29T18:43:49, Data: 2025-09-29T18:43:47,3.81,25631,4542.00,4986.00,4582.00,2.08,95.11,2.03,874.62
+2025-09-29T18:43:49, Add row to /TRACKING.csv
+2025-09-29T18:43:49, Number of rows in /TRACKING.csv: 3
+2025-09-29T18:43:52, Done loop ...
+2025-09-29T18:43:52, ... powering down.
+2025-09-29T19:00:33, Setup Complete
+2025-09-29T19:00:35, Data: 2025-09-29T19:00:33,3.56,25631,4492.00,4988.00,4582.00,1.91,94.72,1.78,874.74
+2025-09-29T19:00:35, Add row to /TRACKING.csv
+2025-09-29T19:00:35, Number of rows in /TRACKING.csv: 4
+2025-09-29T19:00:38, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T19:00:38, Remove tracking
+2025-09-29T19:00:38, Write to /TRANSMIT.csv: 2025-09-29T19:00:33,3.56,4492.00,1.9,95
+2025-09-29T19:00:38, Number of rows in /TRANSMIT.csv: 8
+2025-09-29T19:00:39, Current hour = 19, Transmission hour = 1
+2025-09-29T19:00:39, 2911112447+04576:456+05074:475+03786:455+02794:065+04690:065+03691:454+02895:449+01995
+2025-09-29T19:00:41,  - attempt to send message: 2911112447+04576:456+05074:475+03786:455+02794:065+04690:065+03691:454+02895:449+01995
+2025-09-29T19:00:41,  - Modem begin successful
+2025-09-29T19:00:41,  - Sending...
+2025-09-29T19:01:11, Send response: 
+2025-09-29T19:01:12,  - Retry...
+2025-09-29T19:01:12,    - Sending...
+2025-09-29T19:01:12,    - Send response: 10
+2025-09-29T19:01:42,  Sync clocks... 
+2025-09-29T19:01:42,  - Clock was not synced
+2025-09-29T19:01:42, Transmission failed. Error = 10
+2025-09-29T19:01:42, Done loop ...
+2025-09-29T19:01:42, ... powering down.
+2025-09-29T19:17:18, Setup Complete
+2025-09-29T19:17:20, Data: 2025-09-29T19:17:18,3.79,25631,4573.00,4986.00,4675.00,1.61,94.59,1.36,875.01
+2025-09-29T19:17:20, Add row to /TRACKING.csv
+2025-09-29T19:17:21, Number of rows in /TRACKING.csv: 1
+2025-09-29T19:17:23, Done loop ...
+2025-09-29T19:17:23, ... powering down.
+2025-09-29T19:34:04, Setup Complete
+2025-09-29T19:34:06, Data: 2025-09-29T19:34:04,3.78,25631,4484.00,4795.00,4588.50,1.55,95.12,1.11,875.15
+2025-09-29T19:34:06, Add row to /TRACKING.csv
+2025-09-29T19:34:06, Number of rows in /TRACKING.csv: 2
+2025-09-29T19:34:09, Done loop ...
+2025-09-29T19:34:09, ... powering down.
+2025-09-29T19:50:49, Setup Complete
+2025-09-29T19:50:51, Data: 2025-09-29T19:50:49,3.65,25631,500.00,4986.00,4548.00,1.16,95.88,0.72,875.19
+2025-09-29T19:50:51, Add row to /TRACKING.csv
+2025-09-29T19:50:52, Number of rows in /TRACKING.csv: 3
+2025-09-29T19:50:54, Done loop ...
+2025-09-29T19:50:55, ... powering down.
+2025-09-29T20:07:35, Setup Complete
+2025-09-29T20:07:37, Data: 2025-09-29T20:07:35,3.65,25631,4438.00,4761.00,4606.50,1.61,94.65,0.75,875.21
+2025-09-29T20:07:37, Add row to /TRACKING.csv
+2025-09-29T20:07:37, Number of rows in /TRACKING.csv: 4
+2025-09-29T20:07:40, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T20:07:40, Remove tracking
+2025-09-29T20:07:40, Write to /TRANSMIT.csv: 2025-09-29T20:07:35,3.65,4438.00,1.6,95
+2025-09-29T20:07:41, Number of rows in /TRANSMIT.csv: 9
+2025-09-29T20:07:41, Current hour = 20, Transmission hour = 1
+2025-09-29T20:07:41, 2911113447+04576:456+05074:475+03786:455+02794:065+04690:065+03691:454+02895:449+01995:444+01695
+2025-09-29T20:07:43,  - attempt to send message: 2911113447+04576:456+05074:475+03786:455+02794:065+04690:065+03691:454+02895:449+01995:444+01695
+2025-09-29T20:08:43,  - Modem begin successful
+2025-09-29T20:08:44,  - Sending...
+2025-09-29T20:09:14, Send response: 
+2025-09-29T20:09:14,  - Retry...
+2025-09-29T20:09:14,    - Sending...
+2025-09-29T20:09:14,    - Send response: 10
+2025-09-29T20:09:44,  Sync clocks... 
+2025-09-29T20:09:44,  - Clock was not synced
+2025-09-29T20:09:44, Transmission failed. Error = 10
+2025-09-29T20:09:44, Done loop ...
+2025-09-29T20:09:44, ... powering down.
+2025-09-29T20:24:20, Setup Complete
+2025-09-29T20:24:22, Data: 2025-09-29T20:24:20,3.75,25631,4508.00,4987.00,4580.50,1.47,94.49,0.81,875.23
+2025-09-29T20:24:22, Add row to /TRACKING.csv
+2025-09-29T20:24:22, Number of rows in /TRACKING.csv: 1
+2025-09-29T20:24:25, Done loop ...
+2025-09-29T20:24:25, ... powering down.
+2025-09-29T20:41:05, Setup Complete
+2025-09-29T20:41:08, Data: 2025-09-29T20:41:06,3.59,25631,4468.00,4801.00,4571.00,1.37,95.70,0.77,875.30
+2025-09-29T20:41:08, Add row to /TRACKING.csv
+2025-09-29T20:41:08, Number of rows in /TRACKING.csv: 2
+2025-09-29T20:41:11, Done loop ...
+2025-09-29T20:41:11, ... powering down.
+2025-09-29T20:57:51, Setup Complete
+2025-09-29T20:57:53, Data: 2025-09-29T20:57:51,3.56,25631,4466.00,4708.00,4607.00,1.41,93.89,0.71,875.19
+2025-09-29T20:57:53, Add row to /TRACKING.csv
+2025-09-29T20:57:53, Number of rows in /TRACKING.csv: 3
+2025-09-29T20:57:56, Done loop ...
+2025-09-29T20:57:56, ... powering down.
+2025-09-29T21:14:37, Setup Complete
+2025-09-29T21:14:39, Data: 2025-09-29T21:14:37,3.56,25631,4424.00,4648.00,4567.00,1.67,92.89,0.77,875.25
+2025-09-29T21:14:39, Add row to /TRACKING.csv
+2025-09-29T21:14:39, Number of rows in /TRACKING.csv: 4
+2025-09-29T21:14:42, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T21:14:42, Remove tracking
+2025-09-29T21:14:42, Write to /TRANSMIT.csv: 2025-09-29T21:14:37,3.56,4424.00,1.7,93
+2025-09-29T21:14:42, Number of rows in /TRANSMIT.csv: 10
+2025-09-29T21:14:42, Current hour = 21, Transmission hour = 1
+2025-09-29T21:14:43, 2911112447+04576:456+05074:475+03786:455+02794:065+04690:065+03691:454+02895:449+01995:444+01695:442+01793
+2025-09-29T21:14:45,  - attempt to send message: 2911112447+04576:456+05074:475+03786:455+02794:065+04690:065+03691:454+02895:449+01995:444+01695:442+01793
+2025-09-29T21:15:45,  - Modem begin unsuccessful
+2025-09-29T21:15:45, Transmission failed. Error = 3
+2025-09-29T21:15:45, n_transmit >= 10, too much to transmit, delete /TRANSMIT.csv
+2025-09-29T21:15:45, Done loop ...
+2025-09-29T21:15:45, ... powering down.
+2025-09-29T21:31:22, Setup Complete
+2025-09-29T21:31:24, Data: 2025-09-29T21:31:22,3.67,25631,4531.00,4724.00,4581.50,1.32,93.50,0.65,875.29
+2025-09-29T21:31:24, Add row to /TRACKING.csv
+2025-09-29T21:31:24, Number of rows in /TRACKING.csv: 1
+2025-09-29T21:31:27, Done loop ...
+2025-09-29T21:31:27, ... powering down.
+2025-09-29T21:48:07, Setup Complete
+2025-09-29T21:48:10, Data: 2025-09-29T21:48:07,3.58,25631,4422.00,4784.00,4558.00,1.81,89.24,0.61,875.41
+2025-09-29T21:48:10, Add row to /TRACKING.csv
+2025-09-29T21:48:10, Number of rows in /TRACKING.csv: 2
+2025-09-29T21:48:12, Done loop ...
+2025-09-29T21:48:13, ... powering down.
+2025-09-29T22:04:53, Setup Complete
+2025-09-29T22:04:55, Data: 2025-09-29T22:04:53,3.55,25631,4433.00,4985.00,4580.00,1.47,89.46,0.48,875.33
+2025-09-29T22:04:55, Add row to /TRACKING.csv
+2025-09-29T22:04:55, Number of rows in /TRACKING.csv: 3
+2025-09-29T22:04:58, Done loop ...
+2025-09-29T22:04:58, ... powering down.
+2025-09-29T22:21:39, Setup Complete
+2025-09-29T22:21:41, Data: 2025-09-29T22:21:39,3.65,25631,4410.00,4987.00,4614.00,1.47,88.50,0.35,875.41
+2025-09-29T22:21:41, Add row to /TRACKING.csv
+2025-09-29T22:21:41, Number of rows in /TRACKING.csv: 4
+2025-09-29T22:21:44, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T22:21:44, Remove tracking
+2025-09-29T22:21:44, Write to /TRANSMIT.csv: 2025-09-29T22:21:39,3.65,4410.00,1.5,88
+2025-09-29T22:21:45, Number of rows in /TRANSMIT.csv: 1
+2025-09-29T22:21:45, Current hour = 22, Transmission hour = 1
+2025-09-29T22:21:45, Current hour = 22, Transmission hour = 6
+2025-09-29T22:21:45, Current hour = 22, Transmission hour = 8
+2025-09-29T22:21:45, Current hour = 22, Transmission hour = 10
+2025-09-29T22:21:45, Current hour = 22, Transmission hour = 15
+2025-09-29T22:21:45, Current hour = 22, Transmission hour = 20
+2025-09-29T22:21:45, Current hour = 22, Transmission hour = 22
+2025-09-29T22:21:45, 2922213441+01588
+2025-09-29T22:21:47,  - attempt to send message: 2922213441+01588
+2025-09-29T22:24:18,  - Modem begin successful
+2025-09-29T22:24:18,  - Sending...
+2025-09-29T22:24:58, Send response: 
+2025-09-29T22:24:58,  - Retry...
+2025-09-29T22:24:58,    - Sending...
+2025-09-29T22:24:58,    - Send response: 10
+2025-09-29T22:25:28,  Sync clocks... 
+2025-09-29T22:25:28,  - Clock was not synced
+2025-09-29T22:25:28, Transmission failed. Error = 10
+2025-09-29T22:25:28, Done loop ...
+2025-09-29T22:25:28, ... powering down.
+2025-09-29T22:38:24, Setup Complete
+2025-09-29T22:38:26, Data: 2025-09-29T22:38:24,3.58,25631,4517.00,4634.00,4580.50,1.36,88.31,0.40,875.36
+2025-09-29T22:38:26, Add row to /TRACKING.csv
+2025-09-29T22:38:26, Number of rows in /TRACKING.csv: 1
+2025-09-29T22:38:28, Done loop ...
+2025-09-29T22:38:29, ... powering down.
+2025-09-29T22:55:09, Setup Complete
+2025-09-29T22:55:11, Data: 2025-09-29T22:55:09,3.69,25631,4444.00,4988.00,4528.00,1.53,84.78,0.32,875.41
+2025-09-29T22:55:11, Add row to /TRACKING.csv
+2025-09-29T22:55:12, Number of rows in /TRACKING.csv: 2
+2025-09-29T22:55:14, Done loop ...
+2025-09-29T22:55:14, ... powering down.
+2025-09-29T23:11:55, Setup Complete
+2025-09-29T23:11:57, Data: 2025-09-29T23:11:55,3.76,25631,4412.00,4651.00,4559.50,1.51,86.08,0.30,875.33
+2025-09-29T23:11:57, Add row to /TRACKING.csv
+2025-09-29T23:11:57, Number of rows in /TRACKING.csv: 3
+2025-09-29T23:12:00, Done loop ...
+2025-09-29T23:12:00, ... powering down.
+2025-09-29T23:28:40, Setup Complete
+2025-09-29T23:28:42, Data: 2025-09-29T23:28:40,3.80,25631,4447.00,4718.00,4611.00,1.30,83.97,0.22,875.33
+2025-09-29T23:28:42, Add row to /TRACKING.csv
+2025-09-29T23:28:43, Number of rows in /TRACKING.csv: 4
+2025-09-29T23:28:46, Number of rows in /TRACKING.csv is >= 4
+2025-09-29T23:28:46, Remove tracking
+2025-09-29T23:28:46, Write to /TRANSMIT.csv: 2025-09-29T23:28:40,3.80,4447.00,1.3,84
+2025-09-29T23:28:46, Number of rows in /TRANSMIT.csv: 2
+2025-09-29T23:28:46, Current hour = 23, Transmission hour = 1
+2025-09-29T23:28:46, Current hour = 23, Transmission hour = 6
+2025-09-29T23:28:46, Current hour = 23, Transmission hour = 8
+2025-09-29T23:28:46, Current hour = 23, Transmission hour = 10
+2025-09-29T23:28:46, Current hour = 23, Transmission hour = 15
+2025-09-29T23:28:46, Current hour = 23, Transmission hour = 20
+2025-09-29T23:28:46, Current hour = 23, Transmission hour = 22
+2025-09-29T23:28:46, Done loop ...
+2025-09-29T23:28:46, ... powering down.
+2025-09-29T23:45:26, Setup Complete
+2025-09-29T23:45:28, Data: 2025-09-29T23:45:26,3.69,25631,4446.00,4747.00,4610.00,1.19,83.11,0.14,875.32
+2025-09-29T23:45:28, Add row to /TRACKING.csv
+2025-09-29T23:45:28, Number of rows in /TRACKING.csv: 1
+2025-09-29T23:45:30, Done loop ...
+2025-09-29T23:45:30, ... powering down.
+2025-09-30T00:02:11, Setup Complete
+2025-09-30T00:02:13, Data: 2025-09-30T00:02:11,3.79,25631,4474.00,4986.00,4620.50,2.06,80.25,0.39,875.27
+2025-09-30T00:02:13, Add row to /TRACKING.csv
+2025-09-30T00:02:14, Number of rows in /TRACKING.csv: 2
+2025-09-30T00:02:16, Done loop ...
+2025-09-30T00:02:16, ... powering down.
+2025-09-30T00:18:57, Setup Complete
+2025-09-30T00:18:59, Data: 2025-09-30T00:18:57,3.59,25631,4437.00,4796.00,4565.50,1.77,80.97,0.40,875.24
+2025-09-30T00:18:59, Add row to /TRACKING.csv
+2025-09-30T00:18:59, Number of rows in /TRACKING.csv: 3
+2025-09-30T00:19:02, Done loop ...
+2025-09-30T00:19:02, ... powering down.
+2025-09-30T00:35:42, Setup Complete
+2025-09-30T00:35:44, Data: 2025-09-30T00:35:42,3.56,25631,4468.00,4988.00,4504.50,1.53,82.58,0.30,875.26
+2025-09-30T00:35:44, Add row to /TRACKING.csv
+2025-09-30T00:35:45, Number of rows in /TRACKING.csv: 4
+2025-09-30T00:35:48, Number of rows in /TRACKING.csv is >= 4
+2025-09-30T00:35:48, Remove tracking
+2025-09-30T00:35:48, Write to /TRANSMIT.csv: 2025-09-30T00:35:42,3.56,4468.00,1.5,83
+2025-09-30T00:35:48, Number of rows in /TRANSMIT.csv: 3
+2025-09-30T00:35:48, Current hour = 0, Transmission hour = 1
+2025-09-30T00:35:48, Current hour = 0, Transmission hour = 6
+2025-09-30T00:35:48, Current hour = 0, Transmission hour = 8
+2025-09-30T00:35:48, Current hour = 0, Transmission hour = 10
+2025-09-30T00:35:48, Current hour = 0, Transmission hour = 15
+2025-09-30T00:35:48, Current hour = 0, Transmission hour = 20
+2025-09-30T00:35:48, Current hour = 0, Transmission hour = 22
+2025-09-30T00:35:48, Done loop ...
+2025-09-30T00:35:48, ... powering down.
+2025-09-30T00:52:28, Setup Complete
+2025-09-30T00:52:30, Data: 2025-09-30T00:52:28,3.63,25631,4449.00,4706.00,4534.00,1.79,81.07,0.31,875.18
+2025-09-30T00:52:30, Add row to /TRACKING.csv
+2025-09-30T00:52:30, Number of rows in /TRACKING.csv: 1
+2025-09-30T00:52:33, Done loop ...
+2025-09-30T00:52:33, ... powering down.
+2025-09-30T01:09:13, Setup Complete
+2025-09-30T01:09:15, Data: 2025-09-30T01:09:13,3.54,25631,4445.00,4709.00,4540.50,1.74,81.48,0.35,875.08
+2025-09-30T01:09:16, Add row to /TRACKING.csv
+2025-09-30T01:09:16, Number of rows in /TRACKING.csv: 2
+2025-09-30T01:09:18, Done loop ...
+2025-09-30T01:09:18, ... powering down.
+2025-09-30T01:25:59, Setup Complete
+2025-09-30T01:26:01, Data: 2025-09-30T01:25:59,3.60,25631,4425.00,4813.00,4550.00,2.08,79.06,0.43,875.15
+2025-09-30T01:26:01, Add row to /TRACKING.csv
+2025-09-30T01:26:01, Number of rows in /TRACKING.csv: 3
+2025-09-30T01:26:04, Done loop ...
+2025-09-30T01:26:04, ... powering down.
+2025-09-30T01:42:44, Setup Complete
+2025-09-30T01:42:47, Data: 2025-09-30T01:42:44,3.64,25631,4493.00,4612.00,4567.00,2.10,79.67,0.45,874.96
+2025-09-30T01:42:47, Add row to /TRACKING.csv
+2025-09-30T01:42:47, Number of rows in /TRACKING.csv: 4
+2025-09-30T01:42:50, Number of rows in /TRACKING.csv is >= 4
+2025-09-30T01:42:50, Remove tracking
+2025-09-30T01:42:50, Write to /TRANSMIT.csv: 2025-09-30T01:42:44,3.64,4493.00,2.1,80
+2025-09-30T01:42:50, Number of rows in /TRANSMIT.csv: 4
+2025-09-30T01:42:50, Current hour = 1, Transmission hour = 1
+2025-09-30T01:42:50, 2922213441+01588:445+01384:447+01583:449+02180
+2025-09-30T01:42:52,  - attempt to send message: 2922213441+01588:445+01384:447+01583:449+02180
+2025-09-30T01:43:53,  - Modem begin successful
+2025-09-30T01:43:53,  - Sending...
+2025-09-30T01:44:23, Send response: 
+2025-09-30T01:44:23,  - Retry...
+2025-09-30T01:44:23,    - Sending...
+2025-09-30T01:44:23,    - Send response: 10
+2025-09-30T01:44:53,  Sync clocks... 
+2025-09-30T01:44:53,  - Clock was not synced
+2025-09-30T01:44:53, Transmission failed. Error = 10
+2025-09-30T01:44:53, Done loop ...
+2025-09-30T01:44:53, ... powering down.
+2025-09-30T01:59:30, Setup Complete
+2025-09-30T01:59:32, Data: 2025-09-30T01:59:30,3.56,25631,4488.00,4988.00,4549.50,2.32,80.57,0.75,874.85
+2025-09-30T01:59:32, Add row to /TRACKING.csv
+2025-09-30T01:59:32, Number of rows in /TRACKING.csv: 1
+2025-09-30T01:59:34, Done loop ...
+2025-09-30T01:59:34, ... powering down.
+2025-09-30T02:16:15, Setup Complete
+2025-09-30T02:16:17, Data: 2025-09-30T02:16:15,3.60,25631,4490.00,4988.00,4528.00,2.40,80.13,0.89,874.84
+2025-09-30T02:16:17, Add row to /TRACKING.csv
+2025-09-30T02:16:18, Number of rows in /TRACKING.csv: 2
+2025-09-30T02:16:20, Done loop ...
+2025-09-30T02:16:20, ... powering down.
+2025-09-30T02:33:01, Setup Complete
+2025-09-30T02:33:03, Data: 2025-09-30T02:33:01,3.56,25631,4448.00,4988.00,4527.50,2.03,81.96,0.87,874.73
+2025-09-30T02:33:03, Add row to /TRACKING.csv
+2025-09-30T02:33:03, Number of rows in /TRACKING.csv: 3
+2025-09-30T02:33:06, Done loop ...
+2025-09-30T02:33:06, ... powering down.
+2025-09-30T02:49:46, Setup Complete
+2025-09-30T02:49:48, Data: 2025-09-30T02:49:46,3.55,25631,4475.00,4988.00,4564.00,2.09,82.40,0.91,874.85
+2025-09-30T02:49:48, Add row to /TRACKING.csv
+2025-09-30T02:49:48, Number of rows in /TRACKING.csv: 4
+2025-09-30T02:49:52, Number of rows in /TRACKING.csv is >= 4
+2025-09-30T02:49:52, Remove tracking
+2025-09-30T02:49:52, Write to /TRANSMIT.csv: 2025-09-30T02:49:46,3.55,4475.00,2.1,82
+2025-09-30T02:49:52, Number of rows in /TRANSMIT.csv: 5
+2025-09-30T02:49:52, Current hour = 2, Transmission hour = 1
+2025-09-30T02:49:52, 2922212441+01588:445+01384:447+01583:449+02180:448+02182
+2025-09-30T02:49:54,  - attempt to send message: 2922212441+01588:445+01384:447+01583:449+02180:448+02182
+2025-09-30T02:50:55,  - Modem begin successful
+2025-09-30T02:50:55,  - Sending...
+2025-09-30T02:51:25, Send response: 
+2025-09-30T02:51:25,  - Retry...
+2025-09-30T02:51:25,    - Sending...
+2025-09-30T02:51:25,    - Send response: 10
+2025-09-30T02:51:55,  Sync clocks... 
+2025-09-30T02:51:55,  - Clock was not synced
+2025-09-30T02:51:55, Transmission failed. Error = 10
+2025-09-30T02:51:55, Done loop ...
+2025-09-30T02:51:55, ... powering down.
+2025-09-30T03:06:31, Setup Complete
+2025-09-30T03:06:34, Data: 2025-09-30T03:06:31,3.75,25631,4518.00,4986.00,4562.00,2.67,80.22,1.50,874.93
+2025-09-30T03:06:34, Add row to /TRACKING.csv
+2025-09-30T03:06:34, Number of rows in /TRACKING.csv: 1
+2025-09-30T03:06:36, Done loop ...
+2025-09-30T03:06:36, ... powering down.
+2025-09-30T03:23:17, Setup Complete
+2025-09-30T03:23:19, Data: 2025-09-30T03:23:17,3.66,25631,4466.00,4753.00,4571.00,2.67,79.52,1.79,874.74
+2025-09-30T03:23:19, Add row to /TRACKING.csv
+2025-09-30T03:23:19, Number of rows in /TRACKING.csv: 2
+2025-09-30T03:23:22, Done loop ...
+2025-09-30T03:23:22, ... powering down.
+2025-09-30T03:40:02, Setup Complete
+2025-09-30T03:40:05, Data: 2025-09-30T03:40:02,3.66,25631,4484.00,4691.00,4558.50,3.19,75.16,2.11,874.72
+2025-09-30T03:40:05, Add row to /TRACKING.csv
+2025-09-30T03:40:05, Number of rows in /TRACKING.csv: 3
+2025-09-30T03:40:08, Done loop ...
+2025-09-30T03:40:08, ... powering down.
+2025-09-30T03:56:48, Setup Complete
+2025-09-30T03:56:50, Data: 2025-09-30T03:56:48,3.56,25631,4450.00,4733.00,4492.50,2.89,76.92,2.08,874.78
+2025-09-30T03:56:50, Add row to /TRACKING.csv
+2025-09-30T03:56:50, Number of rows in /TRACKING.csv: 4
+2025-09-30T03:56:54, Number of rows in /TRACKING.csv is >= 4
+2025-09-30T03:56:54, Remove tracking
+2025-09-30T03:56:54, Write to /TRANSMIT.csv: 2025-09-30T03:56:48,3.56,4450.00,2.9,77
+2025-09-30T03:56:54, Number of rows in /TRANSMIT.csv: 6
+2025-09-30T03:56:54, Current hour = 3, Transmission hour = 1
+2025-09-30T03:56:54, 2922212441+01588:445+01384:447+01583:449+02180:448+02182:445+02977
+2025-09-30T03:56:56,  - attempt to send message: 2922212441+01588:445+01384:447+01583:449+02180:448+02182:445+02977
+2025-09-30T03:58:27,  - Modem begin unsuccessful
+2025-09-30T03:58:27, Transmission failed. Error = 3
+2025-09-30T03:58:27, Done loop ...
+2025-09-30T03:58:27, ... powering down.
+2025-09-30T04:13:33, Setup Complete
+2025-09-30T04:13:36, Data: 2025-09-30T04:13:33,3.78,25631,4487.00,4593.00,4548.50,2.98,77.87,2.24,874.56
+2025-09-30T04:13:36, Add row to /TRACKING.csv
+2025-09-30T04:13:36, Number of rows in /TRACKING.csv: 1
+2025-09-30T04:13:38, Done loop ...
+2025-09-30T04:13:38, ... powering down.
+2025-09-30T04:30:19, Setup Complete
+2025-09-30T04:30:21, Data: 2025-09-30T04:30:19,3.55,25631,4511.00,4740.00,4543.00,2.70,78.44,2.05,874.26
+2025-09-30T04:30:21, Add row to /TRACKING.csv
+2025-09-30T04:30:21, Number of rows in /TRACKING.csv: 2
+2025-09-30T04:30:24, Done loop ...
+2025-09-30T04:30:24, ... powering down.
+2025-09-30T04:47:05, Setup Complete
+2025-09-30T04:47:07, Data: 2025-09-30T04:47:05,3.75,25631,4440.00,4594.00,4562.00,3.02,75.84,2.14,874.34
+2025-09-30T04:47:07, Add row to /TRACKING.csv
+2025-09-30T04:47:07, Number of rows in /TRACKING.csv: 3
+2025-09-30T04:47:10, Done loop ...
+2025-09-30T04:47:10, ... powering down.
+2025-09-30T05:03:50, Setup Complete
+2025-09-30T05:03:52, Data: 2025-09-30T05:03:50,3.60,25631,4434.00,4593.00,4515.00,2.74,78.24,2.23,874.21
+2025-09-30T05:03:53, Add row to /TRACKING.csv
+2025-09-30T05:03:53, Number of rows in /TRACKING.csv: 4
+2025-09-30T05:03:56, Number of rows in /TRACKING.csv is >= 4
+2025-09-30T05:03:56, Remove tracking
+2025-09-30T05:03:56, Write to /TRANSMIT.csv: 2025-09-30T05:03:50,3.60,4434.00,2.7,78
+2025-09-30T05:03:56, Number of rows in /TRANSMIT.csv: 7
+2025-09-30T05:03:56, Current hour = 5, Transmission hour = 1
+2025-09-30T05:03:56, 2922212441+01588:445+01384:447+01583:449+02180:448+02182:445+02977:443+02778
+2025-09-30T05:03:58,  - attempt to send message: 2922212441+01588:445+01384:447+01583:449+02180:448+02182:445+02977:443+02778
+2025-09-30T05:07:59,  - Modem begin unsuccessful
+2025-09-30T05:07:59, Transmission failed. Error = 5
+2025-09-30T05:07:59, Done loop ...
+2025-09-30T05:07:59, ... powering down.
+2025-09-30T05:20:35, Setup Complete
+2025-09-30T05:20:38, Data: 2025-09-30T05:20:35,3.60,25631,4482.00,4587.00,4541.50,2.96,75.58,2.35,874.12
+2025-09-30T05:20:38, Add row to /TRACKING.csv
+2025-09-30T05:20:38, Number of rows in /TRACKING.csv: 1
+2025-09-30T05:20:40, Done loop ...
+2025-09-30T05:20:40, ... powering down.
+2025-09-30T05:37:21, Setup Complete
+2025-09-30T05:37:23, Data: 2025-09-30T05:37:21,3.56,25631,4482.00,4619.00,4574.00,2.98,75.72,2.38,873.97
+2025-09-30T05:37:23, Add row to /TRACKING.csv
+2025-09-30T05:37:23, Number of rows in /TRACKING.csv: 2
+2025-09-30T05:37:26, Done loop ...
+2025-09-30T05:37:26, ... powering down.
+2025-09-30T05:54:07, Setup Complete
+2025-09-30T05:54:09, Data: 2025-09-30T05:54:07,3.70,25631,4491.00,4622.00,4551.50,3.09,73.66,2.28,874.03
+2025-09-30T05:54:09, Add row to /TRACKING.csv
+2025-09-30T05:54:09, Number of rows in /TRACKING.csv: 3
+2025-09-30T05:54:12, Done loop ...
+2025-09-30T05:54:12, ... powering down.
+2025-09-30T06:10:52, Setup Complete
+2025-09-30T06:10:55, Data: 2025-09-30T06:10:52,3.64,25631,4500.00,4638.00,4554.00,2.94,74.79,2.21,873.88
+2025-09-30T06:10:55, Add row to /TRACKING.csv
+2025-09-30T06:10:55, Number of rows in /TRACKING.csv: 4
+2025-09-30T06:10:58, Number of rows in /TRACKING.csv is >= 4
+2025-09-30T06:10:58, Remove tracking
+2025-09-30T06:10:58, Write to /TRANSMIT.csv: 2025-09-30T06:10:52,3.64,4500.00,2.9,75
+2025-09-30T06:10:58, Number of rows in /TRANSMIT.csv: 8
+2025-09-30T06:10:58, Current hour = 6, Transmission hour = 1
+2025-09-30T06:10:58, 2922213441+01588:445+01384:447+01583:449+02180:448+02182:445+02977:443+02778:450+02975
+2025-09-30T06:11:00,  - attempt to send message: 2922213441+01588:445+01384:447+01583:449+02180:448+02182:445+02977:443+02778:450+02975
+2025-09-30T06:12:01,  - Modem begin successful
+2025-09-30T06:12:01,  - Sending...
+2025-09-30T06:12:31, Send response: 
+2025-09-30T06:12:31,  - Retry...
+2025-09-30T06:12:31,    - Sending...
+2025-09-30T06:12:31,    - Send response: 10
+2025-09-30T06:13:01,  Sync clocks... 
+2025-09-30T06:13:01,  - Clock was not synced
+2025-09-30T06:13:02, Transmission failed. Error = 10
+2025-09-30T06:13:02, Done loop ...
+2025-09-30T06:13:02, ... powering down.
+2025-09-30T06:27:38, Setup Complete
+2025-09-30T06:27:40, Data: 2025-09-30T06:27:38,3.57,25631,4447.00,4753.00,4569.00,3.16,73.47,2.42,874.18
+2025-09-30T06:27:40, Add row to /TRACKING.csv
+2025-09-30T06:27:40, Number of rows in /TRACKING.csv: 1
+2025-09-30T06:27:43, Done loop ...
+2025-09-30T06:27:43, ... powering down.
+2025-09-30T06:44:23, Setup Complete
+2025-09-30T06:44:26, Data: 2025-09-30T06:44:23,3.62,25631,4499.00,4608.00,4566.00,2.89,74.82,2.39,874.14
+2025-09-30T06:44:26, Add row to /TRACKING.csv
+2025-09-30T06:44:26, Number of rows in /TRACKING.csv: 2
+2025-09-30T06:44:28, Done loop ...
+2025-09-30T06:44:28, ... powering down.
+2025-09-30T07:01:09, Setup Complete
+2025-09-30T07:01:11, Data: 2025-09-30T07:01:09,3.82,25631,500.00,4755.00,4529.00,2.91,75.46,2.35,874.13
+2025-09-30T07:01:11, Add row to /TRACKING.csv
+2025-09-30T07:01:11, Number of rows in /TRACKING.csv: 3
+2025-09-30T07:01:14, Done loop ...
+2025-09-30T07:01:14, ... powering down.
+2025-09-30T07:17:54, Setup Complete
+2025-09-30T07:17:57, Data: 2025-09-30T07:17:55,3.67,25631,4492.00,4615.00,4568.00,2.92,76.06,2.47,873.93
+2025-09-30T07:17:57, Add row to /TRACKING.csv
+2025-09-30T07:17:57, Number of rows in /TRACKING.csv: 4
+2025-09-30T07:18:00, Number of rows in /TRACKING.csv is >= 4
+2025-09-30T07:18:00, Remove tracking
+2025-09-30T07:18:00, Write to /TRANSMIT.csv: 2025-09-30T07:17:55,3.67,4492.00,2.9,76
+2025-09-30T07:18:00, Number of rows in /TRANSMIT.csv: 9
+2025-09-30T07:18:00, Current hour = 7, Transmission hour = 1
+2025-09-30T07:18:01, 2922213441+01588:445+01384:447+01583:449+02180:448+02182:445+02977:443+02778:450+02975:449+02976
+2025-09-30T07:18:03,  - attempt to send message: 2922213441+01588:445+01384:447+01583:449+02180:448+02182:445+02977:443+02778:450+02975:449+02976
+2025-09-30T07:18:03,  - Modem begin successful
+2025-09-30T07:18:03,  - Sending...
+2025-09-30T07:18:33, Send response: 
+2025-09-30T07:18:34,  - Retry...
+2025-09-30T07:18:34,    - Sending...
+2025-09-30T07:18:34,    - Send response: 10
+2025-09-30T07:19:04,  Sync clocks... 
+2025-09-30T07:19:04,  - Clock was not synced
+2025-09-30T07:19:04, Transmission failed. Error = 10
+2025-09-30T07:19:04, Done loop ...
+2025-09-30T07:19:04, ... powering down.
+2025-09-30T07:34:40, Setup Complete
+2025-09-30T07:34:42, Data: 2025-09-30T07:34:40,3.91,25631,4451.00,4986.00,4580.50,3.08,74.71,2.74,874.13
+2025-09-30T07:34:43, Add row to /TRACKING.csv
+2025-09-30T07:34:43, Number of rows in /TRACKING.csv: 1
+2025-09-30T07:34:45, Done loop ...
+2025-09-30T07:34:45, ... powering down.
+2025-09-30T07:51:26, Setup Complete
+2025-09-30T07:51:28, Data: 2025-09-30T07:51:26,3.96,25631,4378.00,4632.00,4581.00,3.36,73.73,3.06,874.02
+2025-09-30T07:51:28, Add row to /TRACKING.csv
+2025-09-30T07:51:29, Number of rows in /TRACKING.csv: 2
+2025-09-30T07:51:31, Done loop ...
+2025-09-30T07:51:31, ... powering down.
+2025-09-30T08:08:12, Setup Complete
+2025-09-30T08:08:14, Data: 2025-09-30T08:08:12,3.80,25631,4447.00,4605.00,4565.50,3.66,72.79,4.55,873.99
+2025-09-30T08:08:14, Add row to /TRACKING.csv
+2025-09-30T08:08:15, Number of rows in /TRACKING.csv: 3
+2025-09-30T08:08:18, Done loop ...
+2025-09-30T08:08:18, ... powering down.
+2025-09-30T08:24:58, Setup Complete
+2025-09-30T08:25:01, Data: 2025-09-30T08:24:58,3.62,25631,4493.00,4743.00,4602.00,3.67,73.88,4.29,873.96
+2025-09-30T08:25:01, Add row to /TRACKING.csv
+2025-09-30T08:25:01, Number of rows in /TRACKING.csv: 4
+2025-09-30T08:25:04, Number of rows in /TRACKING.csv is >= 4
+2025-09-30T08:25:04, Remove tracking
+2025-09-30T08:25:04, Write to /TRANSMIT.csv: 2025-09-30T08:24:58,3.62,4493.00,3.7,74
+2025-09-30T08:25:04, Number of rows in /TRANSMIT.csv: 10
+2025-09-30T08:25:04, Current hour = 8, Transmission hour = 1
+2025-09-30T08:25:04, 2922213441+01588:445+01384:447+01583:449+02180:448+02182:445+02977:443+02778:450+02975:449+02976:449+03774
+2025-09-30T08:25:07,  - attempt to send message: 2922213441+01588:445+01384:447+01583:449+02180:448+02182:445+02977:443+02778:450+02975:449+02976:449+03774
+2025-09-30T08:29:07,  - Modem begin unsuccessful
+2025-09-30T08:29:07, Transmission failed. Error = 5
+2025-09-30T08:29:07, n_transmit >= 10, too much to transmit, delete /TRANSMIT.csv
+2025-09-30T08:29:07, Done loop ...
+2025-09-30T08:29:07, ... powering down.
+2025-09-30T08:41:44, Setup Complete
+2025-09-30T08:41:46, Data: 2025-09-30T08:41:44,3.56,25631,4470.00,4618.00,4585.50,3.61,74.66,3.99,874.06
+2025-09-30T08:41:46, Add row to /TRACKING.csv
+2025-09-30T08:41:46, Number of rows in /TRACKING.csv: 1
+2025-09-30T08:41:49, Done loop ...
+2025-09-30T08:41:49, ... powering down.
+2025-09-30T08:58:30, Setup Complete
+2025-09-30T08:58:32, Data: 2025-09-30T08:58:30,3.81,25631,4530.00,4985.00,4605.50,3.56,76.75,3.98,874.15
+2025-09-30T08:58:32, Add row to /TRACKING.csv
+2025-09-30T08:58:32, Number of rows in /TRACKING.csv: 2
+2025-09-30T08:58:35, Done loop ...
+2025-09-30T08:58:35, ... powering down.

@@ -37,8 +37,6 @@ data/Cleaned/
 out/
 tests/reference/
 
-# --- Not yet imported (phase 1 moves these to raw/sd/) ---------------------
-data/Site Visits/
 
 # --- Tooling ---------------------------------------------------------------
 __pycache__/

@@ -32,7 +32,7 @@ import os, re, csv, sys, math, datetime as dt
 from collections import defaultdict, Counter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VISITS = os.path.join(ROOT, "data", "Site Visits")
+VISITS = os.path.join(ROOT, "raw", "sd")   # SD downloads (moved here 2026-10-04)
 OUTDIR = os.path.join(ROOT, "data", "Cleaned")
 
 # ERA3 epoch minus ERA2 epoch -- the constant IridiumSBD was wrong by.

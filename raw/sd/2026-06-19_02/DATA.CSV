@@ -1,0 +1,2 @@
+datetime,batt_v,memory,snow_depth_min_mm,snow_depth_max_mm,snow_depth_median_mm,air_2m_temp_deg_c,air_2m_temp_rh_prct,baro_temp_deg_c,baro_pressure_hPa
+2026-06-17T10:56:30,4.12,25631,4332.00,4662.00,4359.50,9.53,56.43,10.17,885.44

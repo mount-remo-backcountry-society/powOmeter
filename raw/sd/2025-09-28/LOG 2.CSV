@@ -1,0 +1,54 @@
+DATETIME, MESSAGE: 
+2025-09-28T12:35:52, Setup Complete
+2025-09-28T12:35:55, Data: 2025-09-28T12:35:52,3.97,25631,4395.00,4469.00,4410.50,7.18,75.86,9.05,876.28
+2025-09-28T12:35:55, Add row to /TRACKING.csv
+2025-09-28T12:35:55, Number of rows in /TRACKING.csv: 1
+2025-09-28T12:35:57, Done loop ...
+2025-09-28T12:35:57, ... powering down.
+2025-09-28T12:36:27, Setup Complete
+2025-09-28T12:36:29, Data: 2025-09-28T12:36:27,3.56,25631,4400.00,4598.00,4448.00,7.33,74.08,9.32,876.25
+2025-09-28T12:36:29, Add row to /TRACKING.csv
+2025-09-28T12:36:30, Number of rows in /TRACKING.csv: 2
+2025-09-28T12:36:32, Done loop ...
+2025-09-28T12:36:32, ... powering down.
+2025-09-28T12:37:41, Setup Complete
+2025-09-28T12:37:43, Data: 2025-09-28T12:37:41,3.59,25631,4464.00,4584.00,4567.50,7.46,74.44,9.08,876.34
+2025-09-28T12:37:43, Add row to /TRACKING.csv
+2025-09-28T12:37:43, Number of rows in /TRACKING.csv: 3
+2025-09-28T12:37:46, Done loop ...
+2025-09-28T12:37:46, ... powering down.
+2025-09-28T12:38:10, Setup Complete
+2025-09-28T12:38:13, Data: 2025-09-28T12:38:10,3.58,25631,4433.00,4583.00,4563.00,7.52,74.27,9.03,876.35
+2025-09-28T12:38:13, Add row to /TRACKING.csv
+2025-09-28T12:38:13, Number of rows in /TRACKING.csv: 4
+2025-09-28T12:38:16, Number of rows in /TRACKING.csv is >= 4
+2025-09-28T12:38:16, Remove tracking
+2025-09-28T12:38:16, Write to /TRANSMIT.csv: 2025-09-28T12:38:10,3.58,4433.00,7.5,74
+2025-09-28T12:38:16, Number of rows in /TRANSMIT.csv: 1
+2025-09-28T12:38:16, Current hour = 12, Transmission hour = 1
+2025-09-28T12:38:16, Current hour = 12, Transmission hour = 6
+2025-09-28T12:38:16, Current hour = 12, Transmission hour = 8
+2025-09-28T12:38:16, Current hour = 12, Transmission hour = 10
+2025-09-28T12:38:16, Current hour = 12, Transmission hour = 15
+2025-09-28T12:38:17, Current hour = 12, Transmission hour = 20
+2025-09-28T12:38:17, Current hour = 12, Transmission hour = 22
+2025-09-28T12:38:17, Done loop ...
+2025-09-28T12:38:17, ... powering down.
+2025-09-28T12:39:22, Setup Complete
+2025-09-28T12:39:25, Data: 2025-09-28T12:39:22,3.60,25631,4420.00,4599.00,4576.00,7.43,72.87,8.15,876.31
+2025-09-28T12:39:25, Add row to /TRACKING.csv
+2025-09-28T12:39:25, Number of rows in /TRACKING.csv: 1
+2025-09-28T12:39:27, Done loop ...
+2025-09-28T12:39:27, ... powering down.
+2025-09-28T12:39:39, Setup Complete
+2025-09-28T12:39:41, Data: 2025-09-28T12:39:39,3.58,25631,4382.00,4590.00,4458.50,7.39,71.02,8.14,879.47
+2025-09-28T12:39:41, Add row to /TRACKING.csv
+2025-09-28T12:39:41, Number of rows in /TRACKING.csv: 2
+2025-09-28T12:39:44, Done loop ...
+2025-09-28T12:39:44, ... powering down.
+2025-09-28T12:56:25, Setup Complete
+2025-09-28T12:56:28, Data: 2025-09-28T12:56:25,3.66,25631,4517.00,4668.00,4604.50,6.32,75.33,10.63,876.16
+2025-09-28T12:56:28, Add row to /TRACKING.csv
+2025-09-28T12:56:28, Number of rows in /TRACKING.csv: 3
+2025-09-28T12:56:31, Done loop ...
+2025-09-28T12:56:31, ... powering down.
