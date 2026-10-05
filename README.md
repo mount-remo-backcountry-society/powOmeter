@@ -37,7 +37,7 @@ published data, and the documentation** to run it.
 ## Licences
 
 Code: MIT (`LICENSE`). Station data: CC BY 4.0, crediting MRBS
-(`LICENSE-DATA.md`). Both are drafts pending MRBS confirmation.
+(`LICENSE-DATA.md`). Both confirmed by MRBS (2026-10).
 
 ## Repository
 

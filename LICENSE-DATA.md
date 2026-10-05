@@ -1,7 +1,5 @@
 # Data licence
 
-**[DRAFT: pending confirmation by the MRBS board.]**
-
 POW-O-METER station data in this repository (`raw/`, and the published files
 under `v1/`) are licensed under the **Creative Commons Attribution 4.0
 International licence (CC BY 4.0)**:

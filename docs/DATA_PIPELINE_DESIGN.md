@@ -367,8 +367,8 @@ on that choice.
 phase 2 (§4).
 
 **Licences:**
-- Code: MIT, and POW-O-METER data: CC BY 4.0 crediting MRBS (both *to
-  confirm with MRBS*).
+- Code: MIT, and POW-O-METER data: CC BY 4.0 crediting MRBS (*confirmed by
+  MRBS, 2026-10*).
 - **BC MoTI observations are "Access Only"**: reproduction needs written
   permission. Station locations are under the Open Government Licence – BC.
   Verified 2026-10-02; the records are saved in `docs/research/evidence/`
@@ -470,8 +470,8 @@ phase 2 (§4).
 | 2026-10-03 | Review findings adopted: MRBS organization before publishing; publish-always plus Issue alarms; approval snapshots; firmware-era statistics; snow depth as a derivation; point readings plus an on-the-hour series instead of hourly means; published-CSV intake; pattern-only CI check; smaller output set; handover routines |
 
 **Open questions**
-1. The MRBS organization and second owner; licence confirmation; terms of
-   use.
+1. The MRBS organization's second owner; terms of use. (Licences confirmed
+   by MRBS, 2026-10.)
 2. MoTI permission (pending; to cover both projects).
 3. Which Google account owns the Apps Script trigger?
 4. What would Avalanche Canada want from v1?
