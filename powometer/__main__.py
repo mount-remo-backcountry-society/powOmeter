@@ -2,6 +2,8 @@
 
   validate   check the files in config/ and print any problems
   build      rebuild everything from raw/ and config/ into out/
+  fetch      save new satellite messages from the sheet's Messages tab into
+             raw/radio/messages_tab/ (needs the MESSAGES_CSV_URL setting)
   approve    freeze a reviewed period:
              approve <variable> <from UTC> <until UTC> <snapshot name> <initials>
              e.g. approve snow_depth 2025-01-26T18:58:34Z 2025-09-28T18:03:32Z 2025-season JK
@@ -58,6 +60,17 @@ def main(argv: list[str]) -> int:
         for p in problems:
             print("  - " + p)
         return 1
+    if cmd == "fetch":
+        import os
+        from .intake import fetch
+        url = os.environ.get("MESSAGES_CSV_URL", "")
+        if not url:
+            print("fetch: MESSAGES_CSV_URL is not set (a GitHub secret; see OPERATIONS.md)")
+            return 1
+        path = fetch(url)
+        print(f"fetch: new messages saved to {path.relative_to(path.parents[3]).as_posix()}" if path
+              else "fetch: no new messages")
+        return 0
     if cmd == "build":
         from .build import build
         return build()

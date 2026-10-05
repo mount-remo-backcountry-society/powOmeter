@@ -109,12 +109,48 @@ The RockBLOCK history is the backstop if the email intake misses messages.
 *(to be written)* Note: while suspended, the station still reports
 "Message sent!", but nothing arrives. Only the receiving side shows delivery.
 
+## The publish workflow
+
+Every hour (once the repository is public) the **publish** workflow:
+fetches new satellite messages from the sheet's Messages tab into
+`raw/radio/messages_tab/` (a new file only when there is something new),
+rebuilds everything, publishes the files, and opens or closes alarm Issues.
+
+- **Run it by hand:** Actions tab → **publish** → **Run workflow**.
+- **Test the alarms:** run it by hand with some text in *inject_alarm*
+  (e.g. `test`). An Issue titled "Alarm: TEST …" opens; run it again with
+  the box empty and the Issue closes.
+- **The Messages-tab link** is stored as the secret `MESSAGES_CSV_URL`
+  (Settings → Secrets and variables → Actions). It comes from the sheet:
+  File → Share → Publish to web → Messages tab, CSV. Never put the link in a
+  file. If it leaks: Publish to web → Stop publishing, publish again, and
+  replace the secret.
+- **If the workflow itself fails** (red cross in the Actions tab), GitHub
+  emails whoever last changed the workflow. Open the failed run and read the
+  first red step.
+
 ## When an alarm Issue opens
-*(phase 2)*
+
+GitHub emails everyone who watches the repository (top right: **Watch** →
+**All activity**). The Issue closes by itself when the alarm clears.
+
+| Alarm | What it means | What to do |
+|---|---|---|
+| No satellite message for 12 h (in season, Oct–mid June) | The station, its modem or the email/sheet chain stopped | Check the RockBLOCK console for recent messages. If they are there, the Gmail/Apps Script/sheet chain is stuck: check the sheet's Messages tab and the script's Executions. If not, the station: battery, snow on the antenna, or a hang (no hardware watchdog: a hang drains the battery) |
+| Station clock off by more than 30 min | The real-time clock drifted or reset | Data are still timed (from the transmit time). Reset the clock at the next visit; check the RTC coin cell |
+| Battery below 3.5 V | Not enough charge (cold, short days, snow on the panel) | Watch the trend; clear the solar panel at the next chance |
+| Messages could not be decoded | A garbled or unexpected payload | Look at the message in the RockBLOCK console. One-off: ignore, it clears after a day. Repeating: firmware or modem problem |
+| Approved data differs from its snapshot | A code or config change would alter approved data | Investigate before anything else; never just re-approve (CLAUDE.md rule 7) |
+| SD file unreadable / many unreadable lines | An SD download is damaged or in a new format | Check the uploaded files against the card |
+| Distance step at a visit without a re-mount | Probably an unrecorded re-mount, or fresh snow | If re-mounted: add a mount in `config/mounts.yaml`. If snowfall: nothing; the label stays "estimate" until the next mount change |
+| TEST (injected) | Someone tested the alarms | Nothing; the next normal run closes it |
 
 ## Monthly
-*(phase 2)* Open the station site, check the build date, commit the
-keep-alive file.
+
+1. Open the published page and check that "Files built" is recent.
+2. Edit `KEEPALIVE.md` in the GitHub web interface: put today's date, and
+   commit. GitHub silently switches off hourly workflows in a repository
+   with no activity for 60 days; this prevents it.
 
 ## Yearly
 *(phase 2)* Sign in to the station's Gmail account; upgrade day for software

@@ -1,0 +1,94 @@
+name: publish
+
+# Fetch new satellite messages, rebuild, publish, and open/close alarm Issues
+# (design §6.7, phase 2).
+#
+# While the repository is private this runs only by hand (Actions tab ->
+# publish -> Run workflow): Actions minutes and Pages are free only for
+# public repositories. When it goes public, enable the schedule below (an
+# off-the-hour minute, because GitHub delays jobs scheduled on the hour).
+
+on:
+  workflow_dispatch:
+    inputs:
+      inject_alarm:
+        description: "Test only: text of a fake alarm. It opens an Issue; the next normal run closes it"
+        required: false
+        default: ""
+  # schedule:
+  #   - cron: "23 * * * *"
+
+permissions:
+  contents: write     # commit new raw messages
+  issues: write       # alarm Issues
+  pages: write        # deploy
+  id-token: write     # deploy
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install pinned dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch new satellite messages
+        env:
+          MESSAGES_CSV_URL: ${{ secrets.MESSAGES_CSV_URL }}
+        run: python -m powometer fetch
+
+      - name: Save new raw messages to the repository
+        run: |
+          git add raw/radio/messages_tab
+          if git diff --cached --quiet; then
+            echo "nothing new"
+          else
+            python tools/privacy_check.py --staged
+            git -c user.name="github-actions[bot]" \
+                -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+                commit -q -m "Fetch satellite messages"
+            git pull -q --rebase
+            git push -q
+          fi
+
+      - name: Check config
+        run: python -m powometer validate
+
+      - name: Build
+        env:
+          INJECT_ALARM: ${{ inputs.inject_alarm }}
+        run: python -m powometer build
+
+      - name: Add the index page
+        run: cp site/index.html out/index.html
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: out
+
+      - name: Open and close alarm Issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/alarm_issues.py out/v1/status.json
+
+  deploy:
+    needs: build
+    # Pages needs a public repository on GitHub's free plan
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

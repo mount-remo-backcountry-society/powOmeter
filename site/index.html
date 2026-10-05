@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POW-O-METER data</title>
+<style>
+  :root { --bg: #fbfbf8; --fg: #1d2326; --muted: #5b6569; --line: #d9ddd9; --warn: #9a3412; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #15191b; --fg: #e8ecea; --muted: #a3adb0; --line: #2e3538; --warn: #fdba74; } }
+  body { background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif;
+         max-width: 44rem; margin: 0 auto; padding: 1.5rem 1rem; }
+  h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
+  .muted { color: var(--muted); }
+  .stale { color: var(--warn); font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; }
+  td { border-top: 1px solid var(--line); padding: .4rem .5rem .4rem 0; vertical-align: top; }
+  a { color: inherit; }
+  code { font-size: .9em; }
+</style>
+</head>
+<body>
+<h1>POW-O-METER: station data</h1>
+<p class="muted">Snow station of the Mount Remo Backcountry Society, Shames Mountain, BC.
+  This page lists the data files; a proper station page will follow.</p>
+
+<p id="age">Checking how recent the data are…</p>
+
+<table>
+  <tr><td><a href="v1/latest.json">latest.json</a></td><td>Most recent value of each variable</td></tr>
+  <tr><td><a href="v1/best.csv">best.csv</a></td><td>Best available readings (large)</td></tr>
+  <tr><td><a href="v1/best_hourly.csv">best_hourly.csv</a></td><td>Interpolated to whole hours (not hourly means)</td></tr>
+  <tr><td><a href="v1/observations.csv">observations.csv</a></td><td>Every reading, all statistics, with quality labels (large)</td></tr>
+  <tr><td><a href="v1/status.json">status.json</a></td><td>Station health and alarms</td></tr>
+  <tr><td><a href="v1/sites.json">sites.json</a></td><td>Station sites, coordinates, licences</td></tr>
+  <tr><td><a href="v1/SCHEMA.md">SCHEMA.md</a></td><td>What every column means. Times are UTC</td></tr>
+  <tr><td><a href="v1/CHANGELOG.md">CHANGELOG.md</a></td><td>Changes to the file format</td></tr>
+</table>
+
+<p class="muted">Values are <strong>provisional</strong> unless labelled approved. Station data are
+  not a forecast: check the avalanche forecast at <a href="https://avalanche.ca">avalanche.ca</a>.
+  Data: CC BY 4.0, credit "Mount Remo Backcountry Society".</p>
+
+<script>
+  // Data age is worked out here, in your browser, so a stopped pipeline still shows as stale.
+  fetch("v1/status.json", { cache: "no-store" }).then(r => r.json()).then(s => {
+    const st = s.stations && s.stations.powometer;
+    const last = st && st.last_message_utc ? new Date(st.last_message_utc) : null;
+    const el = document.getElementById("age");
+    if (!last) { el.textContent = "No station messages found."; return; }
+    const h = (Date.now() - last) / 36e5;
+    const ago = h < 48 ? Math.round(h) + " hours" : Math.round(h / 24) + " days";
+    el.textContent = "Last message from the station: " + ago + " ago (" +
+      last.toLocaleString("en-CA", { timeZone: "America/Vancouver", dateStyle: "medium", timeStyle: "short" }) +
+      " BC time). Files built " + new Date(s.built_utc).toLocaleString("en-CA",
+      { timeZone: "America/Vancouver", dateStyle: "medium", timeStyle: "short" }) + ".";
+    if (h > 12) el.className = "stale";
+  }).catch(() => { document.getElementById("age").textContent = "Could not read status.json."; });
+</script>
+</body>
+</html>

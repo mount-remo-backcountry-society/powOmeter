@@ -10,13 +10,14 @@ from the build time in status.json).
 from __future__ import annotations
 
 import json
+import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 
-from . import OUT, ROOT, hourly, pipeline, radio, timing
+from . import OUT, ROOT, hourly, monitor, pipeline, radio, timing
 from .config import as_utc, load, validate
 from .decoders.powometer_payload import parse_payload
 
@@ -71,7 +72,8 @@ def sd_alarms(report: list[dict]) -> list[str]:
     return out
 
 
-def _status(cfg, obs: pd.DataFrame, best: pd.DataFrame, messages, unmatched, alarms, sd_report) -> dict:
+def _status(cfg, obs: pd.DataFrame, best: pd.DataFrame, messages, unmatched, alarms, sd_report,
+            now: datetime) -> dict:
     last_msg = messages[-1] if messages else None
     payloads = [m for m in messages if m.transmit_utc >= DEPLOYED]
     decode_errors = [m for m in payloads if parse_payload(m.payload_text) is None]
@@ -83,7 +85,7 @@ def _status(cfg, obs: pd.DataFrame, best: pd.DataFrame, messages, unmatched, ala
     batt = best[(best.variable == "battery_voltage") & best.value.notna()].sort_values("time_utc").tail(1)
     st = {
         "schema_version": SCHEMA_VERSION,
-        "built_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "built_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "stations": {
             "powometer": {
                 "last_observation_utc": best["time_utc"].max().strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -95,7 +97,9 @@ def _status(cfg, obs: pd.DataFrame, best: pd.DataFrame, messages, unmatched, ala
                 "decode_errors": len(decode_errors),
             }
         },
-        "alarms": alarms,
+        # each {"id", "message"}; INJECT_ALARM (set by hand in the publish
+        # workflow) adds a test alarm to check that Issues open and close
+        "alarms": monitor.check(cfg, payloads, now, alarms, os.environ.get("INJECT_ALARM", "")),
         "info": {
             "corrections_matching_nothing": unmatched,
             "sd_downloads": list(sd_report),
@@ -200,7 +204,9 @@ def build(out_dir: Path = OUT) -> int:
                          "quality": r.quality, "approval": r.approval, "site_id": r.site_id}
     dump = lambda name, obj: (v1 / name).write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     dump("latest.json", {"schema_version": SCHEMA_VERSION, "station_id": "powometer", "values": latest})
-    dump("status.json", _status(cfg, obs, best, messages, unmatched, alarms, sd_report))
+    status = _status(cfg, obs, best, messages, unmatched, alarms, sd_report, datetime.now(timezone.utc))
+    dump("status.json", status)
+    alarms = [a["message"] for a in status["alarms"]]
     dump("sites.json", _sites(cfg))
     dump("datapackage.json", _datapackage())
     for doc in ("SCHEMA.md", "CHANGELOG.md"):

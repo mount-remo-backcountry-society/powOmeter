@@ -13,7 +13,7 @@ change gets a new `v2/` alongside `v1/`. All changes are listed in
 | `best.csv` | Best available readings: median distance and snow depth, plus the point variables. Values with quality `poor` or `missing` are left out |
 | `best_hourly.csv` | `best.csv` interpolated to whole hours. **Not hourly means** |
 | `latest.json` | The most recent value of each variable in `best.csv` |
-| `status.json` | Station health: last observation and message, clock offset, battery, decode errors, alarms |
+| `status.json` | Station health: last observation and message, clock offset, battery, decode errors, and `alarms` (a list of `{id, message}`; empty when all is well) |
 | `sites.json` | Stations and sites: coordinates, periods, licence per source |
 | `datapackage.json` | Column definitions, units, CF standard names, licence |
 
