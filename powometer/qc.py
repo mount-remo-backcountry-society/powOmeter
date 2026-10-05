@@ -27,10 +27,13 @@ RANGES = {      # variable: (min, max) plausible; outside -> poor
 }
 NO_ECHO_M = (4.90, 5.20)          # sensor's own "no target" readings
 TOO_CLOSE_M = 0.505               # MB7374 reports anything nearer than 50 cm as 0.50 m;
-                                  # in storms these are echoes off falling snow (JK, 2026-10-05)
+                                  # in storms these are echoes off falling snow (JK, 2026-10-04)
 DEAD_TEMP = -99.0                 # firmware writes -99.9 for a dead SHT31
 SPIKE_M = 0.30                    # distance departing this far from its neighbours
 SPIKE_WINDOW = "2h"               # centred: neighbours within +/-1 h (review F13)
+VISIT_STEP_M = 0.15               # distance step at a visit that suggests a re-mount
+VISIT_STEP_WINDOW = "6h"          # median before / after the visit
+BOUNDARY_SLACK = "12h"            # a mount change this close to the visit explains the step
 NEGATIVE_DEPTH_CM = -15           # below this, snow depth is suspect (bare-ground scatter is about ±8 cm)
 DEPTH_STAT = {"min": "max", "max": "min", "median": "median"}   # min distance = max depth
 
@@ -99,9 +102,44 @@ def site_visits(df: pd.DataFrame, cfg: Config) -> None:
         add_qualifier(df, m, "site_visit")
 
 
-def derive_snow_depth(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
+def visit_steps(df: pd.DataFrame, cfg: Config) -> list[dict]:
+    """Unrecorded re-mounts (code review F9). At each field visit, compare
+    the median distance in the VISIT_STEP_WINDOW before and after the visit
+    (its `disturbed` window, else 08:00-20:00 BC time on the visit day). A
+    step of VISIT_STEP_M or more with no mount change in mounts.yaml within
+    BOUNDARY_SLACK means the snow-depth reference is probably wrong from
+    then on. Fresh snow can also cause a step, so this raises an alarm for a
+    person to look at; it never changes a reference itself."""
+    d = df[(df.variable == "distance_to_surface") & (df.statistic == "median") & (df.quality == "good")]
+    bounds = sorted(as_utc(m["from"]) for m in cfg.mounts)
+    win, slack = pd.Timedelta(VISIT_STEP_WINDOW), pd.Timedelta(BOUNDARY_SLACK)
+    out = []
+    for v in cfg.visits:
+        w = v.get("disturbed")
+        if w:
+            a, b = pd.Timestamp(as_utc(w["from"])), pd.Timestamp(as_utc(w["until"]))
+        else:
+            day = pd.Timestamp(v["date"]).tz_localize("UTC")
+            a, b = day + pd.Timedelta(hours=15), day + pd.Timedelta(hours=27)
+        if any(a - slack <= t <= b + slack for t in bounds):
+            continue
+        pre = d[(d.time_utc >= a - win) & (d.time_utc < a)]
+        post = d[(d.time_utc >= b) & (d.time_utc < b + win)]
+        if pre.empty or post.empty:
+            continue
+        step = float(post["value"].median() - pre["value"].median())
+        if abs(step) >= VISIT_STEP_M:
+            until = next((t for t in bounds if t > b), None)
+            out.append({"date": str(v["date"]), "site": post["site_id"].mode().iloc[0],
+                        "step_m": round(step, 2), "from": b, "until": until})
+    return out
+
+
+def derive_snow_depth(df: pd.DataFrame, cfg: Config, steps: list[dict] = ()) -> pd.DataFrame:
     """snow depth (cm, whole numbers) = mount reference - distance, for every
-    distance row inside a mounting period. Labels are inherited."""
+    distance row inside a mounting period. Labels are inherited. After an
+    unrecorded re-mount (`steps`, from visit_steps) snow depth is labelled
+    estimate until the next mount change."""
     dist = df[df.variable == "distance_to_surface"]
     parts = []
     for m in cfg.mounts:
@@ -123,6 +161,12 @@ def derive_snow_depth(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
     if not parts:
         return df
     sd = pd.concat(parts)
+    for s in steps:
+        m = (sd.site_id == s["site"]) & (sd.time_utc >= s["from"])
+        if s["until"] is not None:
+            m &= sd.time_utc < s["until"]
+        worsen(sd, m, "estimate")
+        add_qualifier(sd, m, "unrecorded_remount")
     neg = sd["value"] < NEGATIVE_DEPTH_CM
     worsen(sd, neg, "suspect")
     add_qualifier(sd, neg, "negative_depth")

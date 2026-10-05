@@ -24,11 +24,15 @@ def process(cfg: Config, messages=None, with_approval: bool = True, sd_report: l
     obs = qc.run(obs, cfg)
     matched: set[str] = set()
     obs = corrections.apply(obs, cfg, "measured", matched)
-    obs = qc.derive_snow_depth(obs, cfg)
+    steps = qc.visit_steps(obs, cfg)
+    obs = qc.derive_snow_depth(obs, cfg, steps)
     obs = corrections.apply(obs, cfg, "derived", matched)
-    alarms: list[str] = []
+    alarms = [f"visit {s['date']}: distance changed {s['step_m']:+.2f} m but mounts.yaml has no re-mount; "
+              "snow depth after it is labelled estimate. Add a mount (or confirm it was snowfall)"
+              for s in steps]
     if with_approval:
-        obs, alarms = approval.apply(obs, cfg)
+        obs, ap_alarms = approval.apply(obs, cfg)
+        alarms += ap_alarms
     else:
         obs = obs.assign(approval="working")
     return obs, matched, alarms

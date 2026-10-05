@@ -32,13 +32,21 @@ DECIMALS = {"snow_depth": 0, "distance_to_surface": 3, "air_temperature": 2,
 DEPLOYED = datetime(2025, 1, 26, 18, 58, 34, tzinfo=timezone.utc)
 
 
+def _num(v) -> str:
+    """Shortest text for a number; never "-0" (review F12)."""
+    if pd.isna(v):
+        return ""
+    v = float(v) + 0.0                     # + 0.0 turns -0.0 into 0.0
+    return f"{v:.0f}" if v.is_integer() else f"{v:g}"
+
+
 def _fmt(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     out["time_utc"] = out["time_utc"].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
     for var, d in DECIMALS.items():
         m = out.variable == var
         out.loc[m, "value"] = out.loc[m, "value"].round(d)
-    out["value"] = out["value"].map(lambda v: "" if pd.isna(v) else (f"{v:.0f}" if float(v).is_integer() else f"{v:g}"))
+    out["value"] = out["value"].map(_num)
     out["qualifiers"] = out["qualifiers"].fillna("")
     return out
 
@@ -123,7 +131,7 @@ def _datapackage() -> dict:
         {"name": "statistic", "type": "string", "description": "point | min | max | median (of the burst of ultrasonic readings)"},
         {"name": "value", "type": "number"},
         {"name": "unit", "type": "string"},
-        {"name": "source", "type": "string", "description": "sd (SD card) | radio (satellite)"},
+        {"name": "source", "type": "string", "description": "sd (SD card) | radio (satellite) | derived (best_hourly.csv: interpolated)"},
         {"name": "level", "type": "string", "description": "qc (automatic checks) | corrected (manual corrections applied)"},
         {"name": "approval", "type": "string", "description": "working (shown as Provisional) | in_review | approved"},
         {"name": "quality", "type": "string", "description": "WaterML2: good | suspect | estimate | poor | unchecked | missing"},

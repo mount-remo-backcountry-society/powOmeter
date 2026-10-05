@@ -3,6 +3,7 @@ full build. Most tests use small synthetic tables so each rule is checked in
 isolation; the last ones run the real build."""
 import csv
 import hashlib
+import math
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -38,10 +39,45 @@ def full(df, c):
     """The pipeline's QC sequence: checks, measured corrections, snow depth,
     snow-depth corrections (pipeline.process without the I/O)."""
     out = corrections.apply(qc.run(df, c), c, "measured")
-    return corrections.apply(qc.derive_snow_depth(out, c), c, "derived")
+    out = qc.derive_snow_depth(out, c, qc.visit_steps(out, c))
+    return corrections.apply(out, c, "derived")
 
 
 # --- snow depth and QC ----------------------------------------------------
+
+def visit_table(jump):
+    """A day of readings either side of a visit window on day 3, with the
+    distance jumping by `jump` m during the visit."""
+    t = [T0 + timedelta(days=2, hours=12) + timedelta(minutes=17 * i) for i in range(30)] + \
+        [T0 + timedelta(days=3, hours=4) + timedelta(minutes=17 * i) for i in range(30)]
+    df = table([2.0] * 30 + [2.0 + jump] * 30)
+    df["time_utc"] = t
+    return df
+
+
+VISIT = {"date": (T0 + timedelta(days=3)).date(),
+         "disturbed": {"from": T0 + timedelta(days=3), "until": T0 + timedelta(days=3, hours=3)}}
+
+
+def test_unrecorded_remount_is_alarmed_and_labelled():
+    """F9: the distance jumps 0.40 m at a visit with no mount change."""
+    c = cfg(visits=[VISIT])
+    steps = qc.visit_steps(qc.run(visit_table(0.40), c), c)
+    assert [(s["step_m"], s["until"]) for s in steps] == [(0.4, None)]
+    sd = full(visit_table(0.40), c)
+    sd = sd[sd.variable == "snow_depth"]
+    after = sd[sd.time_utc >= T0 + timedelta(days=3)]
+    assert set(after.quality) == {"estimate"} and all("unrecorded_remount" in q for q in after.qualifiers)
+    assert set(sd[sd.time_utc < T0 + timedelta(days=3)].quality) == {"good"}
+
+
+def test_recorded_remount_or_small_step_is_quiet():
+    c = cfg(visits=[VISIT])
+    assert qc.visit_steps(qc.run(visit_table(0.10), c), c) == []
+    c.mounts.append({"id": "MY", "site": "s", "from": T0 + timedelta(days=3, hours=3), "until": None,
+                     "reference_m": 4.4, "quality": "good"})
+    c.mounts[0]["until"] = T0 + timedelta(days=3, hours=3)
+    assert qc.visit_steps(qc.run(visit_table(0.40), c), c) == []
 
 def test_snow_depth_is_reference_minus_distance_in_whole_cm():
     out = full(table([1.234, 2.0, 3.995]), cfg())
@@ -327,3 +363,33 @@ def test_rebuild_is_identical(built, tmp_path):
             assert a == b
         else:
             assert hashlib.sha256(a).digest() == hashlib.sha256(b).digest(), f.name
+
+
+SHEET_INTERVAL_MS = 1.12094444443937 * 3600 * 1000     # deployed Apps Script (repo Code.gs: 4 x 998 s, not deployed)
+
+
+def test_times_match_sheet_since_the_move(built):
+    """F10: radio reading times agree with the sheet to the second, except
+    for one known difference: the deployed Apps Script spaced a message's
+    readings 1.12094444443937 h (4,035.4 s) apart and cut the result to
+    whole seconds; the station's measured interval is 4 x 998 = 3,992 s.
+    Reading i of a message (i = 0 at the header time) therefore differs by
+    floor(4035.4 i) - 3992 i seconds: 0, 43, 86, 130, 173 ..."""
+    sheet = list(csv.DictReader(open(FIX / "sheet_data_since_2026-09-26.csv", encoding="utf-8")))
+    expected = set()
+    by_msg = {}
+    for r in sheet:
+        by_msg.setdefault(r["transmit_pst"], []).append(r["measurement_pst"])
+    for times in by_msg.values():
+        for i, t in enumerate(sorted(times)):
+            sheet_step = math.floor(i * SHEET_INTERVAL_MS / 1000) - 3992 * i
+            utc = datetime.strptime(t, "%Y-%m-%d %H:%M:%S") + timedelta(hours=8, seconds=-sheet_step)
+            expected.add(utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    ours = {r["time_utc"] for r in csv.DictReader(open(built / "best.csv", encoding="utf-8"))
+            if r["time_utc"] >= "2026-09-26T20:45" and r["source"] == "radio"
+            and r["variable"] == "air_temperature"}
+    assert ours == expected
+
+
+def test_no_negative_zero_in_output():
+    assert [build._num(x) for x in (-0.0, 0.0, -3.0, 2.5, float("nan"))] == ["0", "0", "-3", "2.5", ""]

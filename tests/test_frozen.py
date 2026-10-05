@@ -47,7 +47,7 @@ def test_more_regular_than_v0(result):
 def test_mostly_agrees_with_v0_outside_the_visit(result):
     """Where anchors did not change, times are identical: of the 1,256 rows
     outside the visit window, 1,130 within 1 s and 1,235 within 2 min
-    (measured 2026-10-05)."""
+    (measured 2026-10-04)."""
     _, times, _ = result
     ref = [dt.datetime.strptime(r["reconstructed_utc"], "%Y-%m-%dT%H:%M:%SZ")
            for r in csv.DictReader(open(REF, encoding="utf-8"))]

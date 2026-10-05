@@ -139,6 +139,15 @@ def _radio_code(dist_m, temp_c, rh) -> tuple | None:
     return (int(round(dist_m * 100)), int(round(temp_c * 10)), 0 if r >= 100 else r)
 
 
+# How the merge works, in plain words. Most readings exist twice: on the SD
+# card (exact time, two decimals) and in a satellite message (rounded to
+# whole cm, 0.1 degC and 1 %RH, and sometimes timed only roughly from when the
+# message was sent). The SD copy always wins. A satellite reading is dropped
+# when the SD card holds a reading that the firmware would have sent as
+# exactly the same numbers, within 3 hours; if the satellite reading lacks a
+# value (dead sensor), it is dropped when any SD reading lies within 10
+# minutes. Whatever remains is a reading the SD card never got, e.g. while
+# the card was full or removed, and fills that gap.
 def merge(sd_rows: list[dict], radio_rows: list[dict]) -> pd.DataFrame:
     """SD is authoritative; a radio reading is kept only if the SD card does
     not have the same reading. "Same" = the identical encoded values

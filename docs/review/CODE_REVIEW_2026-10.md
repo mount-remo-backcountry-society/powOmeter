@@ -287,7 +287,7 @@ fixes; F1–F4 should land, with tests, before anything is published.
   a private fork for anything free-text.
 - **Patterns:** an IMEI written with spaces or dashes, or a spreadsheet ID
   without an upper-case letter, is not matched; `FLOAT_RE` needs three
-  decimals, so `12.34,-123.45` [example replaced 2026-10-05: the original example fell inside the home check's radius] would pass the home check. Low likelihood, easy
+  decimals, so `12.34,-123.45` [example replaced 2026-10-04: the original example fell inside the home check's radius] would pass the home check. Low likelihood, easy
   to tighten.
 - Checked and fine: `.gitignore` covers everything the brief lists;
   `.gitattributes` keeps raw bytes; the history scan walks all refs

@@ -78,6 +78,15 @@ def anchors_from(messages: list[Message], lo: dt.datetime, hi: dt.datetime):
     return sorted(set(out))
 
 
+# How the alignment works, in plain words. While the clock was frozen, the
+# SD rows are in the right ORDER but have no usable time. Some of the same
+# readings also went out by satellite, whose send times are known: these are
+# the anchors. For each anchor, guess where in the SD block it should be
+# (by its time, between the anchors already placed, or evenly spread at
+# first), and accept the SD row with the identical values closest to that
+# guess, if within 12 rows (or 2 % of the block). Anchors that would put
+# time backwards are dropped. Three passes refine the guesses. Rows between
+# anchors are then timed by interpolation (reconstruct below).
 def align(codes, anchors, t0, t1):
     """Assign each anchor an SD row index, monotonically (v0 algorithm)."""
     n = len(codes)
