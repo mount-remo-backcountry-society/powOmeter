@@ -19,6 +19,8 @@ import yaml
 from . import CONFIG, ROOT
 
 DECODER_TYPES = {"powometer", "avalanche_canada"}
+DECODERS_BUILT = {"powometer"}        # avalanche_canada: planned (design R5, parked)
+MOUNT_GAP_MAX_H = 12                  # longer gap between mounts: snow depth silently missing
 MOUNT_METHODS = {"bare_ground", "tape", "chained", "field_offset"}
 QUALITIES = {"good", "estimate"}
 OPS = {"delete", "spike_filter", "threshold", "gap_fill", "offset", "drift"}
@@ -66,13 +68,23 @@ def load(config_dir: Path = CONFIG) -> Config:
 
 
 def as_utc(v) -> datetime | None:
-    """YAML gives timezone-aware datetimes for '...Z' values; normalise."""
+    """Normalise a time to UTC.
+
+    YAML datetimes without a zone are UTC by the YAML spec. A STRING without
+    'Z' or an offset is refused (review F5): Python would read it as the
+    computer's local time, which on this laptop is Pacific time."""
     if v is None:
         return None
     if isinstance(v, datetime):
         return v.astimezone(timezone.utc) if v.tzinfo else v.replace(tzinfo=timezone.utc)
     if isinstance(v, str):
-        return datetime.fromisoformat(v.replace("Z", "+00:00")).astimezone(timezone.utc)
+        try:
+            t = datetime.fromisoformat(v.strip().replace("Z", "+00:00"))
+        except ValueError:
+            raise ValueError(f"{v!r} is not a time; write UTC like 2026-09-26T20:45:00Z") from None
+        if t.tzinfo is None:
+            raise ValueError(f"{v!r} has no time zone; write UTC with a Z, like 2026-09-26T20:45:00Z")
+        return t.astimezone(timezone.utc)
     raise TypeError(f"not a time: {v!r}")
 
 
@@ -118,6 +130,10 @@ def validate(config_dir: Path = CONFIG, root: Path = ROOT) -> list[str]:
         for k in ("enabled", "publish"):
             if not isinstance(s.get(k), bool):
                 p.append(f"stations.yaml {s.get('id')}: '{k}' must be true or false")
+        if (s.get("enabled") is True or s.get("publish") is True) and s.get("type") in DECODER_TYPES \
+                and s.get("type") not in DECODERS_BUILT:
+            p.append(f"stations.yaml {s.get('id')}: no decoder for type {s.get('type')!r} is built yet, "
+                     "so it cannot be enabled or published")
     station_ids = set(ids)
 
     # sites
@@ -155,6 +171,19 @@ def validate(config_dir: Path = CONFIG, root: Path = ROOT) -> list[str]:
             except Exception:
                 pass
 
+    by_site: dict = {}
+    for m in c.mounts:
+        try:
+            by_site.setdefault(m.get("site"), []).append((as_utc(m["from"]), as_utc(m.get("until")), m.get("id")))
+        except Exception:
+            pass                                # reported by _period_problems
+    for spans in by_site.values():
+        spans.sort(key=lambda s: s[0])
+        for (_a1, b1, n1), (a2, _b2, n2) in zip(spans, spans[1:]):
+            if b1 is not None and (a2 - b1).total_seconds() > MOUNT_GAP_MAX_H * 3600:
+                p.append(f"mounts.yaml: {(a2 - b1).total_seconds() / 3600:.0f} h gap between {n1} and {n2}; "
+                         f"snow depth is missing there. Close the gap or add a mount")
+
     # field visits
     for v in c.visits:
         name = f"field_visits.yaml {v.get('date')}"
@@ -185,6 +214,8 @@ def validate(config_dir: Path = CONFIG, root: Path = ROOT) -> list[str]:
             p.append(f"{name}: unknown station {x.get('station')!r}")
         if x.get("variable") not in VARIABLES:
             p.append(f"{name}: unknown variable {x.get('variable')!r} (known: {sorted(VARIABLES)})")
+        if op in ("offset", "drift") and x.get("variable") == "all":
+            p.append(f"{name}: '{op}' adds a number in one unit, so it needs one variable, not 'all'")
         has_msg, has_win = "message" in x, "from" in x or "until" in x
         if has_msg == has_win:
             p.append(f"{name}: give either 'message' (one transmit time) or 'from'/'until', not both or neither")

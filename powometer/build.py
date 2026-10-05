@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from . import OUT, ROOT, approval, assemble, corrections, hourly, qc, radio, timing
+from . import OUT, ROOT, hourly, pipeline, radio, timing
 from .config import as_utc, load, validate
 from .decoders.powometer_payload import parse_payload
 
@@ -145,11 +145,8 @@ def build(out_dir: Path = OUT) -> int:
         return 1
     cfg = load()
     messages = radio.load_all()
-    obs = assemble.merge(assemble.sd_points(cfg, messages), assemble.radio_points(cfg, messages))
-    obs = qc.run(obs, cfg)
-    unmatched: list[str] = []
-    obs = corrections.apply(obs, cfg, unmatched)
-    obs, alarms = approval.apply(obs, cfg)
+    obs, matched, alarms = pipeline.process(cfg, messages)
+    unmatched = [c["id"] for c in cfg.corrections if c["id"] not in matched]
     publish = {s["id"] for s in cfg.stations if s.get("publish")}
     obs = obs[obs.station_id.isin(publish) & obs.site_id.notna()]
 

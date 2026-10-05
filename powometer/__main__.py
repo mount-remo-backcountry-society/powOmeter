@@ -17,13 +17,22 @@ def approve(argv: list[str]) -> int:
 
     import yaml
 
-    from . import APPROVED, ROOT, approval, assemble, corrections, qc, radio
-    from .config import load
+    from . import APPROVED, ROOT, approval, pipeline
+    from .config import as_utc, load, validate
     _, _, variable, start, end, name, by = argv
+    problems = validate()
+    if problems:
+        print("Approval stopped: fix these config problems first:")
+        for p in problems:
+            print("  - " + p)
+        return 1
+    try:
+        as_utc(start), as_utc(end)
+    except ValueError as e:
+        print(f"Approval stopped: {e}")
+        return 1
     cfg = load()
-    msgs = radio.load_all()
-    obs = assemble.merge(assemble.sd_points(cfg, msgs), assemble.radio_points(cfg, msgs))
-    obs = corrections.apply(qc.run(obs, cfg), cfg)
+    obs, _, _ = pipeline.process(cfg, with_approval=False)
     path = APPROVED / "powometer" / name / f"{variable}.csv"
     sha = approval.write_snapshot(obs, "powometer", variable, start, end, path)
     entry = [{"station": "powometer", "variable": variable, "from": start, "until": end,

@@ -56,7 +56,7 @@ them plan trips and be safer.
 | R2 | Accessible and open source | Public repo, open licences, downloadable CSV with standard names |
 | R3 | A non-programmer can take over, with AI help | Few platforms; CSV/YAML edited in the GitHub web interface; alerts as GitHub Issues; `OPERATIONS.md`; `CLAUDE.md`; MRBS-owned accounts; no dependency on tools only Julian has |
 | R4 | powWX and POW-O-METER independent, yet integrated | Published files only; one-way dependency |
-| R5 | More stations later | Station ID everywhere; stations in config; one decoder per source type |
+| R5 | More stations later | Station ID everywhere; stations in config; one decoder per source type. *Phase 1 builds only the POW-O-METER decoder; `validate` refuses to enable a station whose decoder is not built* |
 | R6 | Safer trip planning | Data age computed live in the browser; labels visible; stale data marked; local time shown; terms of use; link to the Avalanche Canada forecast |
 
 Presentation: two separate, linked sites (station data; forecast). Julian's
@@ -275,9 +275,20 @@ Parquet is added only if a consumer asks for it.
 
 ### 8.1 Automatic QC (level `qc`)
 
-Range, step and spike checks; no-echo values to `missing`; SD/radio
-agreement; negative snow depth flagged `suspect`. Rules set labels and never
-delete. The same rules apply to third-party data once licensed: the Kasiks
+Range and spike checks (spike: more than 0.30 m from the median of the
+readings within ±1 h); the sensor's sentinel distances (no echo, about 5 m;
+too close, 0.50 m: echoes off falling snow) to `missing`; a distance step at
+a field visit with no recorded re-mount raises an alarm; negative snow depth
+flagged `suspect`. Rules set labels and never delete.
+
+Processing order (code review F2): checks on measured values → corrections
+to measured values → snow depth derived from the corrected distance →
+corrections to snow depth → approval. A correction to the distance therefore
+always reaches the snow depth.
+
+*Parked:* an SD/radio agreement check. The merge already keeps radio
+readings only where the SD card has none, so there is rarely a pair to
+compare. The same rules apply to third-party data once licensed: the Kasiks
 High temperature fault of 2026-09-25 would fail the neighbour check.
 
 ### 8.2 Corrections: an operation log (level `corrected`)
@@ -287,8 +298,8 @@ High temperature fault of 2026-09-25 would fail the neighbour check.
   op: delete            # delete | spike_filter | threshold | gap_fill | offset | drift
   station: powometer
   variable: snow_depth
-  from: 2026-09-26T19:00:00Z
-  to:   2026-09-26T21:31:00Z
+  from:  2026-09-26T18:15:00Z
+  until: 2026-09-26T20:45:00Z
   reason: "Readings disturbed during the 2026-09-26 site visit"
   by: JK
   date: 2026-09-29
@@ -296,9 +307,9 @@ High temperature fault of 2026-09-25 would fail the neighbour check.
   op: drift
   station: powometer
   variable: snow_depth
-  from: 2026-09-26T21:31:00Z
-  to:   2027-06-15T00:00:00Z
-  params: {end_offset_cm: -4}     # e.g. from the season-end zero-depth measurement
+  from:  2026-09-26T20:45:00Z
+  until: 2027-06-15T00:00:00Z
+  params: {start: 0, end: -4}     # cm, ramped over the period; e.g. from the season-end zero-depth measurement
   reason: "Bare-ground reading 4 cm off at season end"
   by: JK
   date: 2027-06-20

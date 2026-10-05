@@ -16,3 +16,6 @@ Compared with the Google Sheet it will eventually replace:
 - Snow depth is in whole centimetres, per site and mounting period, with
   data-derived references. See `docs/DIFFERENCES_v0.md`.
 - Every value carries level, approval, quality and qualifier labels.
+- Distances of 0.50 m (the sensor's minimum-range reading, usually falling
+  snow) are `missing` with qualifier `too_close`; the sheet showed them as
+  deep snow.

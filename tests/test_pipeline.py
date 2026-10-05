@@ -34,34 +34,64 @@ def table(values, variable="distance_to_surface", statistic="median", step_min=1
     })
 
 
+def full(df, c):
+    """The pipeline's QC sequence: checks, measured corrections, snow depth,
+    snow-depth corrections (pipeline.process without the I/O)."""
+    out = corrections.apply(qc.run(df, c), c, "measured")
+    return corrections.apply(qc.derive_snow_depth(out, c), c, "derived")
+
+
 # --- snow depth and QC ----------------------------------------------------
 
 def test_snow_depth_is_reference_minus_distance_in_whole_cm():
-    out = qc.run(table([1.234, 2.0, 3.995]), cfg())
+    out = full(table([1.234, 2.0, 3.995]), cfg())
     sd = out[out.variable == "snow_depth"]
     assert list(sd.value) == [277, 200, 0]           # 4.0 - d, cm, rounded
     assert set(sd.unit) == {"cm"} and set(sd.statistic) == {"median"}
 
 
 def test_min_distance_gives_max_depth():
-    out = qc.run(table([1.0], statistic="min"), cfg())
+    out = full(table([1.0], statistic="min"), cfg())
     assert out[out.variable == "snow_depth"].statistic.iloc[0] == "max"
 
 
 def test_estimate_mount_labels_depth():
     c = cfg(mounts=[{"id": "MX", "site": "s", "from": T0, "until": None, "reference_m": 4.0,
                      "quality": "estimate"}])
-    sd = qc.run(table([1.0]), c)
+    sd = full(table([1.0]), c)
     sd = sd[sd.variable == "snow_depth"].iloc[0]
     assert sd.quality == "estimate" and "reference_estimate" in sd.qualifiers
 
 
 def test_no_echo_and_out_of_range():
-    out = qc.run(table([4.95, 0.1, 2.0]), cfg())
+    out = qc.run(table([4.95, 5.5, 2.0]), cfg())
     d = out[out.variable == "distance_to_surface"].reset_index()
     assert d.quality.tolist() == ["missing", "poor", "good"]
     assert "no_echo" in d.qualifiers[0] and pd.isna(d.value[0])
     assert "out_of_range" in d.qualifiers[1]
+
+
+def test_too_close_is_missing_never_deep_snow():
+    """0.50 m is the MB7374's minimum-range reading: in storms, echoes off
+    falling snow (JK). A run of them must not become 3.5 m of snow (F1)."""
+    vals = [2.0, 0.5, 0.5, 0.5, 0.5, 0.5, 2.0]
+    out = full(table(vals), cfg())
+    d = out[out.variable == "distance_to_surface"].reset_index()
+    assert d.value.isna().tolist() == [False] + [True] * 5 + [False]
+    assert (d.quality[1:6] == "missing").all() and all("too_close" in q for q in d.qualifiers[1:6])
+    sd = out[out.variable == "snow_depth"].reset_index()
+    assert sd.value.isna().sum() == 5 and set(sd.quality[1:6]) == {"missing"}
+    best = sd[~sd.quality.isin(["poor", "missing"]) & sd.quality.notna()]
+    assert best.value.max() == 200
+
+
+def test_spike_window_is_time_based():
+    """Neighbours are readings within +/-1 h: a value after a 2-day gap is
+    not judged against readings from before the gap (F13)."""
+    df = table([2.0, 2.0, 2.0, 3.0, 3.0, 3.0])
+    df.loc[3:, "time_utc"] += timedelta(days=2)
+    out = qc.run(df, cfg())
+    assert (out.quality == "good").all()
 
 
 def test_spike_is_suspect_not_deleted():
@@ -72,7 +102,7 @@ def test_spike_is_suspect_not_deleted():
 
 
 def test_negative_depth_flagged_not_clipped():
-    out = qc.run(table([4.30, 4.05]), cfg())        # depths -30, -5 cm
+    out = full(table([4.30, 4.05]), cfg())        # depths -30, -5 cm
     sd = out[out.variable == "snow_depth"].reset_index()
     assert sd.value.tolist() == [-30, -5]
     assert sd.quality.tolist() == ["suspect", "good"]
@@ -102,10 +132,33 @@ def corr(**kw):
 
 def run_corr(values, *cs):
     df = qc.run(table(values), cfg())
-    df = df[df.variable == "distance_to_surface"]
-    unmatched = []
-    out = corrections.apply(df, cfg(corrections=list(cs)), unmatched)
-    return out.reset_index(drop=True), unmatched
+    matched = set()
+    out = corrections.apply(df, cfg(corrections=list(cs)), "measured", matched)
+    return out.reset_index(drop=True), [c["id"] for c in cs if c["id"] not in matched]
+
+
+def test_distance_correction_reaches_snow_depth():
+    """F2: an offset on the distance must change the snow depth derived
+    from it, and the snow depth carries the correction's labels."""
+    c = cfg(corrections=[corr(op="offset", params={"value": 0.5}, **{"from": T0})])
+    sd = full(table([1.0, 1.0]), c)
+    sd = sd[sd.variable == "snow_depth"]
+    assert sd.value.tolist() == [250, 250]                 # 4.0 - (1.0 + 0.5)
+    assert set(sd.level) == {"corrected"} and all("C9" in q for q in sd.qualifiers)
+
+
+def test_delete_on_distance_removes_depth_from_best():
+    c = cfg(corrections=[corr(op="delete", **{"from": T0, "until": T0 + timedelta(minutes=1)})])
+    sd = full(table([1.0, 1.0]), c)
+    sd = sd[sd.variable == "snow_depth"]
+    assert sd.quality.tolist() == ["poor", "good"]
+
+
+def test_snow_depth_correction_applies_after_derivation():
+    c = cfg(corrections=[corr(variable="snow_depth", op="offset", params={"value": -10}, **{"from": T0})])
+    out = full(table([1.0]), c)
+    assert out[out.variable == "snow_depth"].value.tolist() == [290]
+    assert out[out.variable == "distance_to_surface"].value.tolist() == [1.0]
 
 
 def test_delete_keeps_value_marks_poor():
@@ -169,9 +222,26 @@ def test_hourly_interpolates_points_and_respects_gaps():
                        "value": [0.0, 2.0, 4.0, 6.0, 9.0], "quality": "good",
                        "approval": "working", "level": "qc"})
     h = hourly.to_hourly(df)
-    assert h.time_utc.tolist() == [T0, T0 + timedelta(hours=1)]   # 02:00-04:00 have no close neighbours
-    assert h.value.round(3).tolist() == [1.0, 5.0]
-    assert set(h.qualifiers) == {"interpolated"} and set(h.statistic) == {"point"}
+    # 02:00-04:00 have no close neighbours; 05:00 is a reading exactly on the hour
+    assert h.time_utc.tolist() == [T0, T0 + timedelta(hours=1), T0 + timedelta(hours=5)]
+    assert h.value.round(3).tolist() == [1.0, 5.0, 9.0]
+    assert h.qualifiers.tolist() == ["interpolated", "interpolated", ""]
+    assert set(h.statistic) == {"point"}
+
+
+def test_hourly_labels_are_the_worse_neighbour_or_the_exact_reading():
+    """F13: approval and level come from both neighbours, not the later one;
+    a reading exactly on the hour keeps its own value and labels."""
+    t = [T0 - timedelta(minutes=10), T0 + timedelta(minutes=10), T0 + timedelta(hours=1)]
+    df = pd.DataFrame({"station_id": "powometer", "site_id": "s", "variable": "air_temperature",
+                       "statistic": "point", "unit": "degC", "time_utc": t, "value": [1.0, 3.0, 7.0],
+                       "quality": ["suspect", "good", "good"], "approval": ["working", "approved", "approved"],
+                       "level": ["corrected", "qc", "qc"]})
+    h = hourly.to_hourly(df).set_index("time_utc")
+    assert h.loc[T0, ["value", "quality", "approval", "level", "qualifiers"]].tolist() == \
+        [2.0, "suspect", "working", "corrected", "interpolated"]
+    assert h.loc[T0 + timedelta(hours=1), ["value", "quality", "approval", "level", "qualifiers"]].tolist() == \
+        [7.0, "good", "approved", "qc", ""]
 
 
 # --- real build -----------------------------------------------------------

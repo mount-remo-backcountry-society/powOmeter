@@ -1,11 +1,14 @@
 """Automatic quality control and snow-depth derivation (level "qc").
 
 Sets `quality` (WaterML2 codes: good, suspect, estimate, poor, unchecked,
-missing) and adds `qualifiers`. Never deletes a row and never changes a
-recorded value; it only labels.
+missing) and adds `qualifiers`. Never deletes a row. It changes a recorded
+value in one case only: the sensor's two sentinel distances (no echo, about
+5 m; too close, 0.50 m) are not measurements, so their value is set to
+missing (NaN) and the qualifier says why.
 
-Order: range checks -> spikes -> site visits -> snow depth (which inherits
-the distance's labels) -> snow-depth checks.
+Order (see pipeline.py): checks on the measured values -> manual
+corrections -> snow depth derived from the corrected distance (inheriting
+its labels) -> snow-depth checks.
 """
 from __future__ import annotations
 
@@ -23,9 +26,11 @@ RANGES = {      # variable: (min, max) plausible; outside -> poor
     "battery_voltage": (2.0, 5.0),
 }
 NO_ECHO_M = (4.90, 5.20)          # sensor's own "no target" readings
+TOO_CLOSE_M = 0.505               # MB7374 reports anything nearer than 50 cm as 0.50 m;
+                                  # in storms these are echoes off falling snow (JK, 2026-10-05)
 DEAD_TEMP = -99.0                 # firmware writes -99.9 for a dead SHT31
 SPIKE_M = 0.30                    # distance departing this far from its neighbours
-SPIKE_WINDOW = 5
+SPIKE_WINDOW = "2h"               # centred: neighbours within +/-1 h (review F13)
 NEGATIVE_DEPTH_CM = -15           # below this, snow depth is suspect (bare-ground scatter is about ±8 cm)
 DEPTH_STAT = {"min": "max", "max": "min", "median": "median"}   # min distance = max depth
 
@@ -53,7 +58,11 @@ def range_checks(df: pd.DataFrame) -> None:
             df.loc[echo, "value"] = np.nan          # no target: not a distance
             worsen(df, echo, "missing")
             add_qualifier(df, echo, "no_echo")
-            m = m & ~echo
+            close = m & (df["value"] <= TOO_CLOSE_M)
+            df.loc[close, "value"] = np.nan         # minimum-range sentinel (review F1)
+            worsen(df, close, "missing")
+            add_qualifier(df, close, "too_close")
+            m = m & ~echo & ~close
         if var == "air_temperature":
             dead = m & (df["value"] <= DEAD_TEMP)
             worsen(df, dead, "missing")
@@ -65,15 +74,19 @@ def range_checks(df: pd.DataFrame) -> None:
 
 
 def spike_checks(df: pd.DataFrame) -> None:
-    for (site, stat), grp in df[(df.variable == "distance_to_surface") & (df.quality == "good")] \
-            .groupby(["site_id", "statistic"]):
-        g = grp.sort_values("time_utc")
-        med = g["value"].rolling(SPIKE_WINDOW, center=True, min_periods=3).median()
-        spike = (g["value"] - med).abs() > SPIKE_M
-        idx = g.index[spike.fillna(False).values]
-        m = df.index.isin(idx)
-        worsen(df, pd.Series(m, index=df.index), "suspect")
-        add_qualifier(df, pd.Series(m, index=df.index), "spike")
+    """A distance more than SPIKE_M from the median of the readings within
+    +/-1 h is a spike. The window is in time, not in rows, so the neighbours
+    of a reading are never days away across a gap in the record."""
+    hits = pd.Series(False, index=df.index)
+    good = df[(df.variable == "distance_to_surface") & (df.quality == "good")]
+    for _, grp in good.groupby(["site_id", "statistic"]):
+        g = grp.sort_values("time_utc", kind="stable")
+        s = pd.Series(g["value"].to_numpy(), index=pd.DatetimeIndex(g["time_utc"]))
+        med = s.rolling(SPIKE_WINDOW, center=True, min_periods=3).median()
+        spike = ((s - med).abs() > SPIKE_M).to_numpy()
+        hits.loc[g.index[spike]] = True
+    worsen(df, hits, "suspect")
+    add_qualifier(df, hits, "spike")
 
 
 def site_visits(df: pd.DataFrame, cfg: Config) -> None:
@@ -117,10 +130,12 @@ def derive_snow_depth(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
 
 
 def run(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
+    """Checks on the measured values. Snow depth is derived later, after the
+    manual corrections (pipeline.py)."""
     df = df.copy()
     df["qualifiers"] = df["qualifiers"].fillna("")
     df["mount_id"] = None
     range_checks(df)
     spike_checks(df)
     site_visits(df, cfg)
-    return derive_snow_depth(df, cfg)
+    return df

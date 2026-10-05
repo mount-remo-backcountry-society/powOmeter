@@ -28,11 +28,18 @@ change gets a new `v2/` alongside `v1/`. All changes are listed in
 | `statistic` | `point`; or for the ultrasonic burst: `min`, `max`, `median` |
 | `value` | Number; empty when missing |
 | `unit` | See below |
-| `source` | `sd` (SD card, authoritative), `radio` (satellite; fills where the SD card has no reading), `derived` (hourly) |
+| `source` | `sd` (SD card, authoritative), `radio` (satellite; fills where the SD card has no reading), `derived` (in `best_hourly.csv`: interpolated). Snow depth keeps the source of the distance it comes from |
 | `level` | `qc` (automatic checks applied) or `corrected` (a manual correction applied). Raw data is in `raw/` of the repository |
 | `approval` | `working` (shown as **Provisional**), `in_review`, `approved` |
 | `quality` | WaterML 2.0 codes (WMO "WaterML2"): `good`, `suspect`, `estimate`, `poor`, `unchecked`, `missing` |
 | `qualifiers` | Semicolon-separated reasons, from the list below, plus correction ids such as `C002` |
+
+Rows are sorted by `station_id`, `site_id`, `variable`, `statistic`, then
+`time_utc` and `source`.
+
+In `best_hourly.csv`, `quality` is the worse of the two readings either side
+of the hour, `approval` the less approved, and `level` `corrected` if either
+was corrected.
 
 ## Variables
 
@@ -51,6 +58,7 @@ change gets a new `v2/` alongside `v1/`. All changes are listed in
 | Qualifier | Meaning |
 |---|---|
 | `no_echo` | The sensor received no echo; no distance |
+| `too_close` | The sensor's minimum-range reading (0.50 m): something nearer than 50 cm, in storms usually falling snow; no distance |
 | `sensor_fault` | The temperature/humidity sensor returned no reading |
 | `out_of_range` | Physically implausible value |
 | `spike` | Departs sharply from neighbouring readings |
@@ -60,7 +68,7 @@ change gets a new `v2/` alongside `v1/`. All changes are listed in
 | `timestamp_repaired` | Time recovered from clock syncs (the station clock was wrong) |
 | `timestamp_estimated` | Time reconstructed (frozen clock 2025-01-31 → 02-17) |
 | `timed_by_transmit` | Radio reading timed from the satellite transmit time |
-| `interpolated` | Hourly value interpolated between readings |
+| `interpolated` | Hourly value interpolated between readings (a reading exactly on the hour is used as is, without this qualifier) |
 | `gap_filled` | Value filled by a `gap_fill` correction |
 | `C001`, `C002` … | Ids of manual corrections (`config/corrections.yaml` in the repository) |
 

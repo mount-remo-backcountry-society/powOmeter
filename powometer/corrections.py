@@ -14,6 +14,12 @@ Operations, in file order:
 
 Every affected row gets level "corrected" and the correction id as a
 qualifier.
+
+Two phases (independent code review F2): corrections to measured variables
+run BEFORE snow depth is derived, so a fix to the distance reaches the snow
+depth; corrections to snow_depth itself run after. offset and drift change
+values in the variable's own unit, so they must name one variable
+(config.validate refuses `variable: all` for them).
 """
 from __future__ import annotations
 
@@ -39,17 +45,23 @@ def _target(df: pd.DataFrame, c: dict) -> pd.Series:
     return m
 
 
-def apply(df: pd.DataFrame, cfg: Config, unmatched: list | None = None) -> pd.DataFrame:
-    """Apply all corrections. Ids of corrections that match no row are
-    appended to `unmatched` (reported in status.json: a typo in a time would
-    otherwise fail silently)."""
+def apply(df: pd.DataFrame, cfg: Config, phase: str = "measured",
+          matched: set | None = None) -> pd.DataFrame:
+    """Apply the corrections of one phase: "measured" (all but snow_depth)
+    or "derived" (snow_depth). Ids of corrections that matched rows are added
+    to `matched`; the build reports the ones that matched nothing in either
+    phase (a typo in a time would otherwise fail silently)."""
+    if phase not in ("measured", "derived"):
+        raise ValueError(f"unknown correction phase {phase!r}")
     df = df.copy()
     for c in cfg.corrections:
+        if (c["variable"] == "snow_depth") != (phase == "derived"):
+            continue
         m = _target(df, c)
         if not m.any():
-            if unmatched is not None:
-                unmatched.append(c["id"])
             continue
+        if matched is not None:
+            matched.add(c["id"])
         op, p = c["op"], c.get("params") or {}
         if op == "delete":
             df.loc[m, "quality"] = "poor"
