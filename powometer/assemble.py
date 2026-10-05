@@ -56,9 +56,9 @@ def _f(x: str) -> float | None:
     return v if v == v else None          # NaN -> None
 
 
-def sd_points(cfg: Config, messages: list[radio.Message]) -> list[dict]:
+def sd_points(cfg: Config, messages: list[radio.Message], report: list | None = None) -> list[dict]:
     out = []
-    rows = [r for r in sd.load() if r.true_utc is not None]
+    rows = [r for r in sd.load(report=report) if r.true_utc is not None]
     timed = [(r.true_utc, r.parts, r.time_method, r.device_utc) for r in rows]
     block, times, _ = frozen.reconstruct(messages)
     timed += [(t, tuple(p), "reconstructed", None) for p, t in zip(block, times)]

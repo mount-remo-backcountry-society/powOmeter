@@ -12,16 +12,15 @@ reaches the snow depth derived from it (independent code review F2).
 """
 from __future__ import annotations
 
-import pandas as pd
-
 from . import approval, assemble, corrections, qc, radio
 from .config import Config
 
 
-def process(cfg: Config, messages=None, with_approval: bool = True):
-    """Return (observations, matched correction ids, approval alarms)."""
+def process(cfg: Config, messages=None, with_approval: bool = True, sd_report: list | None = None):
+    """Return (observations, matched correction ids, approval alarms).
+    `sd_report` receives one dict per SD LOG file (see sd.load)."""
     messages = radio.load_all() if messages is None else messages
-    obs = assemble.merge(assemble.sd_points(cfg, messages), assemble.radio_points(cfg, messages))
+    obs = assemble.merge(assemble.sd_points(cfg, messages, sd_report), assemble.radio_points(cfg, messages))
     obs = qc.run(obs, cfg)
     matched: set[str] = set()
     obs = corrections.apply(obs, cfg, "measured", matched)

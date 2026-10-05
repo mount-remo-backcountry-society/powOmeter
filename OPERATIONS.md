@@ -29,7 +29,12 @@ names, email addresses or home locations into the repository.
 1. **Copy the SD card's files** into a new folder `raw/sd/<YYYY-MM-DD>/`
    (`_02` for a second download on the same day), unchanged. In GitHub:
    **Add file → Upload files**, drag the files in, and type the folder name
-   in front of the file name. Files over 25 MB: zip them first.
+   in front of the file name. Files over 25 MB: zip them first (zip files
+   in the folder are read directly; any file whose name starts with `LOG`
+   and ends `.CSV`, in any letter case, is read).
+   **Upload photos without location.** Phone photos carry GPS coordinates;
+   the commit check refuses images that do. Web edits on GitHub skip your
+   computer's check, so type only initials and times there.
 2. **Record the visit** in `config/field_visits.yaml` (pencil icon to edit).
    Copy an existing entry and change it:
    - `date`, and `who` as **initials only**
@@ -45,6 +50,11 @@ names, email addresses or home locations into the repository.
    unsure.
 4. Commit. The checks run automatically; a red cross on the commit means a
    problem. Open it to read the message.
+5. After the next build, check `status.json` → `info` → `sd_downloads`: each
+   LOG file is listed with the lines read, lines rejected as unreadable,
+   rows kept, rows whose time could not be recovered, and any clock offset
+   carried over from the previous download. An unreadable file, or more
+   than 1 % rejected lines, also appears under `alarms`.
 
 ## Adding a correction
 
@@ -54,7 +64,9 @@ names, email addresses or home locations into the repository.
    `message` (a satellite transmit time) or a `from`/`until` window in UTC,
    a **reason**, your initials and today's date.
 3. Commit. `delete` never removes data: it marks values `poor`, so they drop
-   out of `best.csv` but stay visible and auditable.
+   out of `best.csv` but stay visible and auditable. A correction to
+   `distance_to_surface` also changes the snow depth calculated from it;
+   `offset` and `drift` need one named variable, not `all`.
 4. If `status.json` lists your correction under
    `corrections_matching_nothing`, its time or variable doesn't match any
    data. Check it.

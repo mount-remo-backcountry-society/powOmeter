@@ -49,7 +49,21 @@ def _write_csv(df: pd.DataFrame, path: Path, columns: list[str]) -> None:
     _fmt(df)[columns].to_csv(path, index=False, lineterminator="\n")
 
 
-def _status(cfg, obs: pd.DataFrame, best: pd.DataFrame, messages, unmatched, alarms) -> dict:
+def sd_alarms(report: list[dict]) -> list[str]:
+    """An SD file that yields nothing readable, or rejects more than 1 % of
+    its "Data:" lines, needs a look: the data would otherwise be dropped
+    silently (code review F7)."""
+    out = []
+    for r in report:
+        where = f"SD {r['download']}/{r['file']}"
+        if r["data_lines"] - r["rejected_lines"] == 0:
+            out.append(f"{where}: no readable measurements ({r['data_lines']} Data lines)")
+        elif r["rejected_lines"] > 0.01 * r["data_lines"]:
+            out.append(f"{where}: {r['rejected_lines']} of {r['data_lines']} Data lines unreadable")
+    return out
+
+
+def _status(cfg, obs: pd.DataFrame, best: pd.DataFrame, messages, unmatched, alarms, sd_report) -> dict:
     last_msg = messages[-1] if messages else None
     payloads = [m for m in messages if m.transmit_utc >= DEPLOYED]
     decode_errors = [m for m in payloads if parse_payload(m.payload_text) is None]
@@ -76,6 +90,7 @@ def _status(cfg, obs: pd.DataFrame, best: pd.DataFrame, messages, unmatched, ala
         "alarms": alarms,
         "info": {
             "corrections_matching_nothing": unmatched,
+            "sd_downloads": list(sd_report),
             "rows": {"observations": int(len(obs)), "best": int(len(best))},
         },
     }
@@ -147,7 +162,9 @@ def build(out_dir: Path = OUT) -> int:
         return 1
     cfg = load()
     messages = radio.load_all()
-    obs, matched, alarms = pipeline.process(cfg, messages)
+    sd_report: list[dict] = []
+    obs, matched, alarms = pipeline.process(cfg, messages, sd_report=sd_report)
+    alarms += sd_alarms(sd_report)
     unmatched = [c["id"] for c in cfg.corrections if c["id"] not in matched]
     publish = {s["id"] for s in cfg.stations if s.get("publish")}
     obs = obs[obs.station_id.isin(publish) & obs.site_id.notna()]
@@ -175,7 +192,7 @@ def build(out_dir: Path = OUT) -> int:
                          "quality": r.quality, "approval": r.approval, "site_id": r.site_id}
     dump = lambda name, obj: (v1 / name).write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     dump("latest.json", {"schema_version": SCHEMA_VERSION, "station_id": "powometer", "values": latest})
-    dump("status.json", _status(cfg, obs, best, messages, unmatched, alarms))
+    dump("status.json", _status(cfg, obs, best, messages, unmatched, alarms, sd_report))
     dump("sites.json", _sites(cfg))
     dump("datapackage.json", _datapackage())
     for doc in ("SCHEMA.md", "CHANGELOG.md"):

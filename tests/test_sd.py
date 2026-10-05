@@ -75,3 +75,58 @@ def test_no_overlap_or_disorder(rows_carry):
     assert timed == sorted(timed)
     gaps = [(b - a).total_seconds() for a, b in zip(timed, timed[1:])]
     assert min(gaps) >= 60
+
+
+# --- reading downloads (code review F7, F8) -------------------------------
+
+def data_line(t: dt.datetime, depth_mm=2000, temp="-3.21"):
+    ts = t.strftime("%Y-%m-%dT%H:%M:%S")
+    return f"{ts}, Data: {ts},4.05,1,{depth_mm},{depth_mm + 10},{depth_mm + 5},{temp},88.50,1.00,870.12"
+
+
+def write_raw(tmp_path):
+    """One download: a lower-case log.csv, and a zip holding LOG 2.CSV with
+    one unreadable Data line."""
+    import zipfile
+    d = tmp_path / "sd" / "2025-03-01"
+    d.mkdir(parents=True)
+    t0 = dt.datetime(2025, 3, 1, 12, 0)
+    first = [data_line(t0 + dt.timedelta(minutes=17 * i)) for i in range(3)]
+    (d / "log.csv").write_text("\n".join(first) + "\n", encoding="utf-8")
+    second = [data_line(t0 + dt.timedelta(hours=2, minutes=17 * i), temp=f"-{i}.50") for i in range(3)]
+    second.append("2025-03-01T15:00:00, Data: 2025-03-01T15:00:00,4.05,truncated")
+    with zipfile.ZipFile(d / "card.zip", "w") as z:
+        z.writestr("LOG 2.CSV", "\n".join(second) + "\n")
+        z.writestr("DATA.CSV", "ignored\n")
+    return tmp_path
+
+
+def test_lower_case_and_zipped_logs_are_read(tmp_path):
+    raw = write_raw(tmp_path)
+    assert [(v, s.name) for v, s in sd.log_files(raw)] == \
+        [("2025-03-01", "log.csv"), ("2025-03-01", "card.zip/LOG 2.CSV")]
+    report = []
+    rows = sd.load(raw, report=report)
+    assert len([r for r in rows if r.true_utc]) == 6
+    assert [(r["file"], r["data_lines"], r["rejected_lines"]) for r in report] == \
+        [("log.csv", 3, 0), ("card.zip/LOG 2.CSV", 4, 1)]
+
+
+def test_unreadable_lines_raise_an_alarm(tmp_path):
+    from powometer.build import sd_alarms
+    report = []
+    sd.load(write_raw(tmp_path), report=report)
+    alarms = sd_alarms(report)
+    assert len(alarms) == 1 and "1 of 4 Data lines unreadable" in alarms[0]
+    assert sd_alarms([{"download": "x", "file": "LOG.CSV", "data_lines": 5, "rejected_lines": 5}])[0] \
+        .endswith("no readable measurements (5 Data lines)")
+
+
+def test_carried_offset_is_the_median_of_recent_syncs():
+    """F8: one bad modem time at the end of a log must not shift the next
+    log's whole clock."""
+    w = dt.datetime(2026, 5, 1)
+    good = [(i, w + dt.timedelta(hours=i), w + dt.timedelta(hours=i, minutes=2879)) for i in range(4)]
+    bad = (9, w + dt.timedelta(hours=9), w + dt.timedelta(hours=9, minutes=2879 + 600))
+    written, true = sd._clock_state(good + [bad])
+    assert written == bad[1] and (true - written) == dt.timedelta(minutes=2879)
