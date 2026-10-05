@@ -5,7 +5,9 @@ changes to the published format. See `SCHEMA.md`.
 
 ## v1.0: 2026-10-04 (not yet published)
 
-First version: `observations.csv`, `best.csv`, `best_hourly.csv`,
+First version (variables: snow_depth, distance_to_surface, air_temperature,
+relative_humidity, air_pressure, battery_voltage, enclosure_temperature):
+`observations.csv`, `best.csv`, `best_hourly.csv`,
 `latest.json`, `status.json`, `sites.json`, `datapackage.json`.
 
 Compared with the Google Sheet it will eventually replace:

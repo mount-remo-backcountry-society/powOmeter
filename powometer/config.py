@@ -26,7 +26,7 @@ OP_PARAMS = {"delete": set(), "spike_filter": {"max_step", "window"},
              "threshold": {"min", "max"}, "gap_fill": {"max_gap"},
              "offset": {"value"}, "drift": {"start", "end"}}
 VARIABLES = {"all", "snow_depth", "distance_to_surface", "air_temperature",
-             "relative_humidity", "air_pressure", "battery_voltage"}
+             "relative_humidity", "air_pressure", "battery_voltage", "enclosure_temperature"}
 STATISTICS = {"min", "median"}
 REMOUNT = {True, False, "probable", "unknown"}
 INITIALS = re.compile(r"^[A-Z]{2,4}$")

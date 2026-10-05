@@ -80,6 +80,7 @@ def sd_points(cfg: Config, messages: list[radio.Message]) -> list[dict]:
                 ("air_temperature", "point", 6, "degC", 1),
                 ("relative_humidity", "point", 7, "%", 1),
                 ("air_pressure", "point", 9, "hPa", 1),
+                ("enclosure_temperature", "point", 8, "degC", 1),   # BMP390, inside the logger box
                 ("battery_voltage", "point", 1, "V", 1)):
             v = _f(parts[idx])
             out.append({**base, "variable": var, "statistic": stat,

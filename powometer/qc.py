@@ -19,6 +19,7 @@ RANGES = {      # variable: (min, max) plausible; outside -> poor
     "air_temperature": (-50.0, 45.0),
     "relative_humidity": (0.0, 100.0),
     "air_pressure": (500.0, 1100.0),
+    "enclosure_temperature": (-50.0, 80.0),     # in the box: can exceed air temperature in sun
     "battery_voltage": (2.0, 5.0),
 }
 NO_ECHO_M = (4.90, 5.20)          # sensor's own "no target" readings

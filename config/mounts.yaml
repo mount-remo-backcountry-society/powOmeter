@@ -14,6 +14,12 @@
 #   field_offset - the offset typed into the Google Sheet "Field" tab at a
 #                  visit (back-calculated to match a probed snow depth)
 #
+# ZERO = TOP OF THE ALPINE HEATHER under the sensor (ankle-high), not the
+# soil. A bare-ground median therefore measures to the heather surface; the
+# heather grows over a summer and the first snow compresses it, so zero is
+# uncertain by about +/-0.1 m. A flat target (board or artificial turf)
+# under the sensor would give a stable zero (WMO CIMO guidance).
+#
 # quality: good | estimate. Snow depth from an "estimate" mounting is labelled
 # quality "estimate" and stays unapproved until reviewed.
 # Analysis behind these values: docs/PLAN_PHASE_0_1.md §1f (2026-10-04).
@@ -25,7 +31,7 @@ mounts:
     until: 2025-09-28T18:03:32Z
     reference_m: 4.51
     method: bare_ground
-    uncertainty_m: 0.08
+    uncertainty_m: 0.10
     quality: good
     notes: >
       Median distance over bare ground 2025-07-10..09-27 (6,752 readings).
@@ -79,7 +85,7 @@ mounts:
     until: 2026-09-26T18:15:00Z
     reference_m: 3.12
     method: bare_ground
-    uncertainty_m: 0.08
+    uncertainty_m: 0.10
     quality: good
     notes: "Lowered 2026-06-19 (step -1.64 m). Bare-ground median 2026-07-10..09-25 (6,667 readings)."
 

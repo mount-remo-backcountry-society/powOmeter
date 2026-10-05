@@ -38,12 +38,13 @@ change gets a new `v2/` alongside `v1/`. All changes are listed in
 
 | `variable` | CF standard name | Unit | Notes |
 |---|---|---|---|
-| `snow_depth` | `surface_snow_thickness` | cm (whole) | Mount reference − distance. `median` uses the median distance; `max` and `min` come from the burst's min and max distance |
+| `snow_depth` | `surface_snow_thickness` | cm (whole) | Mount reference − distance. `median` uses the median distance; `max` and `min` come from the burst's min and max distance. **Zero is the top of the alpine heather** under the sensor (ankle-high), not the soil: heather grows over a summer, and the first snow compresses it, so early-season values can read slightly negative |
 | `distance_to_surface` | – | m | Sensor face to the snow or ground surface |
 | `air_temperature` | `air_temperature` | degC | |
 | `relative_humidity` | `relative_humidity` | % | |
 | `air_pressure` | `surface_air_pressure` | hPa | Station level, SD card only |
 | `battery_voltage` | – | V | SD card only |
+| `enclosure_temperature` | – | degC | Inside the logger box (pressure sensor), SD card only. Diagnostic: LiPo charging stops below about 0 °C |
 
 ## Qualifiers
 

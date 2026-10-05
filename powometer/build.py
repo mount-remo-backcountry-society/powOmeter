@@ -24,9 +24,11 @@ SCHEMA_VERSION = "1.0"
 COLUMNS = ["time_utc", "station_id", "site_id", "variable", "statistic", "value", "unit",
            "source", "level", "approval", "quality", "qualifiers"]
 BEST = [("snow_depth", "median"), ("distance_to_surface", "median"), ("air_temperature", "point"),
-        ("relative_humidity", "point"), ("air_pressure", "point"), ("battery_voltage", "point")]
+        ("relative_humidity", "point"), ("air_pressure", "point"), ("battery_voltage", "point"),
+        ("enclosure_temperature", "point")]
 DECIMALS = {"snow_depth": 0, "distance_to_surface": 3, "air_temperature": 2,
-            "relative_humidity": 1, "air_pressure": 2, "battery_voltage": 2}
+            "relative_humidity": 1, "air_pressure": 2, "battery_voltage": 2,
+            "enclosure_temperature": 2}
 DEPLOYED = datetime(2025, 1, 26, 18, 58, 34, tzinfo=timezone.utc)
 
 
@@ -117,6 +119,7 @@ def _datapackage() -> dict:
         "relative_humidity": {"cf_standard_name": "relative_humidity", "unit": "%"},
         "air_pressure": {"cf_standard_name": "surface_air_pressure", "unit": "hPa"},
         "battery_voltage": {"cf_standard_name": None, "unit": "V"},
+        "enclosure_temperature": {"cf_standard_name": None, "unit": "degC"},
     }
     res = lambda name, desc: {"name": name.split(".")[0], "path": name, "format": "csv",
                               "description": desc, "schema": {"fields": fields}}
