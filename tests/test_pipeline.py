@@ -213,6 +213,45 @@ def test_approved_snapshot_published_and_mismatch_alarmed(tmp_path):
     assert out.value.tolist() == [1.0, 2.0, 3.0]            # snapshot wins
 
 
+@pytest.fixture
+def approved(tmp_path):
+    """Three readings approved; returns (df, config, root)."""
+    df = qc.run(table([2.0, 2.01, 2.02]), cfg()).reset_index(drop=True)
+    snap = tmp_path / "approved" / "x.csv"
+    sha = approval.write_snapshot(df, "powometer", "distance_to_surface", T0, T0 + timedelta(days=1), snap)
+    ap = {"station": "powometer", "variable": "distance_to_surface", "from": T0,
+          "until": T0 + timedelta(days=1), "snapshot": "approved/x.csv", "sha256": sha}
+    return df, cfg(approvals=[ap]), tmp_path
+
+
+def test_row_not_in_snapshot_stays_provisional(approved):
+    """F4: a reading found later (e.g. a new SD download) was never
+    reviewed: it keeps its own value and is not labelled approved."""
+    df, c, root = approved
+    extra = df.iloc[[0]].assign(time_utc=T0 + timedelta(minutes=5), value=2.005)
+    out, alarms = approval.apply(pd.concat([df, extra], ignore_index=True), c, root=root)
+    new = out[out.time_utc == T0 + timedelta(minutes=5)].iloc[0]
+    assert new.value == 2.005 and new.approval == "working" and new.quality == "good"
+    assert (out.approval == "approved").sum() == 3
+    assert len(alarms) == 1 and "1 not in the snapshot" in alarms[0]
+
+
+def test_row_missing_from_rebuild_is_alarmed(approved):
+    df, c, root = approved
+    out, alarms = approval.apply(df.iloc[[0, 2]].reset_index(drop=True), c, root=root)
+    assert len(out) == 2 and set(out.approval) == {"approved"}
+    assert len(alarms) == 1 and "1 missing from the rebuild" in alarms[0]
+
+
+def test_quality_change_is_alarmed_and_snapshot_kept(approved):
+    df, c, root = approved
+    changed = df.copy()
+    changed.loc[1, "quality"] = "suspect"
+    out, alarms = approval.apply(changed, c, root=root)
+    assert out.quality.tolist() == ["good", "good", "good"]
+    assert len(alarms) == 1 and "1 changed" in alarms[0]
+
+
 # --- hourly ---------------------------------------------------------------
 
 def test_hourly_interpolates_points_and_respects_gaps():

@@ -53,9 +53,11 @@ def _status(cfg, obs: pd.DataFrame, best: pd.DataFrame, messages, unmatched, ala
     last_msg = messages[-1] if messages else None
     payloads = [m for m in messages if m.transmit_utc >= DEPLOYED]
     decode_errors = [m for m in payloads if parse_payload(m.payload_text) is None]
-    latest_p = next((parse_payload(m.payload_text) for m in reversed(payloads)
-                     if parse_payload(m.payload_text)), None)
-    clock = timing.clock_offset_minutes(latest_p, payloads[-1].transmit_utc) if latest_p else None
+    # the newest decodable message, timed by ITS OWN transmit time (code
+    # review F6: not the newest message's, which may be undecodable)
+    latest_m = next((m for m in reversed(payloads) if parse_payload(m.payload_text)), None)
+    latest_p = parse_payload(latest_m.payload_text) if latest_m else None
+    clock = timing.clock_offset_minutes(latest_p, latest_m.transmit_utc) if latest_p else None
     batt = best[(best.variable == "battery_voltage") & best.value.notna()].sort_values("time_utc").tail(1)
     st = {
         "schema_version": SCHEMA_VERSION,
@@ -151,7 +153,7 @@ def build(out_dir: Path = OUT) -> int:
     obs = obs[obs.station_id.isin(publish) & obs.site_id.notna()]
 
     best = pd.concat([obs[(obs.variable == v) & (obs.statistic == s)] for v, s in BEST])
-    best = best[~best.quality.isin(["poor", "missing"])]
+    best = best[best.quality.notna() & ~best.quality.isin(["poor", "missing"])]
     hourly_df = hourly.to_hourly(best)
     hourly_df["source"] = "derived"
 
