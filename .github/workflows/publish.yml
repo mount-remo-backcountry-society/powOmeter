@@ -3,10 +3,9 @@ name: publish
 # Fetch new satellite messages, rebuild, publish, and open/close alarm Issues
 # (design §6.7, phase 2).
 #
-# While the repository is private this runs only by hand (Actions tab ->
-# publish -> Run workflow): Actions minutes and Pages are free only for
-# public repositories. When it goes public, enable the schedule below (an
-# off-the-hour minute, because GitHub delays jobs scheduled on the hour).
+# Runs hourly at an off-the-hour minute (GitHub delays jobs scheduled on the
+# hour), and by hand from the Actions tab. Actions minutes and Pages are free
+# only because the repository is public: it must stay public.
 
 on:
   workflow_dispatch:
@@ -15,8 +14,8 @@ on:
         description: "Test only: text of a fake alarm. It opens an Issue; the next normal run closes it"
         required: false
         default: ""
-  # schedule:
-  #   - cron: "23 * * * *"
+  schedule:
+    - cron: "23 * * * *"
 
 permissions:
   contents: write     # commit new raw messages
