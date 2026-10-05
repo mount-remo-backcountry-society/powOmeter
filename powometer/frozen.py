@@ -29,6 +29,7 @@ from pathlib import Path
 
 from . import RAW
 from . import sd
+from .firmware import reading_codes
 from .radio import Message
 
 FROZEN_LOG = ("2025-07-06", "LOG.CSV")     # the download that holds the whole block
@@ -36,15 +37,13 @@ MSG = re.compile(r"^(\d{6})(\d)(.+)$")
 READING = re.compile(r"^(\d{3})([+-]\d{3})(\d{2})$")
 
 
-def payload_code(parts):
-    """An SD row encoded exactly as prepMsg() put it on the radio (minimum)."""
+def payload_codes(parts) -> set:
+    """Every way prepMsg() may have put an SD row on the radio: the burst
+    MINIMUM distance, firmware rounding (firmware.py; review F3)."""
     try:
-        cm = int(round(float(parts[3]) / 10.0))
-        t = int(round(float(parts[6]) * 10))
-        rh = int(round(float(parts[7])))
-        return (cm, t, 0 if rh >= 100 else rh)
-    except Exception:
-        return None
+        return reading_codes(float(parts[3]) / 1000, float(parts[6]), float(parts[7]))
+    except (TypeError, ValueError):
+        return set()
 
 
 def find_block(raw_dir: Path = RAW):
@@ -83,8 +82,9 @@ def align(codes, anchors, t0, t1):
     """Assign each anchor an SD row index, monotonically (v0 algorithm)."""
     n = len(codes)
     where: dict = {}
-    for i, c in enumerate(codes):
-        where.setdefault(c, []).append(i)
+    for i, cs in enumerate(codes):
+        for c in cs:
+            where.setdefault(c, []).append(i)
     span = (t1 - t0).total_seconds()
 
     def predict(t):
@@ -123,7 +123,7 @@ def reconstruct(messages: list[Message], raw_dir: Path = RAW):
     """Return (block_parts, times, n_anchors): reconstructed naive-UTC times
     for each row of the frozen block."""
     block, before, after = find_block(raw_dir)
-    codes = [payload_code(p) for p in block]
+    codes = [payload_codes(p) for p in block]
     n = len(block)
     anchors = anchors_from(messages, before - dt.timedelta(hours=3), after + dt.timedelta(hours=3))
     acc = align(codes, anchors, before, after)

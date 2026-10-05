@@ -21,6 +21,7 @@ import pandas as pd
 from . import frozen, radio, sd, timing
 from .config import Config, as_utc
 from .decoders.powometer_payload import parse_payload
+from .firmware import reading_codes
 
 SD_MATCH = timedelta(minutes=10)
 STATION = "powometer"
@@ -122,10 +123,17 @@ def radio_points(cfg: Config, messages: list[radio.Message]) -> list[dict]:
 CODE_WINDOW = timedelta(hours=3)
 
 
-def _code(dist_m, temp_c, rh) -> tuple | None:
-    """A reading as the radio encodes it: (distance cm, temperature x10, RH
-    with 100 as 0). Identifies the same reading in SD and radio data."""
-    if dist_m is None or temp_c is None or rh is None or pd.isna(dist_m) or pd.isna(temp_c) or pd.isna(rh):
+def _codes(dist_m, temp_c, rh) -> set:
+    """Every way the radio may have encoded an SD reading (firmware.py)."""
+    if any(v is None or pd.isna(v) for v in (dist_m, temp_c, rh)):
+        return set()
+    return reading_codes(float(dist_m), float(temp_c), float(rh))
+
+
+def _radio_code(dist_m, temp_c, rh) -> tuple | None:
+    """A radio reading's own values back as integers (exact: they came off
+    the wire as integers)."""
+    if any(v is None or pd.isna(v) for v in (dist_m, temp_c, rh)):
         return None
     r = int(round(rh))
     return (int(round(dist_m * 100)), int(round(temp_c * 10)), 0 if r >= 100 else r)
@@ -153,8 +161,7 @@ def merge(sd_rows: list[dict], radio_rows: list[dict]) -> pd.DataFrame:
         t = wide.get(("air_temperature", "point"))
         h = wide.get(("relative_humidity", "point"))
         for ts, dv, tv, hv in zip(sd_times, d, t, h):
-            c = _code(dv, tv, hv)
-            if c is not None:
+            for c in _codes(dv, tv, hv):
                 codes[stat].setdefault(c, []).append(ts)
 
     def is_duplicate(reading: pd.DataFrame) -> bool:
@@ -163,7 +170,7 @@ def merge(sd_rows: list[dict], radio_rows: list[dict]) -> pd.DataFrame:
         stat = d["statistic"].iloc[0] if not d.empty else "min"
         val = lambda var: reading.loc[reading.variable == var, "value"].iloc[0] \
             if (reading.variable == var).any() else None
-        c = _code(val("distance_to_surface"), val("air_temperature"), val("relative_humidity"))
+        c = _radio_code(val("distance_to_surface"), val("air_temperature"), val("relative_humidity"))
         if c is not None and any(abs(ts - t) <= CODE_WINDOW for ts in codes.get(stat, {}).get(c, [])):
             return True
         i = sd_times.searchsorted(t)
