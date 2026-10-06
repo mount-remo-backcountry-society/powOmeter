@@ -2,5 +2,6 @@
 # everything they pull in are pinned in requirements.txt (regenerate on the
 # yearly "upgrade day", see OPERATIONS.md).
 pandas==3.0.6
+pillow==12.3.0         # webcam time lapse: shrinks frames
 PyYAML==6.0.3
 pytest==9.1.1

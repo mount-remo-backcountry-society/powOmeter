@@ -16,7 +16,8 @@ def test_real_config_is_valid():
 def test_loads_expected_content():
     c = load()
     assert [m["id"] for m in c.mounts] == ["M1", "M2", "M2b", "M3", "M4", "M5"]
-    assert {s["id"] for s in c.sites} == {"shames_top_a", "shames_top_b"}
+    assert {s["id"] for s in c.sites} == {"shames_top_a", "shames_top_b", "kasiks_high", "kasiks_low",
+                                          "shames_bottom"}
     assert c.no_echo_cm == [498, 499, 500]
 
 
@@ -51,7 +52,7 @@ def edit(d: Path, name: str, old: str, new: str):
      "    op: offset\n    params: {value: 1}\n    station: powometer\n    variable: all\n", "needs one variable"),
     ("corrections.yaml", "    message: 2025-01-26T19:01:45Z\n", "    message: '2025-01-26T19:01:45'\n",
      "must be a UTC time"),
-    ("stations.yaml", "    enabled: false\n", "    enabled: true\n", "no decoder for type 'avalanche_canada'"),
+    ("stations.yaml", "    enabled: false\n", "    enabled: true\n", "written permission"),
 ])
 def test_mistakes_are_reported(cfg, name, old, new, expect):
     edit(cfg, name, old, new)
@@ -67,3 +68,17 @@ def test_time_strings_need_a_zone():
         as_utc("2026-09-26T20:45:00")
     with pytest.raises(ValueError, match="not a time"):
         as_utc("yesterday")
+
+
+def test_permission_on_file_allows_a_nearby_station(cfg, tmp_path):
+    """Rule 3: with the owner's permission filed, the station may be switched on."""
+    (tmp_path / "docs" / "permissions").mkdir(parents=True)
+    (tmp_path / "docs" / "permissions" / "moti.md").write_text("Permission granted ...", encoding="utf-8")
+    on = ("    enabled: true\n    publish: true\n    licence: \"BC MoTI, used with permission\"\n"
+          "    permission: docs/permissions/{}\n")
+    off = ("    enabled: false\n    publish: false\n    licence: \"Access Only (BC MoTI); "
+           "permission requested 2026-10\"\n    permission: null\n")
+    edit(cfg, "stations.yaml", off, on.format("missing.md"))
+    assert any("written permission" in p for p in validate(cfg, tmp_path))
+    edit(cfg, "stations.yaml", on.format("missing.md"), on.format("moti.md"))
+    assert validate(cfg, tmp_path) == []

@@ -3,7 +3,10 @@
   validate   check the files in config/ and print any problems
   build      rebuild everything from raw/ and config/ into out/
   fetch      save new satellite messages from the sheet's Messages tab into
-             raw/radio/messages_tab/ (needs the MESSAGES_CSV_URL setting)
+             raw/radio/messages_tab/ (needs the MESSAGES_CSV_URL setting),
+             and new readings of the enabled nearby stations into raw/avcan/
+  webcams    add the newest webcam frames to a 3-day time lapse:
+             webcams <folder>   (normally out/webcams; never fails the run)
   approve    freeze a reviewed period:
              approve <variable> <from UTC> <until UTC> <snapshot name> <initials>
              e.g. approve snow_depth 2025-01-26T18:58:34Z 2025-09-28T18:03:32Z 2025-season JK
@@ -62,6 +65,8 @@ def main(argv: list[str]) -> int:
         return 1
     if cmd == "fetch":
         import os
+        from . import nearby
+        from .config import load
         from .intake import fetch
         url = os.environ.get("MESSAGES_CSV_URL", "")
         if not url:
@@ -70,6 +75,20 @@ def main(argv: list[str]) -> int:
         path = fetch(url)
         print(f"fetch: new messages saved to {path.relative_to(path.parents[3]).as_posix()}" if path
               else "fetch: no new messages")
+        # nearby stations: a failure is reported, never fatal (their API keeps 7 days)
+        path, report = nearby.fetch(load())
+        for station, r in report.items():
+            print(f"fetch {station}: " + (f"{r['new']} new of {r['rows']} rows" if r["ok"] else f"FAILED {r['error']}"))
+        if path:
+            print(f"fetch: nearby readings saved to {path.relative_to(path.parents[2]).as_posix()}")
+        return 0
+    if cmd == "webcams":
+        from pathlib import Path
+        from .webcams import run
+        if len(argv) != 3:
+            print(__doc__)
+            return 2
+        run(Path(argv[2]))
         return 0
     if cmd == "build":
         from .build import build

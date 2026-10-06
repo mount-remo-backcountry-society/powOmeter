@@ -2,9 +2,16 @@
 # type   = which decoder reads it (one module per type in powometer/decoders/)
 # publish = whether its values may appear in published files and on the site
 #
-# The BC Ministry of Transportation & Infrastructure (MoTI) stations are listed
-# but NOT enabled: their observations are "Access Only" (reproduction needs
-# written permission). See docs/DATA_PIPELINE_DESIGN.md §10.
+# enabled = whether `fetch` collects it and `build` processes it
+# permission = for data owned by others: the file in docs/permissions/ that
+#   records the owner's written permission. `validate` refuses to enable or
+#   publish such a station without it (CLAUDE.md rule 3).
+#
+# The BC Ministry of Transportation & Infrastructure (MoTI) observations are
+# "Access Only": reproduction needs written permission (design §10). To switch
+# a MoTI station on: file the permission in docs/permissions/, set
+# `permission` to that file, update `licence` to the permission's terms, then
+# set enabled and publish to true.
 
 stations:
   - id: powometer
@@ -23,6 +30,7 @@ stations:
     enabled: false
     publish: false
     licence: "Access Only (BC MoTI); permission requested 2026-10"
+    permission: null
 
   - id: avcan_57
     name: Kasiks Low
@@ -32,6 +40,7 @@ stations:
     enabled: false
     publish: false
     licence: "Access Only (BC MoTI); permission requested 2026-10"
+    permission: null
 
   - id: avcan_58
     name: Shames (bottom of the hill)
@@ -41,3 +50,4 @@ stations:
     enabled: false
     publish: false
     licence: "Access Only (BC MoTI); permission requested 2026-10"
+    permission: null

@@ -334,17 +334,47 @@ def test_build_outputs_exist(built):
         assert (built / f).stat().st_size > 0
 
 
+def test_v1_1_only_adds(built):
+    """Contract v1.1 adds files and fields; nothing of v1.0 changes."""
+    import json
+    header = ",".join(build.COLUMNS) + "\n"
+    for f in ("recent.csv", "nearby_best.csv", "nearby_recent.csv"):
+        assert open(built / f, encoding="utf-8").readline() == header
+    best = set(open(built / "best.csv", encoding="utf-8"))
+    recent = list(open(built / "recent.csv", encoding="utf-8"))
+    assert len(recent) > 1 and set(recent) <= best
+    st = json.load(open(built / "status.json", encoding="utf-8"))
+    v10 = {"last_observation_utc", "last_message_utc", "last_message_momsn", "clock_offset_min",
+           "battery_v", "battery_bucket", "decode_errors"}
+    assert v10 <= set(st["stations"]["powometer"]) and {"alarms", "built_utc", "info", "schema_version"} <= set(st)
+    assert st["stations"]["powometer"]["battery_v_time_utc"] <= st["stations"]["powometer"]["last_observation_utc"]
+    assert st["nearby"] == {}                                   # nothing switched on before permission
+    assert json.load(open(built / "nearby_latest.json", encoding="utf-8"))["stations"] == {}
+
+
 def test_no_moti_data_published(built):
     stations = {r["station_id"] for r in csv.DictReader(open(built / "best.csv", encoding="utf-8"))}
     assert stations == {"powometer"}
 
 
+def sheet_rows():
+    """The sheet export (2026-09-26 to 2026-09-29), and the UTC time just
+    after its last reading: radio readings that arrive later are not in it,
+    so the comparisons stop there."""
+    sheet = list(csv.DictReader(open(FIX / "sheet_data_since_2026-09-26.csv", encoding="utf-8")))
+    last = max(datetime.strptime(r["measurement_pst"], "%Y-%m-%d %H:%M:%S") for r in sheet)
+    return sheet, (last + timedelta(hours=8, minutes=30)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def in_sheet_period(r, end):
+    return "2026-09-26T20:45" <= r["time_utc"] < end and r["source"] == "radio"
+
+
 def test_matches_sheet_since_the_move(built):
     """Radio readings since the move: same values as the sheet (which used
     the same decoder), and snow depth within 1 cm (sheet: metres, 3.82 m)."""
-    sheet = list(csv.DictReader(open(FIX / "sheet_data_since_2026-09-26.csv", encoding="utf-8")))
-    best = [r for r in csv.DictReader(open(built / "best.csv", encoding="utf-8"))
-            if r["time_utc"] >= "2026-09-26T20:45" and r["source"] == "radio"]
+    sheet, end = sheet_rows()
+    best = [r for r in csv.DictReader(open(built / "best.csv", encoding="utf-8")) if in_sheet_period(r, end)]
     by_var = {}
     for r in best:
         by_var.setdefault(r["variable"], []).append(float(r["value"]))
@@ -375,7 +405,7 @@ def test_times_match_sheet_since_the_move(built):
     whole seconds; the station's measured interval is 4 x 998 = 3,992 s.
     Reading i of a message (i = 0 at the header time) therefore differs by
     floor(4035.4 i) - 3992 i seconds: 0, 43, 86, 130, 173 ..."""
-    sheet = list(csv.DictReader(open(FIX / "sheet_data_since_2026-09-26.csv", encoding="utf-8")))
+    sheet, end = sheet_rows()
     expected = set()
     by_msg = {}
     for r in sheet:
@@ -386,8 +416,7 @@ def test_times_match_sheet_since_the_move(built):
             utc = datetime.strptime(t, "%Y-%m-%d %H:%M:%S") + timedelta(hours=8, seconds=-sheet_step)
             expected.add(utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
     ours = {r["time_utc"] for r in csv.DictReader(open(built / "best.csv", encoding="utf-8"))
-            if r["time_utc"] >= "2026-09-26T20:45" and r["source"] == "radio"
-            and r["variable"] == "air_temperature"}
+            if in_sheet_period(r, end) and r["variable"] == "air_temperature"}
     assert ours == expected
 
 

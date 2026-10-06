@@ -14,3 +14,6 @@ raw/**      -text
 *.yaml      text eol=lf
 *.md        text eol=lf
 *.sh        text eol=lf
+*.html      text eol=lf
+*.js        text eol=lf
+*.css       text eol=lf

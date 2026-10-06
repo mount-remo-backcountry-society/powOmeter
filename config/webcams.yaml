@@ -1,0 +1,32 @@
+# Shames Mountain webcams, shown on the station page under "More": the
+# newest frame (loaded from Shames Mountain's own address) and a time lapse
+# of the last `keep_hours`.
+#
+# The images belong to Shames Mountain. They are shown with its permission,
+# filed in docs/permissions/ and named in `permission`; `validate` refuses
+# `enabled: true` without it (CLAUDE.md rule 3 applies to images as well).
+#
+# Frames for the time lapse are kept in the published site only, never in
+# git (git keeps every file forever). Each hourly publish run adds the newest
+# frame of each camera, shrunk to `width` pixels, and drops frames older than
+# `keep_hours`.
+
+enabled: false
+permission: null
+owner: Shames Mountain
+credit: "Webcam images © Shames Mountain, used with permission"
+keep_hours: 72
+width: 960                # pixels, time-lapse frames only
+jpeg_quality: 70
+min_brightness: 50        # 0-255; darker frames (night) are left out of the time lapse
+# where the published site lives: if the frames saved between runs are ever
+# lost, they are taken back from here
+site_url: https://mount-remo-backcountry-society.github.io/powOmeter/
+
+cameras:
+  - id: chairlift
+    label: Chairlift
+    url: https://storage.googleapis.com/shames_webcam_images/camera1-latest-timestamp.png
+  - id: parking
+    label: Parking lot
+    url: https://storage.googleapis.com/shames_webcam_images/camera2-latest-timestamp.png
