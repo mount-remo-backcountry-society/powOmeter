@@ -1,13 +1,14 @@
 /* POW-O-METER station page.
  *
  * Reads the published files in v1/ (and webcams/) and draws the page. No
- * cookies, no tracking, no external requests except the webcam images
- * (loaded from Shames Mountain's own address, only when that section is
- * opened and switched on).
+ * cookies, no tracking. The only outside requests are the webcams' newest
+ * images, loaded from Shames Mountain's own address once the webcams are
+ * switched on.
  *
  * Safety rules (design R6):
  *  - every value shows its own age, worked out here in the browser, so a
- *    stopped pipeline still shows as old data;
+ *    stopped pipeline still shows as old data; a warning line appears when
+ *    the data are late or stale, or processing has stopped;
  *  - only values from the CURRENT site appear under "Now" (latest.json also
  *    holds SD-card-only values from older visits and the old site);
  *  - times are shown as BC time, a FIXED UTC-7 (BC dropped clock changes;
@@ -28,14 +29,18 @@
   const CHART_DAYS = 7;
   const TABLE_HOURS = 24;
   const GAP_H = 6;                         // break a chart line across a longer gap
+  const HOVER_H = 2;                       // hover: a station's reading within this of the pointer
   const REFRESH_MIN = 10;
   const CHART_QUALITIES = ["good", "estimate"];   // suspect values are left out of charts
   const STATION = "powometer";
+  const OWN_NAME = "Shames POW-O-METER";
   const REPO = "https://github.com/mount-remo-backcountry-society/powOmeter";
+  const SERIES = ["--series-1", "--series-2", "--series-3", "--series-4"];
 
   const H = 3600e3;
   const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const COMPASS = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
   const pad = (n) => String(n).padStart(2, "0");
 
   // ---- pure functions (tested in selftest.html) --------------------------
@@ -63,12 +68,12 @@
       return { dow: DAYS[d.getUTCDay()], day: d.getUTCDate(), mon: MONTHS[d.getUTCMonth()],
                year: d.getUTCFullYear(), hh: pad(d.getUTCHours()), mm: pad(d.getUTCMinutes()) };
     },
-    /** "Mon 14:05" */
-    fmtTime(ms) { const b = POW.bc(ms); return `${b.dow} ${b.hh}:${b.mm}`; },
-    /** "Mon 5 Oct, 14:05" */
-    fmtDateTime(ms) { const b = POW.bc(ms); return `${b.dow} ${b.day} ${b.mon}, ${b.hh}:${b.mm}`; },
-    /** "Mon 5 Oct" */
+    /** "Fri 2 Oct" */
     fmtDay(ms) { const b = POW.bc(ms); return `${b.dow} ${b.day} ${b.mon}`; },
+    /** "Fri 2 Oct, 14:05" */
+    fmtDateTime(ms) { const b = POW.bc(ms); return `${b.dow} ${b.day} ${b.mon}, ${b.hh}:${b.mm}`; },
+    /** "14:05" */
+    fmtClock(ms) { const b = POW.bc(ms); return `${b.hh}:${b.mm}`; },
     /** BC midnights (ms) from a to b. */
     midnights(a, b) {
       const off = BC_OFFSET_H * H;
@@ -93,10 +98,16 @@
      *  of the heather; the sensor scatters about +/-8 cm). Files keep the
      *  real value. */
     displayDepth(cm) { return Math.max(0, Math.round(cm)); },
-
     fmtTemp(c) { return (c < 0 ? "−" : "") + Math.abs(c).toFixed(1) + " °C"; },
+    /** 250 -> "WSW" */
+    compass(deg) { return COMPASS[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16]; },
+    /** "Kasiks High (1,435 m)"; parentheses in a site name become a comma */
+    stationLabel(name, elev) {
+      const n = name.replace(/\s*\((.*)\)\s*$/, ", $1");
+      return elev ? `${n} (${Number(elev).toLocaleString("en-CA")} m)` : n;
+    },
 
-    /** The current site of the station: the one with no end date. */
+    /** The current site of a station: the one with no end date. */
     currentSite(sites, station = STATION) {
       const s = (sites.sites || []).find((x) => x.station === station && !x.until_utc);
       return s ? s.id : null;
@@ -129,27 +140,43 @@
         .sort((a, b) => b.ms - a.ms);
     },
 
-    /** Chart series: {key: [{x, y}]} per site (or per station), with a null
-     *  point to break the line across gaps and at site changes. */
+    /** Chart series per station: {station: [{x, y}]}. A null point breaks the
+     *  line across gaps longer than GAP_H and where the site changes (snow
+     *  depth is never joined across sites). POW-O-METER's snow depth uses
+     *  the median of the burst. */
     series(rows, variable, fromMs, opts = {}) {
-      const key = opts.key || ((r) => r.site_id);
-      const stat = opts.statistic;
-      const out = {};
+      const out = {}, lastSite = {};
       const sorted = rows.filter((r) => r.variable === variable && r.value !== "" &&
-          CHART_QUALITIES.includes(r.quality) && (!stat || r.statistic === stat) && POW.ms(r.time_utc) >= fromMs)
+          CHART_QUALITIES.includes(r.quality) && POW.ms(r.time_utc) >= fromMs &&
+          !(r.station_id === STATION && variable === "snow_depth" && r.statistic !== "median"))
         .sort((a, b) => POW.ms(a.time_utc) - POW.ms(b.time_utc));
       for (const r of sorted) {
-        const k = key(r), x = POW.ms(r.time_utc);
+        const k = r.station_id, x = POW.ms(r.time_utc);
         let y = Number(r.value);
         if (opts.transform) y = opts.transform(y);
         const s = (out[k] = out[k] || []);
-        if (s.length && x - s[s.length - 1].x > GAP_H * H) s.push({ x: x - 1, y: null });
+        if (s.length && (x - s[s.length - 1].x > GAP_H * H || lastSite[k] !== r.site_id)) s.push({ x: x - 1, y: null });
+        lastSite[k] = r.site_id;
         s.push({ x, y });
       }
       return out;
     },
 
-    /** Plain-words label for a reading's labels, or "" when unremarkable. */
+    /** For hovering: in each series, the index of the point nearest to x
+     *  (within HOVER_H), or -1. */
+    nearestEach(seriesList, x) {
+      return seriesList.map((data) => {
+        let best = -1, bd = Infinity;
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].y === null) continue;
+          const d = Math.abs(data[i].x - x);
+          if (d < bd) { bd = d; best = i; }
+        }
+        return bd <= HOVER_H * H ? best : -1;
+      });
+    },
+
+    /** Plain-words label for a reading's labels. */
     labelText(r) {
       const parts = [];
       parts.push(r.approval === "approved" ? "Approved" : "Provisional");
@@ -181,35 +208,56 @@
     for (const k of kids) if (k !== null && k !== undefined) e.append(k);
     return e;
   };
+  const link = (href, text) => el("a", { href, text, target: "_blank", rel: "noopener" });
   const getJSON = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(u); return r.json(); });
   const getText = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(u); return r.text(); });
   const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const store = {          // remembers the ticked stations in this browser only
+    get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode */ } },
+  };
 
-  const state = { latest: null, status: null, sites: null, recent: null, site: null, charts: {}, loaded: {} };
+  const state = { latest: null, status: null, sites: null, recent: [], site: null,
+                  near: { stations: {} }, nearRows: [], webcams: null, stations: [], hidden: new Set(),
+                  charts: {} };
 
-  // -- freshness banner --
+  // -- stations: POW-O-METER plus the published nearby stations ------------
+  function stationList() {
+    const sites = state.sites.sites || [], stations = state.sites.stations || [];
+    const siteOf = (sid) => sites.find((s) => s.station === sid && !s.until_utc) || {};
+    const ids = [STATION, ...Object.keys(state.near.stations || {}).sort()];
+    return ids.map((sid, i) => {
+      const site = siteOf(sid), st = stations.find((s) => s.id === sid) || {};
+      const name = sid === STATION ? OWN_NAME : site.name || st.name || sid;
+      return { id: sid, label: POW.stationLabel(name, site.elevation_m), elev: site.elevation_m,
+               color: css(SERIES[i % SERIES.length]), operator: st.operator, licence: st.licence };
+    }).sort((a, b) => (b.elev || 0) - (a.elev || 0));
+  }
+
+  // -- warning line (only when something is wrong) --
   function renderBanner(now) {
     const b = $("banner");
     const st = state.status.stations[STATION];
     const lastObs = st.last_observation_utc;
     const built = POW.ageHours(state.status.built_utc, now);
+    const age = lastObs ? POW.ageHours(lastObs, now) : Infinity;
+    const f = POW.freshness(age);
     b.replaceChildren();
+    b.hidden = false;
     if (built > BUILD_STALE_H) {
       b.className = "banner stale";
       b.append(el("strong", { text: "The data processing has stopped. " }),
         `These files were built ${POW.ageText(built)}, so everything below may be older than it looks.`);
-      return;
-    }
-    const age = lastObs ? POW.ageHours(lastObs, now) : Infinity;
-    const f = POW.freshness(age);
-    b.className = "banner " + f;
-    if (f === "stale") {
+    } else if (f === "stale") {
+      b.className = "banner stale";
       b.append(el("strong", { text: "No recent data: don’t rely on these values. " }),
         lastObs ? `The latest reading is from ${POW.fmtDateTime(POW.ms(lastObs))} (${POW.ageText(age)}).` : "");
+    } else if (f === "late") {
+      b.className = "banner late";
+      b.append(el("strong", { text: "Later than usual. " }),
+        `The latest reading is ${POW.ageText(age)} old; the station sends 7 times a day, so this may only be a delay.`);
     } else {
-      b.append(`Latest reading ${POW.ageText(age)} (${POW.fmtTime(POW.ms(lastObs))}). `,
-        f === "late" ? el("strong", { text: "Later than usual." }) : "",
-        f === "late" ? " The station sends 7 times a day; this may only be a delay." : "");
+      b.hidden = true;
     }
   }
 
@@ -224,51 +272,96 @@
       return;
     }
     t.append(el("div", { class: "tile-value", text: fmt(v.value) }),
-      el("div", { class: "tile-age", text: `${POW.ageText(v.age)} · ${POW.fmtTime(v.ms)}` +
+      el("div", { class: "tile-age", text: `${POW.ageText(v.age)} · ${POW.fmtDateTime(v.ms)}` +
         (v.state === "stale" ? " · not current" : v.state === "late" ? " · older than usual" : "") }));
+  }
+  function renderTiles(now) {
+    tile("now-depth", "Snow depth", POW.nowValue(state.latest, "snow_depth", state.site, now), (v) => `${POW.displayDepth(v)} cm`);
+    tile("now-temp", "Air temperature", POW.nowValue(state.latest, "air_temperature", state.site, now), POW.fmtTemp);
+    tile("now-rh", "Humidity", POW.nowValue(state.latest, "relative_humidity", state.site, now), (v) => `${Math.round(v)}%`);
+  }
+
+  // -- station tick-boxes (one row above the charts, for all charts) --
+  function renderPicker() {
+    const box = $("station-picker");
+    box.replaceChildren();
+    box.hidden = state.stations.length < 2;
+    for (const s of state.stations) {
+      const cb = el("input", { type: "checkbox", value: s.id });
+      cb.checked = !state.hidden.has(s.id);
+      cb.addEventListener("change", () => {
+        if (cb.checked) state.hidden.delete(s.id); else state.hidden.add(s.id);
+        store.set("powometer.hidden", [...state.hidden]);
+        renderCharts(Date.now());
+      });
+      const key = el("span", { class: "key line" }); key.style.background = s.color;
+      box.append(el("label", { class: "pick" }, cb, key, s.label));
+    }
   }
 
   // -- charts --
-  function baseOptions(min, max, yFmt, extra = {}) {
-    const muted = css("--text-muted"), grid = css("--grid");
-    return {
-      animation: false, parsing: false, normalized: true, maintainAspectRatio: false,
-      interaction: { mode: "nearest", axis: "x", intersect: false },
-      scales: {
-        x: { type: "linear", min, max,
-             afterBuildTicks: (ax) => { ax.ticks = POW.midnights(min, max).map((value) => ({ value })); },
-             ticks: { color: muted, maxRotation: 0, autoSkip: false,
-                      // every day if there is room, else every other day
-                      callback(v, i, ticks) {
-                        const step = this.chart.width / Math.max(1, ticks.length) < 52 ? 2 : 1;
-                        if ((ticks.length - 1 - i) % step) return "";
-                        const b = POW.bc(v); return `${b.dow} ${b.day}`;
-                      } },
-             grid: { color: grid }, border: { color: css("--axis") } },
-        y: { ticks: { color: muted, callback: yFmt, maxTicksLimit: 5 }, grid: { color: grid },
-             border: { display: false }, ...(extra.y || {}) },
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: { backgroundColor: css("--surface-2"), titleColor: css("--text-secondary"),
-                   bodyColor: css("--text-primary"), borderColor: css("--border"), borderWidth: 1,
-                   displayColors: !!extra.colors, usePointStyle: true,
-                   callbacks: { title: (items) => items.length ? POW.fmtDateTime(items[0].parsed.x) + " BC" : "",
-                                label: extra.label } },
-      },
-      elements: { point: { radius: 0, hoverRadius: 4, hitRadius: 12 },
-                  line: { borderWidth: 2, tension: 0, borderJoinStyle: "round", borderCapStyle: "round" } },
-      spanGaps: false,
-    };
-  }
+  const CHARTS = [
+    { id: "chart-depth", variable: "snow_depth", fmt: (v) => `${v} cm`, axis: (v) => `${v}`,
+      transform: POW.displayDepth, y: { min: 0, suggestedMax: 50 } },
+    { id: "chart-temp", variable: "air_temperature", fmt: POW.fmtTemp, axis: (v) => `${v}°`, freezing: true },
+    { id: "chart-wind", variable: "wind_speed", fmt: (v) => `${Math.round(v)} km/h`, axis: (v) => `${v}`,
+      y: { min: 0, suggestedMax: 20 }, direction: true },
+    { id: "chart-rh", variable: "relative_humidity", fmt: (v) => `${Math.round(v)}%`, axis: (v) => `${v}%`,
+      y: { min: 0, max: 100 } },
+  ];
 
+  // Hover: every chart shows, for each station, the reading nearest the
+  // pointer's time, and all charts follow the same time.
+  Chart.Interaction.modes.nearestEach = (chart, e) => {
+    const x = chart.scales.x.getValueForPixel(e.x);
+    return POW.nearestEach(chart.data.datasets.map((d, i) => chart.isDatasetVisible(i) ? d.data : []), x)
+      .map((index, datasetIndex) => index < 0 ? null : { datasetIndex, index,
+        element: chart.getDatasetMeta(datasetIndex).data[index] })
+      .filter(Boolean);
+  };
+  let syncing = false;
+  function showAt(chart, x) {
+    if (x === null) {
+      chart.$hoverX = null;
+      chart.setActiveElements([]); chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+    } else {
+      chart.$hoverX = x;
+      const active = POW.nearestEach(chart.data.datasets.map((d, i) => chart.isDatasetVisible(i) ? d.data : []), x)
+        .map((index, datasetIndex) => ({ datasetIndex, index })).filter((a) => a.index >= 0);
+      const px = chart.scales.x.getPixelForValue(x);
+      chart.setActiveElements(active);
+      chart.tooltip.setActiveElements(active, { x: px, y: chart.chartArea.top });
+    }
+    chart.update("none");
+  }
+  const sync = {
+    id: "sync",
+    beforeEvent(chart, args) {                    // the pointer's time, before this chart's tooltip is built
+      const e = args.event;
+      if (e.type === "mouseout" || !args.inChartArea) chart.$hoverX = null;
+      else chart.$hoverX = chart.scales.x.getValueForPixel(e.x);
+    },
+    afterEvent(chart, args) {
+      if (syncing) return;
+      const e = args.event;
+      const out = e.type === "mouseout" || !args.inChartArea;
+      if (!out && !["mousemove", "touchstart", "touchmove", "click"].includes(e.type)) return;
+      const x = out ? null : chart.scales.x.getValueForPixel(e.x);
+      chart.$hoverX = x;
+      args.changed = true;                        // redraw this chart's crosshair too
+      syncing = true;
+      for (const c of Object.values(state.charts)) if (c !== chart) showAt(c, x);
+      syncing = false;
+    },
+  };
   // a vertical hairline at the hovered time, and a hairline at 0 degC
   const crosshair = {
     id: "crosshair",
     afterDraw(chart) {
-      const a = chart.tooltip && chart.tooltip.getActiveElements();
-      if (!a || !a.length) return;
-      const x = a[0].element.x, { top, bottom } = chart.chartArea, c = chart.ctx;
+      if (chart.$hoverX === null || chart.$hoverX === undefined) return;
+      const x = chart.scales.x.getPixelForValue(chart.$hoverX), { top, bottom, left, right } = chart.chartArea;
+      if (x < left || x > right) return;
+      const c = chart.ctx;
       c.save(); c.strokeStyle = css("--axis"); c.lineWidth = 1;
       c.beginPath(); c.moveTo(x, top); c.lineTo(x, bottom); c.stroke(); c.restore();
     },
@@ -285,27 +378,72 @@
     },
   };
 
-  function lineChart(canvasId, seriesByKey, color, min, max, yFmt, label, extra = {}) {
-    if (state.charts[canvasId]) state.charts[canvasId].destroy();
-    const datasets = Object.entries(seriesByKey).map(([k, data]) => ({
-      label: extra.names ? extra.names[k] || k : k, data,
-      borderColor: extra.colorOf ? extra.colorOf(k) : color, backgroundColor: extra.colorOf ? extra.colorOf(k) : color,
-    }));
-    const opts = baseOptions(min, max, yFmt, { label, y: extra.y, colors: !!extra.colorOf });
-    opts.plugins.freezing = { on: !!extra.freezing };
-    state.charts[canvasId] = new Chart($(canvasId), { type: "line", data: { datasets }, options: opts,
-                                                      plugins: [crosshair, freezing] });
+  function chartOptions(def, min, max, labelOf) {
+    const muted = css("--text-muted"), grid = css("--grid");
+    return {
+      animation: false, parsing: false, normalized: true, maintainAspectRatio: false,
+      interaction: { mode: "nearestEach", intersect: false },
+      events: ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
+      scales: {
+        x: { type: "linear", min, max,
+             afterBuildTicks: (ax) => { ax.ticks = POW.midnights(min, max).map((value) => ({ value })); },
+             ticks: { color: muted, maxRotation: 0, autoSkip: false,
+                      // every day if there is room, else every other day (newest kept)
+                      callback(v, i, ticks) {
+                        const step = this.chart.width / Math.max(1, ticks.length) < 70 ? 2 : 1;
+                        return (ticks.length - 1 - i) % step ? "" : POW.fmtDay(v);
+                      } },
+             grid: { color: grid }, border: { color: css("--axis") } },
+        y: { ticks: { color: muted, callback: def.axis, maxTicksLimit: 5 }, grid: { color: grid },
+             border: { display: false }, ...(def.y || {}) },
+      },
+      plugins: {
+        legend: { display: false },
+        freezing: { on: !!def.freezing },
+        tooltip: { backgroundColor: css("--surface-2"), titleColor: css("--text-secondary"),
+                   bodyColor: css("--text-primary"), borderColor: css("--border"), borderWidth: 1,
+                   usePointStyle: true, boxWidth: 8, boxHeight: 2,
+                   itemSort: (a, b) => (b.raw.y ?? 0) - (a.raw.y ?? 0),
+                   callbacks: {
+                     title: (items) => items.length ? POW.fmtDateTime(items[0].chart.$hoverX ?? items[0].parsed.x) + " BC" : "",
+                     label: labelOf,
+                     labelPointStyle: () => ({ pointStyle: "line", rotation: 0 }),
+                   } },
+      },
+      elements: { point: { radius: 0, hoverRadius: 4, hitRadius: 12 },
+                  line: { borderWidth: 2, tension: 0, borderJoinStyle: "round", borderCapStyle: "round" } },
+      spanGaps: false,
+    };
   }
 
   function renderCharts(now) {
     const from = now - CHART_DAYS * 24 * H;
-    const rows = state.recent;
-    const depth = POW.series(rows, "snow_depth", from, { statistic: "median", transform: POW.displayDepth });
-    const temp = POW.series(rows, "air_temperature", from);
-    lineChart("chart-depth", depth, css("--series-snow"), from, now, (v) => `${v} cm`,
-      (i) => `${i.parsed.y} cm snow depth`, { y: { min: 0, suggestedMax: 50 } });
-    lineChart("chart-temp", temp, css("--series-temp"), from, now, (v) => `${v}°`,
-      (i) => POW.fmtTemp(i.parsed.y), { freezing: true });
+    const rows = state.recent.concat(state.nearRows);
+    const dirs = new Map();                     // wind direction at a station and time, for the tooltip
+    for (const r of state.nearRows) {
+      if (r.variable === "wind_from_direction" && r.value !== "") dirs.set(`${r.station_id}|${POW.ms(r.time_utc)}`, Number(r.value));
+    }
+    for (const def of CHARTS) {
+      const series = POW.series(rows, def.variable, from, { transform: def.transform });
+      const shown = state.stations.filter((s) => series[s.id] && series[s.id].some((p) => p.y !== null));
+      const wrap = $(def.id).parentElement, note = $(def.id + "-none");
+      if (state.charts[def.id]) { state.charts[def.id].destroy(); delete state.charts[def.id]; }
+      wrap.hidden = !shown.length;
+      if (note) note.hidden = !!shown.length;
+      if (!shown.length) continue;
+      const datasets = shown.map((s) => ({ label: s.label, station: s.id, data: series[s.id],
+        borderColor: s.color, backgroundColor: s.color, hidden: state.hidden.has(s.id) }));
+      const labelOf = (item) => {
+        const ds = item.dataset, p = item.raw;
+        let t = `${def.fmt(p.y)}  ${ds.label}`;
+        if (def.direction) { const d = dirs.get(`${ds.station}|${p.x}`); if (d !== undefined) t = `${def.fmt(p.y)} from ${POW.compass(d)}  ${ds.label}`; }
+        const hx = item.chart.$hoverX;
+        if (hx !== null && hx !== undefined && Math.abs(p.x - hx) > 20 * 60e3) t += ` (at ${POW.fmtClock(p.x)})`;
+        return t;
+      };
+      state.charts[def.id] = new Chart($(def.id), { type: "line", data: { datasets },
+        options: chartOptions(def, from, now, labelOf), plugins: [crosshair, freezing, sync] });
+    }
   }
 
   function renderTable(now) {
@@ -313,33 +451,73 @@
     body.replaceChildren();
     const rows = POW.readings(state.recent, state.site, now - TABLE_HOURS * H, now);
     if (!rows.length) {
-      body.append(el("tr", {}, el("td", { colspan: "3", class: "muted", text: "No readings in the last 24 hours." })));
+      body.append(el("tr", {}, el("td", { colspan: "4", class: "muted", text: "No readings in the last 24 hours." })));
       return;
     }
+    const val = (v, f) => (v === undefined ? "–" : f(v));
     for (const r of rows) {
       body.append(el("tr", {},
-        el("td", { text: POW.fmtTime(r.ms) }),
-        el("td", { class: "num", text: r.snow_depth === undefined ? "–" : `${POW.displayDepth(r.snow_depth)} cm` }),
-        el("td", { class: "num", text: r.air_temperature === undefined ? "–" : POW.fmtTemp(r.air_temperature) })));
+        el("td", { class: "nowrap", text: POW.fmtDateTime(r.ms) }),
+        el("td", { class: "num", text: val(r.snow_depth, (v) => `${POW.displayDepth(v)} cm`) }),
+        el("td", { class: "num", text: val(r.air_temperature, POW.fmtTemp) }),
+        el("td", { class: "num", text: val(r.relative_humidity, (v) => `${Math.round(v)}%`) })));
     }
   }
 
-  // ---- "More" sections, loaded when opened ----------------------------------
-  const sections = {
-    humidity(now) {
-      const from = now - CHART_DAYS * 24 * H;
-      lineChart("chart-rh", POW.series(state.recent, "relative_humidity", from), css("--series-rh"),
-        from, now, (v) => `${v}%`, (i) => `${i.parsed.y}% humidity`, { y: { min: 0, max: 100 } });
-    },
+  // -- webcams: newest image, and a slider back through the last few days --
+  function renderWebcams() {
+    const box = $("webcam-body");
+    const idx = state.webcams;
+    $("webcams").hidden = false;
+    if (!idx || !idx.enabled) {
+      box.replaceChildren(el("p", { class: "muted", text: "Webcam images are not available here yet." }));
+      return;
+    }
+    box.replaceChildren();
+    for (const cam of idx.cameras) box.append(camera(cam, idx.keep_hours));
+    box.append(el("p", { class: "small muted", text: idx.credit }));
+  }
 
+  function camera(cam, keepHours) {
+    // the frames of the time lapse, then the newest image from Shames itself
+    const frames = cam.frames.map((f) => ({ src: "webcams/" + f.file, ms: POW.ms(f.time_utc) }))
+      .concat([{ src: cam.live_url, ms: null }]);
+    const img = el("img", { class: "cam", alt: `${cam.label} webcam`, loading: "lazy", src: cam.live_url });
+    const cap = el("figcaption", {});
+    const slider = el("input", { type: "range", min: "0", max: String(frames.length - 1),
+                                 value: String(frames.length - 1), "aria-label": `${cam.label}: go back in time` });
+    const play = el("button", { type: "button", text: "▶ Last " + Math.round(keepHours / 24) + " days" });
+    let i = frames.length - 1, timer = null;
+    const show = () => {
+      img.src = frames[i].src;
+      cap.textContent = frames[i].ms === null ? `${cam.label}: newest image (its time is printed on it)`
+        : `${cam.label}: ${POW.fmtDateTime(frames[i].ms)} BC · ${i + 1} of ${frames.length - 1}`;
+      slider.value = String(i);
+    };
+    const stop = () => { clearInterval(timer); timer = null; play.textContent = "▶ Last " + Math.round(keepHours / 24) + " days"; };
+    slider.addEventListener("input", () => { if (timer) stop(); i = Number(slider.value); show(); });
+    play.addEventListener("click", () => {
+      if (timer) { stop(); return; }
+      frames.forEach((f) => { const p = new Image(); p.src = f.src; });     // preload
+      i = 0; show();
+      play.textContent = "❚❚ Pause";
+      timer = setInterval(() => { if (++i >= frames.length) { i = frames.length - 1; show(); stop(); } else show(); }, 400);
+    });
+    show();
+    const controls = frames.length > 1 ? el("div", { class: "controls" }, play, slider)
+      : el("p", { class: "small muted", text: "No time lapse yet: no daylight images in the last few days." });
+    return el("div", { class: "camera" }, el("h3", { text: cam.label }), el("figure", {}, img, cap), controls);
+  }
+
+  // ---- "More" sections, filled when opened ----------------------------------
+  const sections = {
     details(now) {
       const body = $("table-details");
       body.replaceChildren();
       for (const r of POW.readings(state.recent, state.site, now - TABLE_HOURS * H, now)) {
-        const lab = r.rows.find((x) => x.variable === "snow_depth" && x.statistic === "median") || r.rows[0];
         const val = (v, f) => (v === undefined ? "–" : f(v));
         body.append(el("tr", {},
-          el("td", { class: "nowrap", text: POW.fmtTime(r.ms) }),
+          el("td", { class: "nowrap", text: POW.fmtDateTime(r.ms) }),
           el("td", { class: "num", text: val(r.snow_depth, (v) => `${v} cm`) }),
           el("td", { class: "num", text: val(r.air_temperature, POW.fmtTemp) }),
           el("td", { class: "num", text: val(r.relative_humidity, (v) => `${v}%`) })));
@@ -350,7 +528,6 @@
             text: [...new Set(extra)].join("; ") })));
         }
       }
-      // values from the SD card only (older, possibly from another site)
       const sd = $("sd-values");
       sd.replaceChildren();
       const names = { air_pressure: "Air pressure", battery_voltage: "Battery", enclosure_temperature: "Inside the logger box" };
@@ -363,73 +540,21 @@
       }
     },
 
-    async nearby(now) {
-      const box = $("nearby-body");
-      const [lat, text] = await Promise.all([getJSON("v1/nearby_latest.json"), getText("v1/nearby_recent.csv")]);
-      const ids = Object.keys(lat.stations || {});
-      box.hidden = !ids.length;
+    nearby(now) {
+      const ids = Object.keys(state.near.stations || {});
+      $("nearby-body").hidden = !ids.length;
       $("nearby-empty").hidden = !!ids.length;
       if (!ids.length) return;
-      const sites = state.sites.sites || [], stations = state.sites.stations || [];
-      const siteOf = (sid) => sites.find((s) => s.station === sid && !s.until_utc) || {};
-      const stationOf = (sid) => stations.find((s) => s.id === sid) || {};
-      const ownElev = (sites.find((s) => s.id === state.site) || {}).elevation_m;
-      const elevOf = (sid) => sid === STATION ? ownElev : siteOf(sid).elevation_m;
-      // colour follows the station (fixed order); the list is sorted by elevation
-      const fixed = [STATION, ...ids.slice().sort()];
-      const order = fixed.slice().sort((a, b) => (elevOf(b) || 0) - (elevOf(a) || 0));
-      const name = (sid) => sid === STATION ? "POW-O-METER" : siteOf(sid).name || sid;
-      const colors = ["--series-1", "--series-2", "--series-3", "--series-4"];
-      const colorOf = (sid) => css(colors[fixed.indexOf(sid) % colors.length]);
-      // latest table
       const tb = $("nearby-table");
       tb.replaceChildren();
-      for (const sid of order) {
-        const t = sid === STATION ? POW.nowValue(state.latest, "air_temperature", state.site, now)
-          : (() => { const v = lat.stations[sid].values.air_temperature; if (!v) return null;
-                     const age = POW.ageHours(v.time_utc, now); return { value: v.value, ms: POW.ms(v.time_utc), age, quality: v.quality }; })();
-        const sw = el("span", { class: "key" }); sw.style.background = colorOf(sid);
+      for (const s of state.stations) {
+        const v = s.id === STATION ? state.latest.values.air_temperature : (state.near.stations[s.id].values || {}).air_temperature;
+        const key = el("span", { class: "key line" }); key.style.background = s.color;
         tb.append(el("tr", {},
-          el("td", {}, sw, name(sid), el("div", { class: "small muted", text: elevOf(sid) ? `${elevOf(sid)} m` : "" })),
-          el("td", { class: "num" }, t ? POW.fmtTemp(t.value) + (t.quality && t.quality !== "good" ? ` (${t.quality})` : "") : "–",
-             el("div", { class: "small muted", text: t ? POW.ageText(t.age) : "" }))));
+          el("td", {}, key, s.label),
+          el("td", { class: "num" }, v ? POW.fmtTemp(v.value) + (v.quality && v.quality !== "good" ? ` (${v.quality})` : "") : "–",
+             el("div", { class: "small muted", text: v ? POW.ageText(POW.ageHours(v.time_utc, now)) : "" }))));
       }
-      // temperature chart, all stations
-      const from = now - CHART_DAYS * 24 * H;
-      const near = POW.series(POW.parseCSV(text), "air_temperature", from, { key: (r) => r.station_id });
-      const own = POW.series(state.recent, "air_temperature", from, { key: () => STATION });
-      const all = {};
-      for (const sid of order) if ((sid === STATION ? own : near)[sid]) all[sid] = (sid === STATION ? own : near)[sid];
-      lineChart("chart-nearby", all, null, from, now, (v) => `${v}°`,
-        (i) => `${POW.fmtTemp(i.parsed.y)}  ${i.dataset.label}`,
-        { freezing: true, colorOf, names: Object.fromEntries(order.map((s) => [s, name(s)])) });
-      const leg = $("nearby-legend");
-      leg.replaceChildren(...order.filter((s) => all[s]).map((sid) => {
-        const k = el("span", { class: "key line" }); k.style.background = colorOf(sid);
-        return el("span", { class: "legend-item" }, k, name(sid));
-      }));
-      const lic = $("nearby-licence");
-      lic.replaceChildren(...ids.map((sid) => el("li", { text: `${name(sid)}: ${stationOf(sid).operator || ""}. ${stationOf(sid).licence || ""}` })));
-    },
-
-    async webcams(now) {
-      const box = $("webcam-body");
-      let idx;
-      try { idx = await getJSON("webcams/index.json"); } catch (e) { idx = null; }
-      if (!idx || !idx.enabled) {
-        box.replaceChildren(el("p", { class: "muted", text: "Webcam images are not available here yet." }));
-        return;
-      }
-      box.replaceChildren();
-      for (const cam of idx.cameras) {
-        const live = el("img", { src: cam.live_url, alt: `${cam.label} webcam, newest image (time printed on it)`,
-                                 loading: "lazy", class: "cam" });
-        const fig = el("figure", {}, live, el("figcaption", { text: `${cam.label}: newest image (its time is printed on it)` }));
-        box.append(el("h3", { text: cam.label }), fig);
-        if (cam.frames.length > 1) box.append(timelapse(cam, idx.keep_hours));
-        else box.append(el("p", { class: "muted small", text: "No time lapse: no daylight images in the last few days." }));
-      }
-      box.append(el("p", { class: "small muted", text: idx.credit }));
     },
 
     health(now) {
@@ -445,54 +570,10 @@
       const sd = (state.status.info.sd_downloads || []).slice(-1)[0];
       add("Last SD card download", sd ? sd.download : "none");
       const alarms = state.status.alarms || [];
-      add("Alarms", alarms.length ? el("ul", {}, ...alarms.map((a) => el("li", { text: a.message })))
-        : "none");
-      const issues = el("a", { href: `${REPO}/issues`, text: "Open alarm Issues on GitHub" });
-      dl.append(el("dt", { text: "" }), el("dd", {}, issues));
+      add("Alarms", alarms.length ? el("ul", {}, ...alarms.map((a) => el("li", { text: a.message }))) : "none");
+      dl.append(el("dt", { text: "" }), el("dd", {}, link(`${REPO}/issues`, "Open alarm Issues on GitHub")));
     },
   };
-
-  function timelapse(cam, keepHours) {
-    const frames = cam.frames;
-    const img = el("img", { class: "cam", alt: `${cam.label} time lapse frame` });
-    const cap = el("figcaption", {});
-    const slider = el("input", { type: "range", min: "0", max: String(frames.length - 1), value: String(frames.length - 1),
-                                 "aria-label": `${cam.label} time lapse position` });
-    const play = el("button", { type: "button", text: "Play" });
-    let i = frames.length - 1, timer = null;
-    const show = () => {
-      img.src = "webcams/" + frames[i].file;
-      cap.textContent = `${POW.fmtDateTime(POW.ms(frames[i].time_utc))} BC · frame ${i + 1} of ${frames.length}`;
-      slider.value = String(i);
-    };
-    slider.addEventListener("input", () => { i = Number(slider.value); show(); });
-    play.addEventListener("click", () => {
-      if (timer) { clearInterval(timer); timer = null; play.textContent = "Play"; return; }
-      frames.forEach((f) => { const p = new Image(); p.src = "webcams/" + f.file; });   // preload
-      if (i === frames.length - 1) i = 0;
-      play.textContent = "Pause";
-      timer = setInterval(() => { show(); if (++i >= frames.length) { i = frames.length - 1; clearInterval(timer); timer = null; play.textContent = "Play"; } }, 400);
-    });
-    const wrap = el("div", { class: "timelapse" },
-      el("p", { class: "small", text: `Time lapse, last ${Math.round(keepHours / 24)} days (daylight images, about one an hour)` }),
-      el("figure", {}, img, cap), el("div", { class: "controls" }, play, slider));
-    // load the newest frame only once the time lapse scrolls into view
-    new IntersectionObserver((es, o) => { if (es.some((e) => e.isIntersecting)) { show(); o.disconnect(); } }).observe(wrap);
-    return wrap;
-  }
-
-  // ---- main ------------------------------------------------------------------
-  function renderAll() {
-    const now = Date.now();
-    renderBanner(now);
-    tile("now-depth", "Snow depth", POW.nowValue(state.latest, "snow_depth", state.site, now), (v) => `${POW.displayDepth(v)} cm`);
-    tile("now-temp", "Air temperature", POW.nowValue(state.latest, "air_temperature", state.site, now), POW.fmtTemp);
-    renderCharts(now);
-    renderTable(now);
-    for (const d of document.querySelectorAll("details[data-section]")) {
-      if (d.open) runSection(d.dataset.section);
-    }
-  }
 
   function runSection(name) {
     const box = document.querySelector(`details[data-section="${name}"] .section-body`);
@@ -503,33 +584,62 @@
     });
   }
 
+  // ---- main ------------------------------------------------------------------
+  function renderAll() {
+    const now = Date.now();
+    state.stations = stationList();
+    renderBanner(now);
+    renderTiles(now);
+    renderPicker();
+    renderCharts(now);
+    renderTable(now);
+    renderCredits();
+    for (const d of document.querySelectorAll("details[data-section]")) if (d.open) runSection(d.dataset.section);
+  }
+
+  function renderCredits() {
+    const ul = $("nearby-credit");
+    ul.replaceChildren(...state.stations.filter((s) => s.id !== STATION)
+      .map((s) => el("li", { text: `${s.label}: ${s.operator || ""}. ${s.licence || ""}` })));
+    ul.hidden = !ul.children.length;
+  }
+
   async function load() {
-    const [latest, status, sites, recent] = await Promise.all([
-      getJSON("v1/latest.json"), getJSON("v1/status.json"), getJSON("v1/sites.json"), getText("v1/recent.csv")]);
-    Object.assign(state, { latest, status, sites, recent: POW.parseCSV(recent), site: POW.currentSite(sites) });
+    const opt = (p) => p.catch(() => null);           // optional files: the page works without them
+    const [latest, status, sites, recent, near, nearRows, webcams] = await Promise.all([
+      getJSON("v1/latest.json"), getJSON("v1/status.json"), getJSON("v1/sites.json"), getText("v1/recent.csv"),
+      opt(getJSON("v1/nearby_latest.json")), opt(getText("v1/nearby_recent.csv")), opt(getJSON("webcams/index.json"))]);
+    const firstLoad = !state.status;
+    Object.assign(state, { latest, status, sites, recent: POW.parseCSV(recent), site: POW.currentSite(sites),
+                           near: near || { stations: {} }, nearRows: nearRows ? POW.parseCSV(nearRows) : [] });
+    if (firstLoad || JSON.stringify(webcams) !== JSON.stringify(state.webcams)) {
+      state.webcams = webcams;
+      renderWebcams();
+    }
   }
 
   function start() {
     for (const e of document.querySelectorAll(".bc-label")) e.textContent = BC_LABEL;
+    state.hidden = new Set(store.get("powometer.hidden") || []);
     for (const d of document.querySelectorAll("details[data-section]")) {
       d.addEventListener("toggle", () => { if (d.open && state.status) runSection(d.dataset.section); });
     }
+    // a link like .../#health opens that section
+    const openHash = () => {
+      const t = document.getElementById(location.hash.slice(1));
+      if (t && t.tagName === "DETAILS") t.open = true;
+      if (t) t.scrollIntoView();
+    };
+    window.addEventListener("hashchange", openHash);
     const refresh = () => load().then(renderAll).catch(() => {
       const b = $("banner");
+      b.hidden = false;
       b.className = "banner stale";
       b.textContent = "Could not load the data. Check your connection; the values shown (if any) may be old.";
     });
-    // a link like .../#webcams opens that section
-    const openHash = () => {
-      const d = document.querySelector(`details[data-section="${location.hash.slice(1)}"]`);
-      if (d) { d.open = true; d.scrollIntoView(); }
-    };
-    window.addEventListener("hashchange", openHash);
     refresh().then(openHash);
     setInterval(refresh, REFRESH_MIN * 60e3);
-    setInterval(() => { if (state.status) { const n = Date.now(); renderBanner(n);
-      tile("now-depth", "Snow depth", POW.nowValue(state.latest, "snow_depth", state.site, n), (v) => `${POW.displayDepth(v)} cm`);
-      tile("now-temp", "Air temperature", POW.nowValue(state.latest, "air_temperature", state.site, n), POW.fmtTemp); } }, 60e3);
+    setInterval(() => { if (state.status) { const n = Date.now(); renderBanner(n); renderTiles(n); } }, 60e3);
     matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (state.status) renderAll(); });
   }
   start();

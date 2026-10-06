@@ -97,6 +97,15 @@ def nearby(scenario, now):
                 temp, q, ql = -35 - (k % 7) * 2, "suspect", "neighbour"
             rows.append(row(t, "air_temperature", round(temp, 1), "degC", site=site, station=sid,
                             statistic="mean", source="avcan", quality=q, qualifiers=ql))
+            if sid in ("avcan_56", "avcan_58"):                     # these two have wind sensors
+                wind = max(0.0, (25 if sid == "avcan_56" else 8) + 12 * math.sin(k / 9))
+                rows.append(row(t, "wind_speed", round(wind, 1), "km/h", site=site, station=sid,
+                                statistic="mean", source="avcan"))
+                rows.append(row(t, "wind_from_direction", (200 + 7 * k) % 360, "degree", site=site, station=sid,
+                                statistic="mean", source="avcan"))
+            if sid == "avcan_56":                                     # and Kasiks High a snow sensor
+                rows.append(row(t, "snow_depth", round(160 - k * 0.3), "cm", site=site, station=sid,
+                                source="avcan"))
         r0 = rows[-8 * 24]
         latest[sid] = {"values": {"air_temperature": {
             "time_utc": r0["time_utc"], "value": float(r0["value"]), "unit": "degC", "statistic": "mean",
@@ -193,7 +202,7 @@ def main(argv):
         return 2
     port = int(argv[2]) if len(argv) > 2 else 8000
     dest = make(argv[1], Path(tempfile.mkdtemp(prefix=f"powometer-{argv[1]}-")))
-    print(f"Scenario '{argv[1]}' at http://localhost:{port}/  (files in {dest}; Ctrl+C to stop)")
+    print(f"Scenario '{argv[1]}' at http://localhost:{port}/  (files in {dest}; Ctrl+C to stop)", flush=True)
     handler = partial(http.server.SimpleHTTPRequestHandler, directory=str(dest))
     http.server.ThreadingHTTPServer(("127.0.0.1", port), handler).serve_forever()
 

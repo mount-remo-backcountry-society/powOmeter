@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>POW-O-METER snow station</title>
-<meta name="description" content="Snow depth and temperature at the top of Shames Mountain, BC. Mount Remo Backcountry Society.">
+<meta name="description" content="Snow depth, temperature and webcams at the top of Shames Mountain, BC. Mount Remo Backcountry Society.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <nav class="linkbar" aria-label="Related sites">
   <div class="linkbar-inner">
     <a href="./" aria-current="page">Station data</a>
-    <a href="https://j-krick.github.io/powWX/">Forecast (powWX)</a>
-    <a href="https://avalanche.ca/map?lat=54.504308&amp;lng=-128.966096">Avalanche forecast (avalanche.ca)</a>
+    <a href="https://j-krick.github.io/powWX/" target="_blank" rel="noopener">Forecast (powWX)</a>
+    <a href="https://avalanche.ca/map?lat=54.504308&amp;lng=-128.966096" target="_blank" rel="noopener">Avalanche forecast (avalanche.ca)</a>
   </div>
 </nav>
 
@@ -20,7 +20,7 @@
   <h1>POW-O-METER</h1>
   <p class="subtitle">Snow station at the top of Shames Mountain, BC (1,150 m)</p>
 
-  <div id="banner" class="banner" role="status" aria-live="polite">Loading the latest readings…</div>
+  <div id="banner" class="banner" role="status" aria-live="polite" hidden></div>
   <noscript><p class="banner stale">This page needs JavaScript to show the readings. The data files are listed under
     <a href="v1/SCHEMA.md">v1/</a>.</p></noscript>
 
@@ -28,22 +28,42 @@
     <div class="tiles">
       <div id="now-depth" class="tile"></div>
       <div id="now-temp" class="tile"></div>
+      <div id="now-rh" class="tile"></div>
     </div>
   </section>
 
   <section>
     <h2>Last 7 days</h2>
+    <div id="station-picker" class="picker" role="group" aria-label="Stations shown in the charts" hidden></div>
+
     <p class="chart-title">Snow depth (cm)</p>
-    <div class="chart tall"><canvas id="chart-depth" aria-label="Snow depth over the last 7 days; the values are in the table below and in the downloads" role="img"></canvas></div>
+    <div class="chart tall"><canvas id="chart-depth" role="img"
+      aria-label="Snow depth over the last 7 days; the values are in the table below and in the downloads"></canvas></div>
+    <p id="chart-depth-none" class="small muted" hidden>No snow-depth readings in the last 7 days.</p>
+
     <p class="chart-title">Air temperature (°C)</p>
-    <div class="chart"><canvas id="chart-temp" aria-label="Air temperature over the last 7 days" role="img"></canvas></div>
+    <div class="chart"><canvas id="chart-temp" role="img" aria-label="Air temperature over the last 7 days"></canvas></div>
+    <p id="chart-temp-none" class="small muted" hidden>No temperature readings in the last 7 days.</p>
+
+    <p class="chart-title">Wind speed (km/h)</p>
+    <div class="chart"><canvas id="chart-wind" role="img" aria-label="Wind speed at the nearby stations over the last 7 days"></canvas></div>
+    <p id="chart-wind-none" class="small muted" hidden>No wind data yet.</p>
+    <p class="small muted">POW-O-METER has no wind sensor; wind comes from the nearby stations (hourly averages).</p>
+
+    <p class="chart-title">Relative humidity (%)</p>
+    <div class="chart"><canvas id="chart-rh" role="img" aria-label="Relative humidity over the last 7 days"></canvas></div>
+    <p id="chart-rh-none" class="small muted" hidden>No humidity readings in the last 7 days.</p>
+
+    <p class="small muted">Point at or touch a chart to see the values at that time in all charts. Readings flagged as
+      suspect (for example a faulty sensor) are left out.</p>
+    <ul id="nearby-credit" class="plain small muted" hidden></ul>
   </section>
 
   <section>
     <h2>Last 24 hours</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Time</th><th class="num">Snow depth</th><th class="num">Temperature</th></tr></thead>
+        <thead><tr><th>Time</th><th class="num">Snow</th><th class="num">Temp.</th><th class="num">Humidity</th></tr></thead>
         <tbody id="table-24h"></tbody>
       </table>
     </div>
@@ -51,28 +71,25 @@
       reading, often because falling snow blocks the snow sensor.</p>
   </section>
 
+  <section id="webcams" hidden>
+    <h2>Webcams</h2>
+    <div id="webcam-body"></div>
+  </section>
+
   <p class="disclaimer">Automatic, provisional readings from unattended, volunteer-run equipment. They can be wrong,
     late or missing, and they are not an avalanche forecast. Check
-    <a href="https://avalanche.ca/map?lat=54.504308&amp;lng=-128.966096">avalanche.ca</a> before you go. <a href="terms.html">Terms of use</a></p>
+    <a href="https://avalanche.ca/map?lat=54.504308&amp;lng=-128.966096" target="_blank" rel="noopener">avalanche.ca</a>
+    before you go. <a href="terms.html" target="_blank" rel="noopener">Terms of use</a></p>
 
   <h2>More</h2>
 
-  <details data-section="humidity">
-    <summary>Humidity</summary>
-    <div class="section-body">
-      <p class="chart-title">Relative humidity (%), last 7 days</p>
-      <div class="chart"><canvas id="chart-rh" aria-label="Relative humidity over the last 7 days" role="img"></canvas></div>
-    </div>
-  </details>
-
-  <details data-section="details">
+  <details id="details" data-section="details">
     <summary>Detailed readings and data labels</summary>
     <div class="section-body">
       <p class="small">The last 24 hours with every label. Snow depth is shown as measured here, including small
         negative values: zero is the top of the alpine heather under the sensor, and the sensor scatters by about
         ±8 cm. <strong>Provisional</strong> values have only had automatic checks; <strong>Approved</strong> ones have
-        been reviewed; values are provisional unless a line under them says otherwise. Quality “suspect” values are
-        left out of the charts.</p>
+        been reviewed; values are provisional unless a line under them says otherwise.</p>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Time</th><th class="num">Snow</th><th class="num">Temp.</th><th class="num">Humidity</th></tr></thead>
@@ -86,9 +103,9 @@
     </div>
   </details>
 
-  <details data-section="nearby">
-    <summary>Nearby stations</summary>
-    <div class="section-body" id="nearby-wrap">
+  <details id="nearby" data-section="nearby">
+    <summary>Nearby stations: latest temperatures</summary>
+    <div class="section-body">
       <p id="nearby-empty" class="muted" hidden>No nearby-station data is published yet.</p>
       <div id="nearby-body">
         <div class="table-wrap">
@@ -97,44 +114,35 @@
             <tbody id="nearby-table"></tbody>
           </table>
         </div>
-        <p class="chart-title">Air temperature (°C), last 7 days</p>
-        <div id="nearby-legend" class="legend"></div>
-        <div class="chart tall"><canvas id="chart-nearby" aria-label="Air temperature at POW-O-METER and nearby stations" role="img"></canvas></div>
-        <p class="small muted">Nearby stations report hourly averages. Readings flagged as suspect (for example a faulty
-          sensor) are left out of the chart.</p>
-        <ul id="nearby-licence" class="plain small muted"></ul>
+        <p class="small muted">Nearby stations report hourly averages; POW-O-METER reports single readings.</p>
       </div>
     </div>
   </details>
 
-  <details data-section="webcams">
-    <summary>Webcams</summary>
-    <div class="section-body" id="webcam-body"></div>
-  </details>
-
-  <details data-section="health">
+  <details id="health" data-section="health">
     <summary>Station health</summary>
     <div class="section-body"><dl id="health-list"></dl></div>
   </details>
 
-  <details>
+  <details id="downloads">
     <summary>Download the data</summary>
     <div class="section-body small">
       <p>All times in the files are <strong>UTC</strong>. POW-O-METER data: CC BY 4.0, credit “Mount Remo Backcountry
-        Society”. Nearby-station data keeps its owner's licence (see <a href="v1/sites.json">sites.json</a>).</p>
+        Society”. Nearby-station data keeps its owner's licence (see
+        <a href="v1/sites.json" target="_blank" rel="noopener">sites.json</a>).</p>
       <div class="table-wrap">
         <table>
           <tbody>
-            <tr><td><a href="v1/recent.csv">recent.csv</a></td><td>Best readings of the last 30 days (small)</td></tr>
-            <tr><td><a href="v1/best_hourly.csv">best_hourly.csv</a></td><td>Interpolated to whole hours (not hourly means), the whole record</td></tr>
-            <tr><td><a href="v1/best.csv">best.csv</a></td><td>Best readings, the whole record (large)</td></tr>
-            <tr><td><a href="v1/observations.csv">observations.csv</a></td><td>Every reading with every label (large)</td></tr>
-            <tr><td><a href="v1/latest.json">latest.json</a></td><td>Newest value of each variable</td></tr>
-            <tr><td><a href="v1/nearby_recent.csv">nearby_recent.csv</a>, <a href="v1/nearby_best.csv">nearby_best.csv</a>, <a href="v1/nearby_latest.json">nearby_latest.json</a></td><td>Nearby stations</td></tr>
-            <tr><td><a href="v1/status.json">status.json</a></td><td>Station health and alarms</td></tr>
-            <tr><td><a href="v1/sites.json">sites.json</a></td><td>Stations, sites, coordinates, licences</td></tr>
-            <tr><td><a href="v1/SCHEMA.md">SCHEMA.md</a></td><td>What every column means</td></tr>
-            <tr><td><a href="v1/CHANGELOG.md">CHANGELOG.md</a></td><td>Changes to the file format</td></tr>
+            <tr><td><a href="v1/recent.csv" target="_blank" rel="noopener">recent.csv</a></td><td>Best readings of the last 30 days (small)</td></tr>
+            <tr><td><a href="v1/best_hourly.csv" target="_blank" rel="noopener">best_hourly.csv</a></td><td>Interpolated to whole hours (not hourly means), the whole record</td></tr>
+            <tr><td><a href="v1/best.csv" target="_blank" rel="noopener">best.csv</a></td><td>Best readings, the whole record (large)</td></tr>
+            <tr><td><a href="v1/observations.csv" target="_blank" rel="noopener">observations.csv</a></td><td>Every reading with every label (large)</td></tr>
+            <tr><td><a href="v1/latest.json" target="_blank" rel="noopener">latest.json</a></td><td>Newest value of each variable</td></tr>
+            <tr><td><a href="v1/nearby_recent.csv" target="_blank" rel="noopener">nearby_recent.csv</a>, <a href="v1/nearby_best.csv" target="_blank" rel="noopener">nearby_best.csv</a>, <a href="v1/nearby_latest.json" target="_blank" rel="noopener">nearby_latest.json</a></td><td>Nearby stations</td></tr>
+            <tr><td><a href="v1/status.json" target="_blank" rel="noopener">status.json</a></td><td>Station health and alarms</td></tr>
+            <tr><td><a href="v1/sites.json" target="_blank" rel="noopener">sites.json</a></td><td>Stations, sites, coordinates, licences</td></tr>
+            <tr><td><a href="v1/SCHEMA.md" target="_blank" rel="noopener">SCHEMA.md</a></td><td>What every column means</td></tr>
+            <tr><td><a href="v1/CHANGELOG.md" target="_blank" rel="noopener">CHANGELOG.md</a></td><td>Changes to the file format</td></tr>
           </tbody>
         </table>
       </div>
@@ -144,9 +152,9 @@
 
 <footer>
   <p>Built and run by volunteers of the Mount Remo Backcountry Society, which owns the station.
-    <a href="terms.html">Terms of use</a> ·
-    <a href="https://github.com/mount-remo-backcountry-society/powOmeter">Source code</a> ·
-    <a href="https://github.com/mount-remo-backcountry-society/powOmeter/issues">Report a problem</a></p>
+    <a href="terms.html" target="_blank" rel="noopener">Terms of use</a> ·
+    <a href="https://github.com/mount-remo-backcountry-society/powOmeter" target="_blank" rel="noopener">Source code</a> ·
+    <a href="https://github.com/mount-remo-backcountry-society/powOmeter/issues" target="_blank" rel="noopener">Report a problem</a></p>
   <p>This page uses no cookies, accounts or tracking.</p>
 </footer>
 <script src="vendor/chart.umd.min.js"></script>

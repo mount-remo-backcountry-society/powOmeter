@@ -254,12 +254,17 @@ Parquet is added only if a consumer asks for it.
 ## 7. Presentation: two linked sites
 
 - **Station site (MRBS)**, simple first (Julian, 2026-10-05):
-  - **main view:** current snow depth and temperature with their age; one
-    7-day chart of each; a 24 h table, one row per reading ("Mon 14:05").
-    Negative snow depth shows as 0 there (files keep the real value)
-  - **"More"**, loaded only when opened: humidity; detailed readings with
-    labels; nearby stations; webcams with a 3-day time lapse; station
-    health; downloads
+  - **main view:** current snow depth, temperature and humidity with their
+    age; 7-day charts of snow depth, temperature, wind (nearby stations
+    only: POW-O-METER has no wind sensor) and humidity, with the nearby
+    stations as lines that can be ticked on and off, and a hover that
+    follows the same time in every chart; a 24 h table, one row per
+    reading ("Mon 5 Oct, 14:05"); the webcams with a 3-day time lapse.
+    Negative snow depth shows as 0 there (files keep the real value). A
+    warning line appears only when the data are late or stale, or
+    processing has stopped. Links open in new tabs
+  - **"More"**, loaded only when opened: detailed readings with labels;
+    nearby stations' latest temperatures; station health; downloads
   - **times shown in BC time, a fixed UTC−7, labelled as such** (files
     stay UTC). Not `America/Vancouver`: BC's permanent UTC−7 is only in
     tzdata 2026b, so devices with older time-zone data would be 1 h off

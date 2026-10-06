@@ -42,6 +42,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--page); color: var(--text-primary);
@@ -73,10 +74,11 @@ h3 { font-size: 1rem; margin: 1.2rem 0 .4rem; }
 
 /* Now tiles */
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+#now-depth { grid-column: 1 / -1; }
 .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: .75rem .9rem; }
 .tile-label { color: var(--text-secondary); font-size: .9rem; }
 .tile-value { font-size: 2.6rem; font-weight: 600; line-height: 1.15; }
-#now-temp .tile-value { font-size: 2rem; }
+#now-temp .tile-value, #now-rh .tile-value { font-size: 2rem; }
 .tile-age { color: var(--text-secondary); font-size: .85rem; }
 .tile.stale .tile-value, .tile.stale .tile-label { color: var(--text-muted); text-decoration: line-through; }
 .tile.stale .tile-age { color: var(--critical); font-weight: 600; }
@@ -91,6 +93,13 @@ h3 { font-size: 1rem; margin: 1.2rem 0 .4rem; }
 .legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: .875rem; color: var(--text-secondary); margin: .2rem 0 .6rem; }
 .key { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: .4rem; vertical-align: 0; }
 .key.line { width: 14px; height: 2px; border-radius: 1px; vertical-align: middle; }
+
+/* station tick-boxes above the charts */
+.picker { display: flex; flex-wrap: wrap; gap: .35rem .5rem; margin: 0 0 .8rem; }
+.pick { display: inline-flex; align-items: center; gap: .35rem; font-size: .875rem; padding: .3rem .6rem;
+        border: 1px solid var(--border); border-radius: 999px; background: var(--surface-1); cursor: pointer; }
+.pick input { margin: 0; accent-color: var(--link); }
+.pick .key { margin-right: 0; }
 
 /* tables */
 table { border-collapse: collapse; width: 100%; background: var(--surface-1); border-radius: 10px; overflow: hidden;
@@ -113,6 +122,7 @@ tr.label-row td { border-top: none; padding-top: 0; }
 dd ul, .plain { margin: 0; padding-left: 1.1rem; }
 
 /* webcams */
+.camera { margin-bottom: 1rem; }
 figure { margin: 0 0 .5rem; }
 img.cam { width: 100%; height: auto; display: block; border-radius: 8px; background: var(--grid); aspect-ratio: 16 / 9; }
 figcaption { font-size: .85rem; color: var(--text-secondary); margin-top: .25rem; }
@@ -125,5 +135,5 @@ footer { color: var(--text-secondary); font-size: .875rem; padding-top: 1rem; pa
 
 @media (max-width: 380px) {
   .tile-value { font-size: 2.1rem; }
-  #now-temp .tile-value { font-size: 1.7rem; }
+  #now-temp .tile-value, #now-rh .tile-value { font-size: 1.7rem; }
 }
