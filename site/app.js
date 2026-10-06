@@ -1,0 +1,536 @@
+/* POW-O-METER station page.
+ *
+ * Reads the published files in v1/ (and webcams/) and draws the page. No
+ * cookies, no tracking, no external requests except the webcam images
+ * (loaded from Shames Mountain's own address, only when that section is
+ * opened and switched on).
+ *
+ * Safety rules (design R6):
+ *  - every value shows its own age, worked out here in the browser, so a
+ *    stopped pipeline still shows as old data;
+ *  - only values from the CURRENT site appear under "Now" (latest.json also
+ *    holds SD-card-only values from older visits and the old site);
+ *  - times are shown as BC time, a FIXED UTC-7 (BC dropped clock changes;
+ *    phones with old time-zone data would show America/Vancouver 1 h off
+ *    from 2026-11-01). Files stay UTC.
+ *
+ * Pure functions are in POW (tested by selftest.html); rendering follows.
+ */
+(function () {
+  "use strict";
+
+  // ---- settings ----------------------------------------------------------
+  const BC_OFFSET_H = -7;                  // BC time = UTC-7 all year
+  const BC_LABEL = "BC time (UTC−7)";
+  const FRESH_H = 6;                       // radio sends 7x a day; longest normal gap ~5 h
+  const STALE_H = 12;                      // = the no-message alarm (config/monitoring.yaml)
+  const BUILD_STALE_H = 3;                 // publish runs hourly
+  const CHART_DAYS = 7;
+  const TABLE_HOURS = 24;
+  const GAP_H = 6;                         // break a chart line across a longer gap
+  const REFRESH_MIN = 10;
+  const CHART_QUALITIES = ["good", "estimate"];   // suspect values are left out of charts
+  const STATION = "powometer";
+  const REPO = "https://github.com/mount-remo-backcountry-society/powOmeter";
+
+  const H = 3600e3;
+  const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const pad = (n) => String(n).padStart(2, "0");
+
+  // ---- pure functions (tested in selftest.html) --------------------------
+  const POW = {
+    BC_OFFSET_H, FRESH_H, STALE_H,
+
+    /** CSV text -> array of objects (the published files never quote fields). */
+    parseCSV(text) {
+      const lines = text.split("\n").filter((l) => l.length);
+      if (!lines.length) return [];
+      const head = lines[0].split(",");
+      return lines.slice(1).map((l) => {
+        const v = l.split(",");
+        const o = {};
+        head.forEach((h, i) => { o[h] = v[i] === undefined ? "" : v[i]; });
+        return o;
+      });
+    },
+
+    ms(iso) { return Date.parse(iso); },
+
+    /** BC-time parts of a UTC instant (ms). */
+    bc(ms) {
+      const d = new Date(ms + BC_OFFSET_H * H);
+      return { dow: DAYS[d.getUTCDay()], day: d.getUTCDate(), mon: MONTHS[d.getUTCMonth()],
+               year: d.getUTCFullYear(), hh: pad(d.getUTCHours()), mm: pad(d.getUTCMinutes()) };
+    },
+    /** "Mon 14:05" */
+    fmtTime(ms) { const b = POW.bc(ms); return `${b.dow} ${b.hh}:${b.mm}`; },
+    /** "Mon 5 Oct, 14:05" */
+    fmtDateTime(ms) { const b = POW.bc(ms); return `${b.dow} ${b.day} ${b.mon}, ${b.hh}:${b.mm}`; },
+    /** "Mon 5 Oct" */
+    fmtDay(ms) { const b = POW.bc(ms); return `${b.dow} ${b.day} ${b.mon}`; },
+    /** BC midnights (ms) from a to b. */
+    midnights(a, b) {
+      const off = BC_OFFSET_H * H;
+      let t = Math.ceil((a + off) / (24 * H)) * 24 * H - off;
+      const out = [];
+      for (; t <= b; t += 24 * H) out.push(t);
+      return out;
+    },
+
+    ageHours(iso, nowMs) { return (nowMs - POW.ms(iso)) / H; },
+    /** "just now", "40 min ago", "3 h ago", "2 days ago" */
+    ageText(hours) {
+      if (hours < 0.05) return "just now";
+      if (hours < 1) return `${Math.round(hours * 60)} min ago`;
+      if (hours < 48) return `${Math.round(hours)} h ago`;
+      return `${Math.round(hours / 24)} days ago`;
+    },
+    /** "fresh" | "late" | "stale" */
+    freshness(hours) { return hours <= FRESH_H ? "fresh" : hours <= STALE_H ? "late" : "stale"; },
+
+    /** Snow depth for the casual view: below zero shows as 0 (zero is the top
+     *  of the heather; the sensor scatters about +/-8 cm). Files keep the
+     *  real value. */
+    displayDepth(cm) { return Math.max(0, Math.round(cm)); },
+
+    fmtTemp(c) { return (c < 0 ? "−" : "") + Math.abs(c).toFixed(1) + " °C"; },
+
+    /** The current site of the station: the one with no end date. */
+    currentSite(sites, station = STATION) {
+      const s = (sites.sites || []).find((x) => x.station === station && !x.until_utc);
+      return s ? s.id : null;
+    },
+
+    /** A value from latest.json for the "Now" tiles, or null. Only values
+     *  from the current site; older than STALE_H they are marked stale. */
+    nowValue(latest, variable, site, nowMs) {
+      const v = latest && latest.values && latest.values[variable];
+      if (!v || v.value === null || v.site_id !== site) return null;
+      const age = POW.ageHours(v.time_utc, nowMs);
+      return { value: v.value, ms: POW.ms(v.time_utc), age, state: POW.freshness(age),
+               quality: v.quality, approval: v.approval };
+    },
+
+    /** Readings of the current site in [fromMs, toMs], grouped by time,
+     *  newest first: [{ms, snow_depth, air_temperature, relative_humidity, rows}] */
+    readings(rows, site, fromMs, toMs) {
+      const by = new Map();
+      for (const r of rows) {
+        if (r.site_id !== site || r.station_id !== STATION) continue;
+        const t = POW.ms(r.time_utc);
+        if (t < fromMs || t > toMs) continue;
+        if (!by.has(t)) by.set(t, { ms: t, rows: [] });
+        const e = by.get(t);
+        e.rows.push(r);
+        if (r.value !== "" && (r.variable !== "snow_depth" || r.statistic === "median")) e[r.variable] = Number(r.value);
+      }
+      return [...by.values()].filter((e) => e.snow_depth !== undefined || e.air_temperature !== undefined)
+        .sort((a, b) => b.ms - a.ms);
+    },
+
+    /** Chart series: {key: [{x, y}]} per site (or per station), with a null
+     *  point to break the line across gaps and at site changes. */
+    series(rows, variable, fromMs, opts = {}) {
+      const key = opts.key || ((r) => r.site_id);
+      const stat = opts.statistic;
+      const out = {};
+      const sorted = rows.filter((r) => r.variable === variable && r.value !== "" &&
+          CHART_QUALITIES.includes(r.quality) && (!stat || r.statistic === stat) && POW.ms(r.time_utc) >= fromMs)
+        .sort((a, b) => POW.ms(a.time_utc) - POW.ms(b.time_utc));
+      for (const r of sorted) {
+        const k = key(r), x = POW.ms(r.time_utc);
+        let y = Number(r.value);
+        if (opts.transform) y = opts.transform(y);
+        const s = (out[k] = out[k] || []);
+        if (s.length && x - s[s.length - 1].x > GAP_H * H) s.push({ x: x - 1, y: null });
+        s.push({ x, y });
+      }
+      return out;
+    },
+
+    /** Plain-words label for a reading's labels, or "" when unremarkable. */
+    labelText(r) {
+      const parts = [];
+      parts.push(r.approval === "approved" ? "Approved" : "Provisional");
+      if (r.quality && r.quality !== "good") parts.push(r.quality);
+      if (r.qualifiers) parts.push(r.qualifiers.split(";").join(", "));
+      return parts.join(" · ");
+    },
+
+    /** Battery level text from status.json. */
+    batteryText(st) {
+      if (st.battery_bucket === null || st.battery_bucket === undefined) return "unknown";
+      const up = st.battery_bucket_upper_v;
+      if (st.battery_bucket === 0) return "below 3.4 V (level 0)";
+      if (up === null || up === undefined) return `4.2 V or more (level ${st.battery_bucket})`;
+      return `${(up - 0.1).toFixed(1)}–${up.toFixed(1)} V (level ${st.battery_bucket})`;
+    },
+  };
+  window.POW = POW;
+
+  // ---- rendering -----------------------------------------------------------
+  if (!document.getElementById("app")) return;          // selftest.html loads only the functions
+
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, attrs = {}, ...kids) => {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "class") e.className = v; else if (k === "text") e.textContent = v; else e.setAttribute(k, v);
+    }
+    for (const k of kids) if (k !== null && k !== undefined) e.append(k);
+    return e;
+  };
+  const getJSON = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(u); return r.json(); });
+  const getText = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(u); return r.text(); });
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  const state = { latest: null, status: null, sites: null, recent: null, site: null, charts: {}, loaded: {} };
+
+  // -- freshness banner --
+  function renderBanner(now) {
+    const b = $("banner");
+    const st = state.status.stations[STATION];
+    const lastObs = st.last_observation_utc;
+    const built = POW.ageHours(state.status.built_utc, now);
+    b.replaceChildren();
+    if (built > BUILD_STALE_H) {
+      b.className = "banner stale";
+      b.append(el("strong", { text: "The data processing has stopped. " }),
+        `These files were built ${POW.ageText(built)}, so everything below may be older than it looks.`);
+      return;
+    }
+    const age = lastObs ? POW.ageHours(lastObs, now) : Infinity;
+    const f = POW.freshness(age);
+    b.className = "banner " + f;
+    if (f === "stale") {
+      b.append(el("strong", { text: "No recent data: don’t rely on these values. " }),
+        lastObs ? `The latest reading is from ${POW.fmtDateTime(POW.ms(lastObs))} (${POW.ageText(age)}).` : "");
+    } else {
+      b.append(`Latest reading ${POW.ageText(age)} (${POW.fmtTime(POW.ms(lastObs))}). `,
+        f === "late" ? el("strong", { text: "Later than usual." }) : "",
+        f === "late" ? " The station sends 7 times a day; this may only be a delay." : "");
+    }
+  }
+
+  // -- Now tiles --
+  function tile(id, label, v, fmt) {
+    const t = $(id);
+    t.replaceChildren();
+    t.className = "tile" + (v ? " " + v.state : "");
+    t.append(el("div", { class: "tile-label", text: label }));
+    if (!v) {
+      t.append(el("div", { class: "tile-value", text: "–" }), el("div", { class: "tile-age", text: "no current reading" }));
+      return;
+    }
+    t.append(el("div", { class: "tile-value", text: fmt(v.value) }),
+      el("div", { class: "tile-age", text: `${POW.ageText(v.age)} · ${POW.fmtTime(v.ms)}` +
+        (v.state === "stale" ? " · not current" : v.state === "late" ? " · older than usual" : "") }));
+  }
+
+  // -- charts --
+  function baseOptions(min, max, yFmt, extra = {}) {
+    const muted = css("--text-muted"), grid = css("--grid");
+    return {
+      animation: false, parsing: false, normalized: true, maintainAspectRatio: false,
+      interaction: { mode: "nearest", axis: "x", intersect: false },
+      scales: {
+        x: { type: "linear", min, max,
+             afterBuildTicks: (ax) => { ax.ticks = POW.midnights(min, max).map((value) => ({ value })); },
+             ticks: { color: muted, maxRotation: 0, autoSkip: false,
+                      // every day if there is room, else every other day
+                      callback(v, i, ticks) {
+                        const step = this.chart.width / Math.max(1, ticks.length) < 52 ? 2 : 1;
+                        if ((ticks.length - 1 - i) % step) return "";
+                        const b = POW.bc(v); return `${b.dow} ${b.day}`;
+                      } },
+             grid: { color: grid }, border: { color: css("--axis") } },
+        y: { ticks: { color: muted, callback: yFmt, maxTicksLimit: 5 }, grid: { color: grid },
+             border: { display: false }, ...(extra.y || {}) },
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: css("--surface-2"), titleColor: css("--text-secondary"),
+                   bodyColor: css("--text-primary"), borderColor: css("--border"), borderWidth: 1,
+                   displayColors: !!extra.colors, usePointStyle: true,
+                   callbacks: { title: (items) => items.length ? POW.fmtDateTime(items[0].parsed.x) + " BC" : "",
+                                label: extra.label } },
+      },
+      elements: { point: { radius: 0, hoverRadius: 4, hitRadius: 12 },
+                  line: { borderWidth: 2, tension: 0, borderJoinStyle: "round", borderCapStyle: "round" } },
+      spanGaps: false,
+    };
+  }
+
+  // a vertical hairline at the hovered time, and a hairline at 0 degC
+  const crosshair = {
+    id: "crosshair",
+    afterDraw(chart) {
+      const a = chart.tooltip && chart.tooltip.getActiveElements();
+      if (!a || !a.length) return;
+      const x = a[0].element.x, { top, bottom } = chart.chartArea, c = chart.ctx;
+      c.save(); c.strokeStyle = css("--axis"); c.lineWidth = 1;
+      c.beginPath(); c.moveTo(x, top); c.lineTo(x, bottom); c.stroke(); c.restore();
+    },
+  };
+  const freezing = {
+    id: "freezing",
+    beforeDatasetsDraw(chart, _args, opts) {
+      if (!opts.on) return;
+      const y = chart.scales.y, { left, right } = chart.chartArea;
+      if (y.min > 0 || y.max < 0) return;
+      const py = y.getPixelForValue(0), c = chart.ctx;
+      c.save(); c.strokeStyle = css("--axis"); c.lineWidth = 1;
+      c.beginPath(); c.moveTo(left, py); c.lineTo(right, py); c.stroke(); c.restore();
+    },
+  };
+
+  function lineChart(canvasId, seriesByKey, color, min, max, yFmt, label, extra = {}) {
+    if (state.charts[canvasId]) state.charts[canvasId].destroy();
+    const datasets = Object.entries(seriesByKey).map(([k, data]) => ({
+      label: extra.names ? extra.names[k] || k : k, data,
+      borderColor: extra.colorOf ? extra.colorOf(k) : color, backgroundColor: extra.colorOf ? extra.colorOf(k) : color,
+    }));
+    const opts = baseOptions(min, max, yFmt, { label, y: extra.y, colors: !!extra.colorOf });
+    opts.plugins.freezing = { on: !!extra.freezing };
+    state.charts[canvasId] = new Chart($(canvasId), { type: "line", data: { datasets }, options: opts,
+                                                      plugins: [crosshair, freezing] });
+  }
+
+  function renderCharts(now) {
+    const from = now - CHART_DAYS * 24 * H;
+    const rows = state.recent;
+    const depth = POW.series(rows, "snow_depth", from, { statistic: "median", transform: POW.displayDepth });
+    const temp = POW.series(rows, "air_temperature", from);
+    lineChart("chart-depth", depth, css("--series-snow"), from, now, (v) => `${v} cm`,
+      (i) => `${i.parsed.y} cm snow depth`, { y: { min: 0, suggestedMax: 50 } });
+    lineChart("chart-temp", temp, css("--series-temp"), from, now, (v) => `${v}°`,
+      (i) => POW.fmtTemp(i.parsed.y), { freezing: true });
+  }
+
+  function renderTable(now) {
+    const body = $("table-24h");
+    body.replaceChildren();
+    const rows = POW.readings(state.recent, state.site, now - TABLE_HOURS * H, now);
+    if (!rows.length) {
+      body.append(el("tr", {}, el("td", { colspan: "3", class: "muted", text: "No readings in the last 24 hours." })));
+      return;
+    }
+    for (const r of rows) {
+      body.append(el("tr", {},
+        el("td", { text: POW.fmtTime(r.ms) }),
+        el("td", { class: "num", text: r.snow_depth === undefined ? "–" : `${POW.displayDepth(r.snow_depth)} cm` }),
+        el("td", { class: "num", text: r.air_temperature === undefined ? "–" : POW.fmtTemp(r.air_temperature) })));
+    }
+  }
+
+  // ---- "More" sections, loaded when opened ----------------------------------
+  const sections = {
+    humidity(now) {
+      const from = now - CHART_DAYS * 24 * H;
+      lineChart("chart-rh", POW.series(state.recent, "relative_humidity", from), css("--series-rh"),
+        from, now, (v) => `${v}%`, (i) => `${i.parsed.y}% humidity`, { y: { min: 0, max: 100 } });
+    },
+
+    details(now) {
+      const body = $("table-details");
+      body.replaceChildren();
+      for (const r of POW.readings(state.recent, state.site, now - TABLE_HOURS * H, now)) {
+        const lab = r.rows.find((x) => x.variable === "snow_depth" && x.statistic === "median") || r.rows[0];
+        const val = (v, f) => (v === undefined ? "–" : f(v));
+        body.append(el("tr", {},
+          el("td", { class: "nowrap", text: POW.fmtTime(r.ms) }),
+          el("td", { class: "num", text: val(r.snow_depth, (v) => `${v} cm`) }),
+          el("td", { class: "num", text: val(r.air_temperature, POW.fmtTemp) }),
+          el("td", { class: "num", text: val(r.relative_humidity, (v) => `${v}%`) })));
+        // labels on their own line, only when there is more to say than "Provisional"
+        const extra = r.rows.map(POW.labelText).filter((t) => t !== "Provisional");
+        if (extra.length) {
+          body.append(el("tr", { class: "label-row" }, el("td", { colspan: "4", class: "small muted",
+            text: [...new Set(extra)].join("; ") })));
+        }
+      }
+      // values from the SD card only (older, possibly from another site)
+      const sd = $("sd-values");
+      sd.replaceChildren();
+      const names = { air_pressure: "Air pressure", battery_voltage: "Battery", enclosure_temperature: "Inside the logger box" };
+      const siteName = Object.fromEntries((state.sites.sites || []).map((s) => [s.id, s.name]));
+      for (const [k, name] of Object.entries(names)) {
+        const v = state.latest.values[k];
+        if (!v) continue;
+        sd.append(el("li", { text: `${name}: ${v.value} ${v.unit === "degC" ? "°C" : v.unit} — ` +
+          `${POW.fmtDay(POW.ms(v.time_utc))} (${POW.ageText(POW.ageHours(v.time_utc, now))}), ${siteName[v.site_id] || v.site_id}` }));
+      }
+    },
+
+    async nearby(now) {
+      const box = $("nearby-body");
+      const [lat, text] = await Promise.all([getJSON("v1/nearby_latest.json"), getText("v1/nearby_recent.csv")]);
+      const ids = Object.keys(lat.stations || {});
+      box.hidden = !ids.length;
+      $("nearby-empty").hidden = !!ids.length;
+      if (!ids.length) return;
+      const sites = state.sites.sites || [], stations = state.sites.stations || [];
+      const siteOf = (sid) => sites.find((s) => s.station === sid && !s.until_utc) || {};
+      const stationOf = (sid) => stations.find((s) => s.id === sid) || {};
+      const ownElev = (sites.find((s) => s.id === state.site) || {}).elevation_m;
+      const elevOf = (sid) => sid === STATION ? ownElev : siteOf(sid).elevation_m;
+      // colour follows the station (fixed order); the list is sorted by elevation
+      const fixed = [STATION, ...ids.slice().sort()];
+      const order = fixed.slice().sort((a, b) => (elevOf(b) || 0) - (elevOf(a) || 0));
+      const name = (sid) => sid === STATION ? "POW-O-METER" : siteOf(sid).name || sid;
+      const colors = ["--series-1", "--series-2", "--series-3", "--series-4"];
+      const colorOf = (sid) => css(colors[fixed.indexOf(sid) % colors.length]);
+      // latest table
+      const tb = $("nearby-table");
+      tb.replaceChildren();
+      for (const sid of order) {
+        const t = sid === STATION ? POW.nowValue(state.latest, "air_temperature", state.site, now)
+          : (() => { const v = lat.stations[sid].values.air_temperature; if (!v) return null;
+                     const age = POW.ageHours(v.time_utc, now); return { value: v.value, ms: POW.ms(v.time_utc), age, quality: v.quality }; })();
+        const sw = el("span", { class: "key" }); sw.style.background = colorOf(sid);
+        tb.append(el("tr", {},
+          el("td", {}, sw, name(sid), el("div", { class: "small muted", text: elevOf(sid) ? `${elevOf(sid)} m` : "" })),
+          el("td", { class: "num" }, t ? POW.fmtTemp(t.value) + (t.quality && t.quality !== "good" ? ` (${t.quality})` : "") : "–",
+             el("div", { class: "small muted", text: t ? POW.ageText(t.age) : "" }))));
+      }
+      // temperature chart, all stations
+      const from = now - CHART_DAYS * 24 * H;
+      const near = POW.series(POW.parseCSV(text), "air_temperature", from, { key: (r) => r.station_id });
+      const own = POW.series(state.recent, "air_temperature", from, { key: () => STATION });
+      const all = {};
+      for (const sid of order) if ((sid === STATION ? own : near)[sid]) all[sid] = (sid === STATION ? own : near)[sid];
+      lineChart("chart-nearby", all, null, from, now, (v) => `${v}°`,
+        (i) => `${POW.fmtTemp(i.parsed.y)}  ${i.dataset.label}`,
+        { freezing: true, colorOf, names: Object.fromEntries(order.map((s) => [s, name(s)])) });
+      const leg = $("nearby-legend");
+      leg.replaceChildren(...order.filter((s) => all[s]).map((sid) => {
+        const k = el("span", { class: "key line" }); k.style.background = colorOf(sid);
+        return el("span", { class: "legend-item" }, k, name(sid));
+      }));
+      const lic = $("nearby-licence");
+      lic.replaceChildren(...ids.map((sid) => el("li", { text: `${name(sid)}: ${stationOf(sid).operator || ""}. ${stationOf(sid).licence || ""}` })));
+    },
+
+    async webcams(now) {
+      const box = $("webcam-body");
+      let idx;
+      try { idx = await getJSON("webcams/index.json"); } catch (e) { idx = null; }
+      if (!idx || !idx.enabled) {
+        box.replaceChildren(el("p", { class: "muted", text: "Webcam images are not available here yet." }));
+        return;
+      }
+      box.replaceChildren();
+      for (const cam of idx.cameras) {
+        const live = el("img", { src: cam.live_url, alt: `${cam.label} webcam, newest image (time printed on it)`,
+                                 loading: "lazy", class: "cam" });
+        const fig = el("figure", {}, live, el("figcaption", { text: `${cam.label}: newest image (its time is printed on it)` }));
+        box.append(el("h3", { text: cam.label }), fig);
+        if (cam.frames.length > 1) box.append(timelapse(cam, idx.keep_hours));
+        else box.append(el("p", { class: "muted small", text: "No time lapse: no daylight images in the last few days." }));
+      }
+      box.append(el("p", { class: "small muted", text: idx.credit }));
+    },
+
+    health(now) {
+      const st = state.status.stations[STATION];
+      const dl = $("health-list");
+      dl.replaceChildren();
+      const add = (k, v) => dl.append(el("dt", { text: k }), el("dd", {}, v));
+      add("Last message from the station", st.last_message_utc ?
+        `${POW.fmtDateTime(POW.ms(st.last_message_utc))} (${POW.ageText(POW.ageHours(st.last_message_utc, now))})` : "none");
+      add("Files built", `${POW.fmtDateTime(POW.ms(state.status.built_utc))} (${POW.ageText(POW.ageHours(state.status.built_utc, now))})`);
+      add("Battery (by radio)", POW.batteryText(st));
+      add("Station clock", st.clock_offset_min === null ? "unknown" : `${st.clock_offset_min >= 0 ? "+" : ""}${st.clock_offset_min} min off`);
+      const sd = (state.status.info.sd_downloads || []).slice(-1)[0];
+      add("Last SD card download", sd ? sd.download : "none");
+      const alarms = state.status.alarms || [];
+      add("Alarms", alarms.length ? el("ul", {}, ...alarms.map((a) => el("li", { text: a.message })))
+        : "none");
+      const issues = el("a", { href: `${REPO}/issues`, text: "Open alarm Issues on GitHub" });
+      dl.append(el("dt", { text: "" }), el("dd", {}, issues));
+    },
+  };
+
+  function timelapse(cam, keepHours) {
+    const frames = cam.frames;
+    const img = el("img", { class: "cam", alt: `${cam.label} time lapse frame` });
+    const cap = el("figcaption", {});
+    const slider = el("input", { type: "range", min: "0", max: String(frames.length - 1), value: String(frames.length - 1),
+                                 "aria-label": `${cam.label} time lapse position` });
+    const play = el("button", { type: "button", text: "Play" });
+    let i = frames.length - 1, timer = null;
+    const show = () => {
+      img.src = "webcams/" + frames[i].file;
+      cap.textContent = `${POW.fmtDateTime(POW.ms(frames[i].time_utc))} BC · frame ${i + 1} of ${frames.length}`;
+      slider.value = String(i);
+    };
+    slider.addEventListener("input", () => { i = Number(slider.value); show(); });
+    play.addEventListener("click", () => {
+      if (timer) { clearInterval(timer); timer = null; play.textContent = "Play"; return; }
+      frames.forEach((f) => { const p = new Image(); p.src = "webcams/" + f.file; });   // preload
+      if (i === frames.length - 1) i = 0;
+      play.textContent = "Pause";
+      timer = setInterval(() => { show(); if (++i >= frames.length) { i = frames.length - 1; clearInterval(timer); timer = null; play.textContent = "Play"; } }, 400);
+    });
+    const wrap = el("div", { class: "timelapse" },
+      el("p", { class: "small", text: `Time lapse, last ${Math.round(keepHours / 24)} days (daylight images, about one an hour)` }),
+      el("figure", {}, img, cap), el("div", { class: "controls" }, play, slider));
+    // load the newest frame only once the time lapse scrolls into view
+    new IntersectionObserver((es, o) => { if (es.some((e) => e.isIntersecting)) { show(); o.disconnect(); } }).observe(wrap);
+    return wrap;
+  }
+
+  // ---- main ------------------------------------------------------------------
+  function renderAll() {
+    const now = Date.now();
+    renderBanner(now);
+    tile("now-depth", "Snow depth", POW.nowValue(state.latest, "snow_depth", state.site, now), (v) => `${POW.displayDepth(v)} cm`);
+    tile("now-temp", "Air temperature", POW.nowValue(state.latest, "air_temperature", state.site, now), POW.fmtTemp);
+    renderCharts(now);
+    renderTable(now);
+    for (const d of document.querySelectorAll("details[data-section]")) {
+      if (d.open) runSection(d.dataset.section);
+    }
+  }
+
+  function runSection(name) {
+    const box = document.querySelector(`details[data-section="${name}"] .section-body`);
+    const old = box && box.querySelector(".section-error");
+    if (old) old.remove();
+    Promise.resolve().then(() => sections[name](Date.now())).catch(() => {
+      if (box) box.prepend(el("p", { class: "muted section-error", text: "Could not load this section." }));
+    });
+  }
+
+  async function load() {
+    const [latest, status, sites, recent] = await Promise.all([
+      getJSON("v1/latest.json"), getJSON("v1/status.json"), getJSON("v1/sites.json"), getText("v1/recent.csv")]);
+    Object.assign(state, { latest, status, sites, recent: POW.parseCSV(recent), site: POW.currentSite(sites) });
+  }
+
+  function start() {
+    for (const e of document.querySelectorAll(".bc-label")) e.textContent = BC_LABEL;
+    for (const d of document.querySelectorAll("details[data-section]")) {
+      d.addEventListener("toggle", () => { if (d.open && state.status) runSection(d.dataset.section); });
+    }
+    const refresh = () => load().then(renderAll).catch(() => {
+      const b = $("banner");
+      b.className = "banner stale";
+      b.textContent = "Could not load the data. Check your connection; the values shown (if any) may be old.";
+    });
+    // a link like .../#webcams opens that section
+    const openHash = () => {
+      const d = document.querySelector(`details[data-section="${location.hash.slice(1)}"]`);
+      if (d) { d.open = true; d.scrollIntoView(); }
+    };
+    window.addEventListener("hashchange", openHash);
+    refresh().then(openHash);
+    setInterval(refresh, REFRESH_MIN * 60e3);
+    setInterval(() => { if (state.status) { const n = Date.now(); renderBanner(n);
+      tile("now-depth", "Snow depth", POW.nowValue(state.latest, "snow_depth", state.site, n), (v) => `${POW.displayDepth(v)} cm`);
+      tile("now-temp", "Air temperature", POW.nowValue(state.latest, "air_temperature", state.site, n), POW.fmtTemp); } }, 60e3);
+    matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (state.status) renderAll(); });
+  }
+  start();
+})();

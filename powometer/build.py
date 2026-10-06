@@ -149,10 +149,10 @@ def _datapackage() -> dict:
         {"name": "station_id", "type": "string"},
         {"name": "site_id", "type": "string", "description": "Physical site; never combine snow depth across sites"},
         {"name": "variable", "type": "string", "description": "See variables below"},
-        {"name": "statistic", "type": "string", "description": "point | min | max | median (of the burst of ultrasonic readings)"},
+        {"name": "statistic", "type": "string", "description": "point | min | max | median (of the burst of ultrasonic readings) | mean | sum (nearby stations: over the hour)"},
         {"name": "value", "type": "number"},
         {"name": "unit", "type": "string"},
-        {"name": "source", "type": "string", "description": "sd (SD card) | radio (satellite) | derived (best_hourly.csv: interpolated)"},
+        {"name": "source", "type": "string", "description": "sd (SD card) | radio (satellite) | derived (best_hourly.csv: interpolated) | avcan (nearby stations)"},
         {"name": "level", "type": "string", "description": "qc (automatic checks) | corrected (manual corrections applied)"},
         {"name": "approval", "type": "string", "description": "working (shown as Provisional) | in_review | approved"},
         {"name": "quality", "type": "string", "description": "WaterML2: good | suspect | estimate | poor | unchecked | missing"},
@@ -166,6 +166,9 @@ def _datapackage() -> dict:
         "air_pressure": {"cf_standard_name": "surface_air_pressure", "unit": "hPa"},
         "battery_voltage": {"cf_standard_name": None, "unit": "V"},
         "enclosure_temperature": {"cf_standard_name": None, "unit": "degC"},
+        "wind_speed": {"cf_standard_name": "wind_speed", "unit": "km/h"},
+        "wind_from_direction": {"cf_standard_name": "wind_from_direction", "unit": "degree"},
+        "precipitation_amount": {"cf_standard_name": "precipitation_amount", "unit": "mm"},
     }
     res = lambda name, desc: {"name": name.split(".")[0], "path": name, "format": "csv",
                               "description": desc, "schema": {"fields": fields}}
@@ -178,6 +181,9 @@ def _datapackage() -> dict:
             res("best.csv", "Best available point readings (median distance and snow depth); poor and missing values excluded"),
             res("best_hourly.csv", "best.csv interpolated to whole hours (not means)"),
             res("recent.csv", f"The rows of best.csv from the {RECENT_DAYS} days before its newest reading"),
+            res("nearby_best.csv", "Nearby stations of other owners (their licences, see sites.json); "
+                                   "poor and missing values excluded"),
+            res("nearby_recent.csv", f"The rows of nearby_best.csv from the {RECENT_DAYS} days before its newest reading"),
         ],
         "variables": variables,
     }

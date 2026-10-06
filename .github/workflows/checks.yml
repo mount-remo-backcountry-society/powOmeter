@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   privacy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
         with:
@@ -28,7 +28,7 @@ jobs:
         run: python tools/privacy_check.py --history
 
   raw-immutable:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
         with:
@@ -45,7 +45,7 @@ jobs:
           fi
 
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6

@@ -1,0 +1,129 @@
+/* POW-O-METER station page. Colours are role tokens, light and dark. */
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface-1: #fcfcfb;
+  --surface-2: #ffffff;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #6f6d68;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.10);
+  --link: #1c5cab;
+  /* chart series (validated reference palette, light steps) */
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
+  --series-snow: var(--series-1);
+  --series-temp: var(--series-2);
+  --series-rh: var(--series-3);
+  /* status (always with words, never colour alone) */
+  --warning: #fab219;
+  --critical: #d03b3b;
+  --warning-wash: #fdf3dc;
+  --critical-wash: #fbe7e7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface-1: #1a1a19; --surface-2: #232322;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #9a988f;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255, 255, 255, 0.10); --link: #86b6ef;
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+    --warning-wash: #2e2410; --critical-wash: #2f1515;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface-1: #1a1a19; --surface-2: #232322;
+  --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #9a988f;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255, 255, 255, 0.10); --link: #86b6ef;
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+  --warning-wash: #2e2410; --critical-wash: #2f1515;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--page); color: var(--text-primary);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main, .linkbar-inner, footer { max-width: 44rem; margin: 0 auto; padding: 0 16px; }
+a { color: var(--link); }
+h1 { font-size: 1.6rem; margin: 1rem 0 0; line-height: 1.2; }
+h2 { font-size: 1.1rem; margin: 1.6rem 0 .5rem; }
+h3 { font-size: 1rem; margin: 1.2rem 0 .4rem; }
+.muted { color: var(--text-secondary); }
+.small { font-size: .875rem; }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* link bar */
+.linkbar { background: var(--surface-1); border-bottom: 1px solid var(--border); font-size: .9rem; }
+.linkbar-inner { display: flex; flex-wrap: wrap; gap: .25rem 1.1rem; padding-top: .55rem; padding-bottom: .55rem; }
+.linkbar a { text-decoration: none; }
+.linkbar a[aria-current] { color: var(--text-primary); font-weight: 600; }
+.subtitle { margin: .2rem 0 0; color: var(--text-secondary); }
+
+/* freshness banner */
+.banner { margin: 1rem 0; padding: .6rem .8rem; border-radius: 8px; border: 1px solid var(--border);
+          background: var(--surface-1); }
+.banner.late { background: var(--warning-wash); border-left: 4px solid var(--warning); }
+.banner.stale { background: var(--critical-wash); border-left: 4px solid var(--critical); }
+.banner.late::before { content: "\26A0\FE0E  "; }
+.banner.stale::before { content: "\26D4\FE0E  "; }
+
+/* Now tiles */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: .75rem .9rem; }
+.tile-label { color: var(--text-secondary); font-size: .9rem; }
+.tile-value { font-size: 2.6rem; font-weight: 600; line-height: 1.15; }
+#now-temp .tile-value { font-size: 2rem; }
+.tile-age { color: var(--text-secondary); font-size: .85rem; }
+.tile.stale .tile-value, .tile.stale .tile-label { color: var(--text-muted); text-decoration: line-through; }
+.tile.stale .tile-age { color: var(--critical); font-weight: 600; }
+.tile.late { border-left: 4px solid var(--warning); }
+.tile.late .tile-age { font-weight: 600; }
+
+/* charts */
+.chart { position: relative; height: 170px; background: var(--surface-1); border: 1px solid var(--border);
+         border-radius: 10px; padding: .4rem .3rem .2rem; margin-bottom: .6rem; }
+.chart.tall { height: 220px; }
+.chart-title { font-size: .9rem; color: var(--text-secondary); margin: .2rem 0 .2rem .2rem; }
+.legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: .875rem; color: var(--text-secondary); margin: .2rem 0 .6rem; }
+.key { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: .4rem; vertical-align: 0; }
+.key.line { width: 14px; height: 2px; border-radius: 1px; vertical-align: middle; }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; background: var(--surface-1); border-radius: 10px; overflow: hidden;
+        border: 1px solid var(--border); }
+th, td { padding: .35rem .6rem; border-top: 1px solid var(--grid); text-align: left; vertical-align: top; }
+thead th { border-top: none; font-weight: 600; font-size: .875rem; color: var(--text-secondary); }
+th.num { text-align: right; }
+.table-wrap { overflow-x: auto; }
+
+/* disclaimer and More */
+.disclaimer { font-size: .9rem; color: var(--text-secondary); margin: 1rem 0; }
+details { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; margin: .5rem 0; }
+summary { cursor: pointer; padding: .7rem .9rem; font-weight: 600; }
+.section-body { padding: 0 .9rem .9rem; }
+dl { margin: 0; }
+dt { color: var(--text-secondary); font-size: .875rem; margin-top: .6rem; }
+dd { margin: 0; }
+.nowrap { white-space: nowrap; }
+tr.label-row td { border-top: none; padding-top: 0; }
+dd ul, .plain { margin: 0; padding-left: 1.1rem; }
+
+/* webcams */
+figure { margin: 0 0 .5rem; }
+img.cam { width: 100%; height: auto; display: block; border-radius: 8px; background: var(--grid); aspect-ratio: 16 / 9; }
+figcaption { font-size: .85rem; color: var(--text-secondary); margin-top: .25rem; }
+.controls { display: flex; gap: .6rem; align-items: center; }
+.controls input[type=range] { flex: 1; }
+button { font: inherit; padding: .35rem .9rem; border-radius: 8px; border: 1px solid var(--axis);
+         background: var(--surface-2); color: var(--text-primary); cursor: pointer; }
+
+footer { color: var(--text-secondary); font-size: .875rem; padding-top: 1rem; padding-bottom: 2rem; }
+
+@media (max-width: 380px) {
+  .tile-value { font-size: 2.1rem; }
+  #now-temp .tile-value { font-size: 1.7rem; }
+}
