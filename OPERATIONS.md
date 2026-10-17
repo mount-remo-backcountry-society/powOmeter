@@ -111,10 +111,14 @@ The RockBLOCK history is the backstop if the email intake misses messages.
 
 ## The publish workflow
 
-Every hour (once the repository is public) the **publish** workflow:
-fetches new satellite messages from the sheet's Messages tab into
-`raw/radio/messages_tab/` (a new file only when there is something new),
-rebuilds everything, publishes the files, and opens or closes alarm Issues.
+Every hour the **publish** workflow:
+1. fetches new satellite messages from the sheet's Messages tab into
+   `raw/radio/messages_tab/`, and new readings of the nearby stations into
+   `raw/avcan/` (a new file only when there is something new)
+2. rebuilds everything
+3. adds the newest webcam frames to the time lapse
+4. publishes the station page and the files
+5. opens or closes alarm Issues
 
 - **Run it by hand:** Actions tab → **publish** → **Run workflow**.
 - **Test the alarms:** run it by hand with some text in *inject_alarm*
@@ -145,9 +149,91 @@ GitHub emails everyone who watches the repository (top right: **Watch** →
 | Distance step at a visit without a re-mount | Probably an unrecorded re-mount, or fresh snow | If re-mounted: add a mount in `config/mounts.yaml`. If snowfall: nothing; the label stays "estimate" until the next mount change |
 | TEST (injected) | Someone tested the alarms | Nothing; the next normal run closes it |
 
+## The station page
+
+<https://mount-remo-backcountry-society.github.io/powOmeter/>. The page's
+files are in `site/`: `index.html` (text and layout), `app.js` (what it
+calculates), `style.css` (colours), `terms.html` (terms of use).
+
+- **What the colours mean:** no colour, the newest reading is under 6 hours
+  old (normal: the station sends 7 times a day). **Amber:** 6 to 12 hours,
+  probably only a delay. **Red, values struck through:** over 12 hours, the
+  same limit as the "no message" alarm. A separate red message, "the data
+  processing has stopped", means the hourly workflow itself has not run
+  for 3 hours.
+- **Times on the page** are BC time, a fixed UTC−7 (the constant
+  `BC_OFFSET_H` in `app.js`). If BC ever changes its clocks again, change
+  that one line. The data files stay in UTC.
+- **Snow depth below zero** shows as 0 on the main view; "More → Detailed
+  readings" and the files keep the real value.
+- **Changing a link** in the bar at the top (powWX, avalanche.ca): edit it
+  in both `site/index.html` and `site/terms.html`.
+- **Check the page's calculations:** open `selftest.html` on the published
+  site; every line should say OK.
+- **(computer) See the page in any state** (fresh, late, stale, storm,
+  alarms, a faulty nearby station, …) with made-up data:
+  `python tools/preview_site.py` lists the states;
+  `python tools/preview_site.py storm` serves one at <http://localhost:8000>.
+  `python tools/preview_site.py live` shows the files of your last build.
+
+## Nearby stations
+
+Kasiks High, Kasiks Low and Shames (bottom of the hill) belong to the BC
+Ministry of Transportation & Infrastructure. They come from Avalanche
+Canada's station API, which keeps only about 7 days, so a few days of
+failed fetches lose nothing.
+
+- **Switched on only with the Ministry's written permission on file**
+  (CLAUDE.md rule 3). They are on: the record is
+  `docs/permissions/moti-2026-10.md`. Its conditions (credit the Ministry,
+  say it is not liable) are met by the `licence` text in
+  `config/stations.yaml`; keep both if you change it. The Ministry asked that
+  its reply not be given to AI tools: never paste it into an assistant.
+  For another station: save a record of the permission in
+  `docs/permissions/` (no names or email addresses of people), then in
+  `config/stations.yaml` set `permission:` to that file, `licence:` to the
+  permission's terms, and `enabled:` and `publish:` to true. `validate`
+  refuses without the file.
+- **A faulty sensor** (like Kasiks High's temperature since 2026-09-25) is
+  labelled `suspect` automatically when it disagrees with every other
+  station, and left out of the page's chart. To mark a period by hand, add
+  a `delete` correction for that station (see "Adding a correction").
+- **A new kind of reading appears** (e.g. snow height in winter): the
+  station's new field names are listed in `status.json` under
+  `info` → `nearby_unmapped_fields`. An AI assistant can add them to
+  `powometer/decoders/avalanche_canada.py`.
+- **If a station stops:** its time in `status.json` → `nearby` stops
+  moving. Nothing to do on our side unless Avalanche Canada changed its
+  API; the fetch prints the error in the workflow log.
+
+## Webcams
+
+Shames Mountain's two webcams (chairlift, parking lot), set up in
+`config/webcams.yaml`. Like the nearby stations, they are **switched on
+only with Shames Mountain's written permission on file**
+(`enabled: true`, `permission:` naming the file in `docs/permissions/`).
+They are on: the record is `docs/permissions/shames-webcams-2026-10.md`.
+Its conditions (credit Shames Mountain, say it is not liable) are met by
+`credit` in `config/webcams.yaml`. As with the Ministry, never paste Shames
+Mountain's reply into an AI assistant.
+
+- The page shows each camera's newest image, loaded from Shames Mountain's
+  own address, and a **3-day time lapse**: one daylight frame an hour
+  (night frames are left out), shrunk to 960 pixels.
+- The frames are kept **in the published site only, never in git** (git
+  keeps every file forever: about 3 GB a season). Between hourly runs they
+  are kept in the workflow's cache; if that is ever lost, the next run takes
+  them back from the live site, and if that fails too, the time lapse
+  simply starts again.
+- A camera that is off for the season serves the same image for weeks; it
+  is added once and drops out after 3 days.
+- If Shames Mountain changes the image addresses, update the `url:` lines.
+- Nothing about the webcams can stop the hourly publishing.
+
 ## Monthly
 
-1. Open the published page and check that "Files built" is recent.
+1. Open the published page, "More → Station health", and check that
+   "Files built" is recent.
 2. Edit `KEEPALIVE.md` in the GitHub web interface: put today's date, and
    commit. GitHub silently switches off hourly workflows in a repository
    with no activity for 60 days; this prevents it.

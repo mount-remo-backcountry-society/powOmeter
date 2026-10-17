@@ -1,4 +1,4 @@
-# POW-O-METER published data: schema v1
+# POW-O-METER published data: schema v1 (version 1.1)
 
 This is the contract for the files under `v1/`. **Changes are add-only:**
 columns and variables are never renamed, removed or reordered. A breaking
@@ -12,8 +12,11 @@ change gets a new `v2/` alongside `v1/`. All changes are listed in
 | `observations.csv` | Every point reading: all variables and statistics, with labels |
 | `best.csv` | Best available readings: median distance and snow depth, plus the point variables. Values with quality `poor` or `missing` are left out |
 | `best_hourly.csv` | `best.csv` interpolated to whole hours. **Not hourly means** |
-| `latest.json` | The most recent value of each variable in `best.csv` |
-| `status.json` | Station health: last observation and message, clock offset, battery, decode errors, and `alarms` (a list of `{id, message}`; empty when all is well) |
+| `recent.csv` | The rows of `best.csv` from the 30 days before its newest reading (small; added in 1.1) |
+| `latest.json` | The most recent value of each variable in `best.csv`. **Each value has its own time and site:** values measured only on the SD card (air pressure, battery, enclosure temperature) are only as recent as the last site visit |
+| `status.json` | Station health: last observation and message, clock offset, battery, decode errors, and `alarms` (a list of `{id, message}`; empty when all is well). `battery_v` comes from the SD card; its time is `battery_v_time_utc` (1.1). `battery_bucket` is the radio's current level, `battery_bucket_upper_v` its upper voltage (1.1). `nearby` (1.1): per nearby station, the newest observation and the last fetch that brought new data |
+| `nearby_best.csv`, `nearby_recent.csv` | Nearby stations of other owners (1.1): same columns, published separately from POW-O-METER's own files. Each owner's licence applies (`sites.json`) |
+| `nearby_latest.json` | The most recent value of each variable per nearby station (1.1) |
 | `sites.json` | Stations and sites: coordinates, periods, licence per source |
 | `datapackage.json` | Column definitions, units, CF standard names, licence |
 
@@ -22,13 +25,13 @@ change gets a new `v2/` alongside `v1/`. All changes are listed in
 | Column | Meaning |
 |---|---|
 | `time_utc` | UTC instant of the reading, RFC 3339 with `Z`. In `best_hourly.csv`: the whole hour |
-| `station_id` | `powometer` |
+| `station_id` | `powometer`; in the `nearby_*` files `avcan_56` (Kasiks High), `avcan_57` (Kasiks Low), `avcan_58` (Shames, bottom of the hill) |
 | `site_id` | `shames_top_a` (original site, until 2026-09-26) or `shames_top_b` (current site). **Never combine snow depth across sites** |
 | `variable` | See below |
-| `statistic` | `point`; or for the ultrasonic burst: `min`, `max`, `median` |
+| `statistic` | `point`; or for the ultrasonic burst: `min`, `max`, `median`. Nearby stations (1.1): `mean` (average over the hour), `sum` (total over the hour) |
 | `value` | Number; empty when missing |
 | `unit` | See below |
-| `source` | `sd` (SD card, authoritative), `radio` (satellite; fills where the SD card has no reading), `derived` (in `best_hourly.csv`: interpolated). Snow depth keeps the source of the distance it comes from |
+| `source` | `sd` (SD card, authoritative), `radio` (satellite; fills where the SD card has no reading), `derived` (in `best_hourly.csv`: interpolated), `avcan` (nearby stations, via Avalanche Canada's station API). Snow depth keeps the source of the distance it comes from |
 | `level` | `qc` (automatic checks applied) or `corrected` (a manual correction applied). Raw data is in `raw/` of the repository |
 | `approval` | `working` (shown as **Provisional**), `in_review`, `approved` |
 | `quality` | WaterML 2.0 codes (WMO "WaterML2"): `good`, `suspect`, `estimate`, `poor`, `unchecked`, `missing` |
@@ -52,6 +55,14 @@ was corrected.
 | `air_pressure` | `surface_air_pressure` | hPa | Station level, SD card only |
 | `battery_voltage` | – | V | SD card only |
 | `enclosure_temperature` | – | degC | Inside the logger box (pressure sensor), SD card only. Diagnostic: LiPo charging stops below about 0 °C |
+| `wind_speed` | `wind_speed` | km/h | Nearby stations only (1.1) |
+| `wind_from_direction` | `wind_from_direction` | degree | Nearby stations only (1.1): direction the wind blows from |
+| `precipitation_amount` | `precipitation_amount` | mm | Nearby stations only (1.1), statistic `sum` over the hour |
+
+**Nearby stations: time convention.** Their values are hourly (`mean` or
+`sum`); `time_utc` is the time the source gives. Whether that marks the start
+or the end of the hour is **not yet verified**. Their snow depth (when the
+station reports one) is the station's own measurement, statistic `point`.
 
 ## Qualifiers
 
@@ -61,7 +72,7 @@ was corrected.
 | `too_close` | The sensor's minimum-range reading (0.50 m): something nearer than 50 cm, in storms usually falling snow; no distance |
 | `sensor_fault` | The temperature/humidity sensor returned no reading |
 | `out_of_range` | Physically implausible value |
-| `spike` | Departs sharply from neighbouring readings |
+| `spike` | Departs sharply from neighbouring readings (nearby stations: a temperature jumping away from the hours either side) |
 | `site_visit` | People were at the station |
 | `negative_depth` | Snow depth below −15 cm (sensor scatter is about ±8 cm on bare ground) |
 | `reference_estimate` | The snow-depth reference for this mounting is an estimate |
@@ -70,11 +81,16 @@ was corrected.
 | `timed_by_transmit` | Radio reading timed from the satellite transmit time |
 | `interpolated` | Hourly value interpolated between readings (a reading exactly on the hour is used as is, without this qualifier) |
 | `gap_filled` | Value filled by a `gap_fill` correction |
+| `stuck` | Nearby stations: temperature unchanged for 12 h or more (1.1) |
+| `neighbour` | Nearby stations: temperature agrees with none of the other stations, allowing for elevation and inversions (1.1) |
+| `negative_amount` | Nearby stations: small negative precipitation, gauge noise (1.1) |
 | `C001`, `C002` … | Ids of manual corrections (`config/corrections.yaml` in the repository) |
 
 ## Licence
 
 POW-O-METER data: CC BY 4.0, credit "Mount Remo Backcountry Society". Data
-from other stations, if ever included, keeps its owner's licence, given per
-source in `sites.json`. Station data are not a forecast; see
+from other stations keeps its owner's terms, given per source in
+`sites.json` (`licence`): for the BC Ministry of Transportation &
+Infrastructure stations, credit to the Ministry and a statement that it is
+not liable. Station data are not a forecast; see
 <https://avalanche.ca>.

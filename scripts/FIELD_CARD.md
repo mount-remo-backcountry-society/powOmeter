@@ -231,3 +231,20 @@ cell is not holding the time (see "Coin cell fails the test").
 If you ever see `matches NO KNOWN ERA`, Iridium has changed epoch again. The
 raw hex in that line plus the true UTC of the message is all that is needed to
 compute the new epoch — one line added to the era table in the sketch fixes it.
+
+---
+
+## Next visit: the unexplained "too close" readings
+
+In summer 2025 the snow sensor often reported its minimum-range value
+(0.50 m: "something nearer than 50 cm") with no snow falling: 997 of the
+1,245 such readings are April to July 2025. Cause unknown. At the next visit:
+
+- **Photograph the sensor face** close up (water drops, frost, insects,
+  spider webs, nests).
+- **Photograph everything within 50 cm below and around the sensor**: the
+  mount arm, cables, antenna, guy wires, growing vegetation.
+- Note anything that could sit in the sensor's beam when the mast moves in
+  the wind.
+
+Upload photos without location (OPERATIONS.md, "After a site visit").

@@ -253,14 +253,24 @@ Parquet is added only if a consumer asks for it.
 
 ## 7. Presentation: two linked sites
 
-- **Station site (MRBS):**
-  - current conditions first (mobile-first)
-  - charts per station and site, with labels
-  - downloads
-  - station health
-  - **times shown in local time (America/Vancouver), labelled as such**
-    (files stay UTC)
-  - overlays only once licensed (§10)
+- **Station site (MRBS)**, simple first (Julian, 2026-10-05):
+  - **main view:** current snow depth, temperature and humidity with their
+    age; 7-day charts of snow depth, temperature, wind (nearby stations
+    only: POW-O-METER has no wind sensor) and humidity, with the nearby
+    stations as lines that can be ticked on and off, and a hover that
+    follows the same time in every chart; a 24 h table, one row per
+    reading ("Mon 5 Oct, 14:05"); the webcams with a 3-day time lapse.
+    Negative snow depth shows as 0 there (files keep the real value). A
+    warning line appears only when the data are late or stale, or
+    processing has stopped. Links open in new tabs
+  - **"More"**, loaded only when opened: detailed readings with labels;
+    nearby stations' latest temperatures; station health; downloads
+  - **times shown in BC time, a fixed UTC−7, labelled as such** (files
+    stay UTC). Not `America/Vancouver`: BC's permanent UTC−7 is only in
+    tzdata 2026b, so devices with older time-zone data would be 1 h off
+    from 2026-11-01
+  - other owners' data and images only with their written permission on
+    file (§10)
 - **Forecast site (powWX):** as now. Each site works without the other; a
   shared link bar connects them and the Avalanche Canada forecast.
 - **Safety (R6):**
@@ -373,8 +383,17 @@ phase 2 (§4).
   permission. Station locations are under the Open Government Licence – BC.
   Verified 2026-10-02; the records are saved in `docs/research/evidence/`
   because both are marked "PENDING ARCHIVE".
-- **Until permission arrives:** no MoTI values in the public repo, the files
-  or on the site. Showing them on a chart also counts as reproduction (F11).
+- **Until permission is on file:** no MoTI values in the public repo, the
+  files or on the site. Showing them on a chart also counts as reproduction
+  (F11). `validate` refuses to enable another owner's station, or the
+  webcams, without a record in `docs/permissions/`.
+- **Permission received** from MoTI and from Shames Mountain (webcams),
+  2026-10-05. Both cover everything POW-O-METER does with them (MoTI: the
+  page, the public raw archive and the downloads; Shames: the live image and
+  the time-lapse copies), and powWX too, on two conditions: credit the owner, and say it is
+  not liable. Both owners asked that their replies not be given to AI tools,
+  so `docs/permissions/` holds Julian's record of the terms, and the
+  originals stay with him, outside the repo (2026-10-16).
 - **Julian's permission request** should name both projects (POW-O-METER and
   powWX), both uses (display and download), and the PCDS-sourced history.
 
@@ -427,10 +446,9 @@ phase 2 (§4).
 | **0. Foundations** | Repo (Julian's account is OK), `.gitignore`, local hook and CI pattern check, raw-immutability check, sanitised export, scrubbed Apps Script copy, licence files, backup of local-only files | A planted test secret is blocked; nothing sensitive in history. The MRBS organization is requested |
 | **1. Record** | Raw archive; `powometer/` (decoders, timing, SD, merge with statistic, snow-depth derivation, QC, operation log, labels, snapshots, on-the-hour series); config; `tests/` with committed fixtures | A rebuild reproduces the post-2026-09-22 Data rows (except documented differences) and `data/Cleaned/UTC/` values. Named tests pass: both DST changes, overlapping SD downloads, both radio date formats (the 22 messages since 2026-09-22 as a fixture), the v1.3 statistic change, an approved-snapshot mismatch. Two rebuilds are identical |
 | **2. Publish** | Requires the MRBS organization. Publish + check Actions, v1 outputs (POW-O-METER only), alarm Issues, keep-alive | Two weeks of clean runs; an injected fault opens and then closes an Issue |
-| **3. Station site** | Mobile-first site, labels, local time, live data age, downloads, link bar | Terms of use agreed with MRBS; used instead of Looker for a month |
+| **3. Station site** | Mobile-first site, simple main view and "More" (§7), local time, live data age, downloads, link bar; nearby stations (Avalanche Canada API) and the Shames webcams with a 3-day time lapse, both once permission is on file; contract v1.1 (add-only) | Terms of use agreed with MRBS; used instead of Looker for a month |
 
 **Parked:**
-- nearby-station overlay (needs MoTI permission)
 - powWX integration
 - Avalanche Canada on v1
 - RockBLOCK HTTP intake: it must answer HTTP 200 within 3 s; retries 14
@@ -467,12 +485,14 @@ phase 2 (§4).
 | 2026-09-29 | Raw-first pipeline in the style of powWX; separate station repo; public repo + Pages; Looker in parallel; the station owns site history; two linked sites |
 | 2026-09-30 | MRBS owns the station project; powWX stays personal; one-way dependency; PCDS as the archive source; QC on third-party data |
 | 2026-10-02 | Labels (`raw`/`qc`/`corrected`; approvals; WaterML2 quality); snow depth in whole cm; CF names; operation log; Aquarius optional; MoTI values withheld until permission; build phases 0–3, park the rest |
+| 2026-10-05 | Phase 3: simple main view with "More"; negative snow depth shown as 0 on the page; BC time as fixed UTC−7; nearby stations and webcams in scope (permission reported); webcam frames kept in the published site, not git; nearby stations published in separate files |
 | 2026-10-03 | Review findings adopted: MRBS organization before publishing; publish-always plus Issue alarms; approval snapshots; firmware-era statistics; snow depth as a derivation; point readings plus an on-the-hour series instead of hourly means; published-CSV intake; pattern-only CI check; smaller output set; handover routines |
 
 **Open questions**
 1. The MRBS organization's second owner; terms of use. (Licences confirmed
    by MRBS, 2026-10.)
-2. MoTI permission (pending; to cover both projects).
+2. ~~MoTI and Shames Mountain permissions~~: filed and checked for scope
+   2026-10-16 (§10); they cover powWX too.
 3. Which Google account owns the Apps Script trigger?
 4. What would Avalanche Canada want from v1?
 5. Is Julian's employer comfortable with Aquarius being used for this station?

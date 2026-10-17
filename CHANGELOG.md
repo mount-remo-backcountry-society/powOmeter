@@ -3,7 +3,25 @@
 Consumers (Avalanche Canada, powWX, anyone else) can watch this file for
 changes to the published format. See `SCHEMA.md`.
 
-## v1.0: 2026-10-04 (not yet published)
+## v1.1: not yet published (phase 3)
+
+Additions only; nothing of v1.0 changes.
+- `recent.csv`: the rows of `best.csv` from the 30 days before its newest
+  reading (small enough for a phone).
+- `status.json`: `battery_v_time_utc` (the SD-card voltage `battery_v` is
+  only as recent as the last site visit), `battery_bucket_upper_v`, and
+  `nearby`.
+- Nearby stations of the BC Ministry of Transportation & Infrastructure,
+  published separately (other owner, other licence): `nearby_best.csv`,
+  `nearby_recent.csv`, `nearby_latest.json`. New variables `wind_speed`,
+  `wind_from_direction`, `precipitation_amount`; statistics `mean` and
+  `sum`; source `avcan`; qualifiers `stuck`, `neighbour`,
+  `negative_amount`. Switched on with the Ministry's written permission
+  (2026-10); their `licence` in `sites.json` gives the Ministry's credit and
+  says it is not liable.
+- `sites.json`: sites of the nearby stations.
+
+## v1.0: 2026-10-04 (published 2026-10-04)
 
 First version (variables: snow_depth, distance_to_surface, air_temperature,
 relative_humidity, air_pressure, battery_voltage, enclosure_temperature):

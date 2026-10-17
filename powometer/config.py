@@ -19,7 +19,8 @@ import yaml
 from . import CONFIG, ROOT
 
 DECODER_TYPES = {"powometer", "avalanche_canada"}
-DECODERS_BUILT = {"powometer"}        # avalanche_canada: planned (design R5, parked)
+DECODERS_BUILT = {"powometer", "avalanche_canada"}
+OWN_LICENCE = "CC-BY-4.0"             # MRBS's own data; anything else needs a permission record
 MOUNT_GAP_MAX_H = 12                  # longer gap between mounts: snow depth silently missing
 MOUNT_METHODS = {"bare_ground", "tape", "chained", "field_offset"}
 QUALITIES = {"good", "estimate"}
@@ -28,7 +29,8 @@ OP_PARAMS = {"delete": set(), "spike_filter": {"max_step", "window"},
              "threshold": {"min", "max"}, "gap_fill": {"max_gap"},
              "offset": {"value"}, "drift": {"start", "end"}}
 VARIABLES = {"all", "snow_depth", "distance_to_surface", "air_temperature",
-             "relative_humidity", "air_pressure", "battery_voltage", "enclosure_temperature"}
+             "relative_humidity", "air_pressure", "battery_voltage", "enclosure_temperature",
+             "wind_speed", "wind_from_direction", "precipitation_amount"}
 STATISTICS = {"min", "median"}
 REMOUNT = {True, False, "probable", "unknown"}
 INITIALS = re.compile(r"^[A-Z]{2,4}$")
@@ -134,6 +136,13 @@ def validate(config_dir: Path = CONFIG, root: Path = ROOT) -> list[str]:
                 and s.get("type") not in DECODERS_BUILT:
             p.append(f"stations.yaml {s.get('id')}: no decoder for type {s.get('type')!r} is built yet, "
                      "so it cannot be enabled or published")
+        # rule 3 of CLAUDE.md: someone else's data needs their written permission on file
+        if (s.get("enabled") is True or s.get("publish") is True) and s.get("licence") != OWN_LICENCE:
+            perm = s.get("permission")
+            if not perm or not (root / str(perm)).is_file() or not str(perm).startswith("docs/permissions/"):
+                p.append(f"stations.yaml {s.get('id')}: data owned by {s.get('operator')!r} can only be enabled "
+                         "or published with 'permission' naming the owner's written permission, filed in "
+                         "docs/permissions/")
     station_ids = set(ids)
 
     # sites
@@ -231,6 +240,25 @@ def validate(config_dir: Path = CONFIG, root: Path = ROOT) -> list[str]:
                 p.append(f"{name}: '{k}' is required")
         if x.get("by") and not INITIALS.match(str(x["by"])):
             p.append(f"{name}: 'by' must be initials")
+
+    # webcams (images owned by Shames Mountain)
+    if (config_dir / "webcams.yaml").exists():
+        w = _load("webcams.yaml", config_dir)
+        if not isinstance(w.get("enabled"), bool):
+            p.append("webcams.yaml: 'enabled' must be true or false")
+        if w.get("enabled") is True:
+            perm = str(w.get("permission") or "")
+            if not perm.startswith("docs/permissions/") or not (root / perm).is_file():
+                p.append("webcams.yaml: the images can only be enabled with 'permission' naming the "
+                         "owner's written permission, filed in docs/permissions/")
+        if not isinstance(w.get("keep_hours"), (int, float)) or not 0 < w["keep_hours"] <= 24 * 7:
+            p.append("webcams.yaml: keep_hours must be a number of hours (at most a week)")
+        cam_ids = [x.get("id") for x in w.get("cameras") or []]
+        if len(cam_ids) != len(set(cam_ids)) or not all(cam_ids):
+            p.append("webcams.yaml: every camera needs an id, and ids must be unique")
+        for x in w.get("cameras") or []:
+            if not str(x.get("url", "")).startswith("https://") or not x.get("label"):
+                p.append(f"webcams.yaml {x.get('id')}: needs a label and an https:// url")
 
     # approvals
     for a in c.approvals:

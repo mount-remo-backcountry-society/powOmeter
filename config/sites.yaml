@@ -23,3 +23,34 @@ sites:
     from: 2026-09-26T20:45:00Z      # in place by 13:45 local; v1.3 started after
     until: null
     notes: "About 70 m from site A, same elevation, less wind-affected."
+
+  # Nearby stations of the BC Ministry of Transportation & Infrastructure.
+  # Locations: Avalanche Canada's station list (weather.prod.avalanche.ca/stations);
+  # MoTI station locations are under the Open Government Licence - BC.
+  # `from` = start of the station's record (PCDS metadata) where known.
+  - id: kasiks_high
+    station: avcan_56
+    name: Kasiks High
+    latitude: 54.30161
+    longitude: -129.44333
+    elevation_m: 1435
+    from: 1975-01-03T00:00:00Z
+    until: null
+
+  - id: kasiks_low
+    station: avcan_57
+    name: Kasiks Low
+    latitude: 54.30361
+    longitude: -129.41833
+    elevation_m: 732
+    from: 1989-10-16T00:00:00Z
+    until: null
+
+  - id: shames_bottom
+    station: avcan_58
+    name: Shames (bottom of the hill)
+    latitude: 54.48497
+    longitude: -128.95586
+    elevation_m: 740
+    from: 2000-01-01T00:00:00Z      # record start unknown; earlier than any data held
+    until: null

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POW-O-METER page self-test</title>
+<style>body { font: 15px/1.5 system-ui, sans-serif; margin: 1rem; } .fail { color: #b00; } .ok { color: #070; }</style>
+</head>
+<body>
+<h1>Station page self-test</h1>
+<p>Checks the page's own calculations (ages, BC time, which values may show as current). Open this file from the
+  published site or a local preview; every line should say OK.</p>
+<p id="summary">Running…</p>
+<ol id="results"></ol>
+<script src="app.js"></script>
+<script>
+(function () {
+  const P = window.POW, out = document.getElementById("results");
+  let failed = 0, n = 0;
+  const eq = (name, got, want) => {
+    n++;
+    const ok = JSON.stringify(got) === JSON.stringify(want);
+    if (!ok) failed++;
+    const li = document.createElement("li");
+    li.className = ok ? "ok" : "fail";
+    li.textContent = (ok ? "OK  " : "FAIL  ") + name + (ok ? "" : ` — got ${JSON.stringify(got)}, want ${JSON.stringify(want)}`);
+    out.append(li);
+  };
+  const T = (s) => Date.parse(s);
+
+  // BC time is a fixed UTC-7, also in winter (BC dropped clock changes in 2026)
+  eq("summer time", P.fmtDateTime(T("2026-10-05T21:05:00Z")), "Mon 5 Oct, 14:05");
+  eq("winter time stays UTC-7", P.fmtDateTime(T("2026-12-15T21:05:00Z")), "Tue 15 Dec, 14:05");
+  eq("day", P.fmtDay(T("2026-10-02T21:05:00Z")), "Fri 2 Oct");
+  eq("date and time", P.fmtDateTime(T("2026-12-01T06:30:00Z")), "Mon 30 Nov, 23:30");
+  eq("BC midnights", P.midnights(T("2026-12-01T00:00:00Z"), T("2026-12-03T00:00:00Z")).map((t) => new Date(t).toISOString()),
+     ["2026-12-01T07:00:00.000Z", "2026-12-02T07:00:00.000Z"]);
+
+  // ages
+  eq("age: minutes", P.ageText(0.5), "30 min ago");
+  eq("age: hours", P.ageText(3.4), "3 h ago");
+  eq("age: days", P.ageText(72), "3 days ago");
+  eq("fresh up to 6 h", [P.freshness(5.9), P.freshness(6.1), P.freshness(12.1)], ["fresh", "late", "stale"]);
+
+  // snow depth below zero shows as 0
+  eq("negative depth", [P.displayDepth(-4), P.displayDepth(0), P.displayDepth(12.4)], [0, 0, 12]);
+  eq("temperature", [P.fmtTemp(-3.44), P.fmtTemp(2)], ["−3.4 °C", "2.0 °C"]);
+
+  // only the current site under "Now"
+  const sites = { sites: [{ id: "a", station: "powometer", until_utc: "2026-09-26T18:15:00Z" },
+                          { id: "b", station: "powometer", until_utc: null },
+                          { id: "k", station: "avcan_56", until_utc: null }] };
+  eq("current site", P.currentSite(sites), "b");
+  const now = T("2026-12-01T12:00:00Z");
+  const latest = { values: {
+    snow_depth: { time_utc: "2026-12-01T10:00:00Z", value: 40, site_id: "b", quality: "good", approval: "working" },
+    air_pressure: { time_utc: "2026-11-20T10:00:00Z", value: 886, site_id: "a" },
+    air_temperature: { time_utc: "2026-11-29T10:00:00Z", value: -5, site_id: "b" } } };
+  eq("current value", P.nowValue(latest, "snow_depth", "b", now).state, "fresh");
+  eq("old-site value never current", P.nowValue(latest, "air_pressure", "b", now), null);
+  eq("old value is stale", P.nowValue(latest, "air_temperature", "b", now).state, "stale");
+
+  // table rows: one per reading, newest first, current site only
+  const csv = "time_utc,station_id,site_id,variable,statistic,value,unit,source,level,approval,quality,qualifiers\n" +
+    "2026-12-01T10:00:00Z,powometer,b,snow_depth,median,-3,cm,radio,qc,working,good,\n" +
+    "2026-12-01T10:00:00Z,powometer,b,air_temperature,point,-2.5,degC,radio,qc,working,good,\n" +
+    "2026-12-01T11:07:00Z,powometer,b,air_temperature,point,-2.9,degC,radio,qc,working,good,\n" +
+    "2026-11-20T11:07:00Z,powometer,a,air_temperature,point,1,degC,sd,qc,working,good,\n";
+  const rows = P.parseCSV(csv);
+  const r = P.readings(rows, "b", now - 24 * 3600e3, now);
+  eq("readings newest first", r.map((x) => [x.ms === T("2026-12-01T11:07:00Z"), x.snow_depth, x.air_temperature]),
+     [[true, undefined, -2.9], [false, -3, -2.5]]);
+
+  // charts: suspect left out, line broken across gaps
+  const s = P.series(P.parseCSV(csv.split("\n")[0] + "\n" +
+    "2026-12-01T00:00:00Z,powometer,b,air_temperature,point,1,degC,radio,qc,working,good,\n" +
+    "2026-12-01T01:00:00Z,powometer,b,air_temperature,point,-40,degC,radio,qc,working,suspect,spike\n" +
+    "2026-12-01T09:00:00Z,powometer,b,air_temperature,point,2,degC,radio,qc,working,good,\n"),
+    "air_temperature", 0);
+  eq("series", s.powometer.map((p) => p.y), [1, null, 2]);
+  const moved = P.series(P.parseCSV(csv.split("\n")[0] + "\n" +
+    "2026-09-26T18:00:00Z,powometer,a,snow_depth,median,-5,cm,sd,qc,working,good,\n" +
+    "2026-09-26T21:00:00Z,powometer,b,snow_depth,median,3,cm,radio,qc,working,good,\n" +
+    "2026-09-26T21:00:00Z,powometer,b,snow_depth,max,9,cm,radio,qc,working,good,\n"),
+    "snow_depth", 0, { transform: P.displayDepth });
+  eq("snow depth never joined across sites; median only; below 0 shows 0", moved.powometer.map((p) => p.y), [0, null, 3]);
+
+  // station names, wind, hover
+  eq("station label", [P.stationLabel("Shames POW-O-METER", 1150), P.stationLabel("Shames (bottom of the hill)", 740)],
+     ["Shames POW-O-METER (1,150 m)", "Shames, bottom of the hill (740 m)"]);
+  eq("compass", [P.compass(0), P.compass(250), P.compass(359), P.compass(-90)], ["N", "WSW", "N", "W"]);
+  const H = 3600e3, a = [{ x: 0, y: 1 }, { x: H, y: 2 }, { x: 2 * H, y: null }], b = [{ x: 10 * H, y: 5 }];
+  eq("hover: nearest reading per station, none if too far", P.nearestEach([a, b], 0.6 * H), [1, -1]);
+  eq("labels", P.labelText({ approval: "working", quality: "suspect", qualifiers: "spike;C001" }),
+     "Provisional · suspect · spike, C001");
+  eq("battery", P.batteryText({ battery_bucket: 3, battery_bucket_upper_v: 3.7 }), "3.6–3.7 V (level 3)");
+
+  document.getElementById("summary").textContent = failed ? `${failed} of ${n} FAILED` : `All ${n} checks OK`;
+  document.title = failed ? "FAIL" : "PASS";
+})();
+</script>
+</body>
+</html>

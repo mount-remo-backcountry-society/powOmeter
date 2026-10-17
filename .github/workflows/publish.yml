@@ -1,7 +1,8 @@
 name: publish
 
-# Fetch new satellite messages, rebuild, publish, and open/close alarm Issues
-# (design §6.7, phase 2).
+# Fetch new satellite messages and nearby-station readings, rebuild, add
+# the newest webcam frames, publish the station page and files, and
+# open/close alarm Issues (design §6.7, phases 2-3).
 #
 # Runs hourly at an off-the-hour minute (GitHub delays jobs scheduled on the
 # hour), and by hand from the Actions tab. Actions minutes and Pages are free
@@ -29,7 +30,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04       # pinned: ubuntu-latest changes under us (Ubuntu 26 from 2026-10-19)
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
@@ -41,7 +42,7 @@ jobs:
       - name: Install pinned dependencies
         run: pip install -r requirements.txt
 
-      - name: Fetch new satellite messages
+      - name: Fetch new satellite messages and nearby-station readings
         env:
           MESSAGES_CSV_URL: ${{ secrets.MESSAGES_CSV_URL }}
         run: python -m powometer fetch
@@ -49,6 +50,7 @@ jobs:
       - name: Save new raw messages to the repository
         run: |
           git add raw/radio/messages_tab
+          if [ -d raw/avcan ]; then git add raw/avcan; fi
           if git diff --cached --quiet; then
             echo "nothing new"
           else
@@ -68,8 +70,28 @@ jobs:
           INJECT_ALARM: ${{ inputs.inject_alarm }}
         run: python -m powometer build
 
-      - name: Add the index page
-        run: cp site/index.html out/index.html
+      - name: Add the station page
+        run: cp -r site/. out/
+
+      # Webcam time lapse: frames live only in the published site and in this
+      # cache between runs, never in git. Nothing here can stop publishing.
+      - name: Restore webcam frames
+        uses: actions/cache/restore@v6
+        continue-on-error: true
+        with:
+          path: out/webcams
+          key: webcams-${{ github.run_id }}
+          restore-keys: webcams-
+      - name: Add the newest webcam frames
+        continue-on-error: true
+        timeout-minutes: 5
+        run: python -m powometer webcams out/webcams
+      - name: Save webcam frames
+        uses: actions/cache/save@v6
+        continue-on-error: true
+        with:
+          path: out/webcams
+          key: webcams-${{ github.run_id }}
 
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -84,7 +106,7 @@ jobs:
     needs: build
     # Pages needs a public repository on GitHub's free plan
     if: ${{ !github.event.repository.private }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

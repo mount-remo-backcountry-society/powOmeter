@@ -22,8 +22,10 @@ irreversible.
    or the maintainer's home location. Run `python tools/privacy_check.py`
    before committing.
 3. **Never commit BC MoTI observation data** (Kasiks High/Low, Shames #58)
-   unless `docs/` records written permission from the Ministry. Their licence
-   is "Access Only".
+   unless `docs/permissions/` records written permission from the Ministry.
+   Their licence is "Access Only". The same goes for Shames Mountain's
+   webcam images. `validate` enforces this: a station or the webcams can
+   only be enabled with `permission:` naming that file.
 4. **The published format is a contract** (`SCHEMA.md` from phase 1).
    Changes are add-only; never rename or reorder columns. Record changes in
    `CHANGELOG.md`.

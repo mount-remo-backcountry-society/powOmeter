@@ -2,9 +2,17 @@
 # type   = which decoder reads it (one module per type in powometer/decoders/)
 # publish = whether its values may appear in published files and on the site
 #
-# The BC Ministry of Transportation & Infrastructure (MoTI) stations are listed
-# but NOT enabled: their observations are "Access Only" (reproduction needs
-# written permission). See docs/DATA_PIPELINE_DESIGN.md §10.
+# enabled = whether `fetch` collects it and `build` processes it
+# permission = for data owned by others: the file in docs/permissions/ that
+#   records the owner's written permission. `validate` refuses to enable or
+#   publish such a station without it (CLAUDE.md rule 3).
+#
+# The BC Ministry of Transportation & Infrastructure (MoTI) observations are
+# "Access Only": reproduction needs written permission (design §10). The
+# Ministry gave it (record: docs/permissions/moti-2026-10.md) on condition that
+# it is credited and that it says the Ministry is not liable: `licence` says
+# both, and is published with each station and shown on the page. Keep both
+# if you change the wording.
 
 stations:
   - id: powometer
@@ -20,24 +28,27 @@ stations:
     operator: BC Ministry of Transportation & Infrastructure
     type: avalanche_canada
     source: {avalanche_canada_id: 56, pcds_native_id: "52322"}
-    enabled: false
-    publish: false
-    licence: "Access Only (BC MoTI); permission requested 2026-10"
+    enabled: true
+    publish: true
+    licence: "Data courtesy of the BC Ministry of Transportation & Infrastructure, used with permission; not covered by CC BY 4.0. The Ministry is not liable for these data or any use of them."
+    permission: docs/permissions/moti-2026-10.md
 
   - id: avcan_57
     name: Kasiks Low
     operator: BC Ministry of Transportation & Infrastructure
     type: avalanche_canada
     source: {avalanche_canada_id: 57, pcds_native_id: "52325"}
-    enabled: false
-    publish: false
-    licence: "Access Only (BC MoTI); permission requested 2026-10"
+    enabled: true
+    publish: true
+    licence: "Data courtesy of the BC Ministry of Transportation & Infrastructure, used with permission; not covered by CC BY 4.0. The Ministry is not liable for these data or any use of them."
+    permission: docs/permissions/moti-2026-10.md
 
   - id: avcan_58
     name: Shames (bottom of the hill)
     operator: BC Ministry of Transportation & Infrastructure
     type: avalanche_canada
     source: {avalanche_canada_id: 58}
-    enabled: false
-    publish: false
-    licence: "Access Only (BC MoTI); permission requested 2026-10"
+    enabled: true
+    publish: true
+    licence: "Data courtesy of the BC Ministry of Transportation & Infrastructure, used with permission; not covered by CC BY 4.0. The Ministry is not liable for these data or any use of them."
+    permission: docs/permissions/moti-2026-10.md
