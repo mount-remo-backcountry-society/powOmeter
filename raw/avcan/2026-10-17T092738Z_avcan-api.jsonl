@@ -1,0 +1,8 @@
+{"fetched_utc": "2026-10-17T09:27:38Z", "row": {"measurementDateTime": "2026-10-17T06:00:00Z", "stationId": 56, "windDirAvg": 154, "windDirCompass": "SE", "windSpeedAvg": 0}, "station_id": "avcan_56"}
+{"fetched_utc": "2026-10-17T09:27:38Z", "row": {"measurementDateTime": "2026-10-17T07:00:00Z", "stationId": 56, "windDirAvg": 85, "windDirCompass": "E", "windSpeedAvg": 0}, "station_id": "avcan_56"}
+{"fetched_utc": "2026-10-17T09:27:38Z", "row": {"measurementDateTime": "2026-10-17T08:00:00Z", "stationId": 56, "windDirAvg": 77, "windDirCompass": "E", "windSpeedAvg": 0}, "station_id": "avcan_56"}
+{"fetched_utc": "2026-10-17T09:27:38Z", "row": {"measurementDateTime": "2026-10-17T09:00:00Z", "stationId": 56, "windDirAvg": 82, "windDirCompass": "E", "windSpeedAvg": 0}, "station_id": "avcan_56"}
+{"fetched_utc": "2026-10-17T09:27:38Z", "row": {"airTempAvg": 4.4, "hourlyPrecip": 0.6, "measurementDateTime": "2026-10-17T06:00:00Z", "stationId": 58, "windDirAvg": 339, "windDirCompass": "N", "windSpeedAvg": 0}, "station_id": "avcan_58"}
+{"fetched_utc": "2026-10-17T09:27:38Z", "row": {"airTempAvg": 4.2, "hourlyPrecip": 0.8, "measurementDateTime": "2026-10-17T07:00:00Z", "stationId": 58, "windDirAvg": 359, "windDirCompass": "N", "windSpeedAvg": 2.8}, "station_id": "avcan_58"}
+{"fetched_utc": "2026-10-17T09:27:38Z", "row": {"airTempAvg": 4, "hourlyPrecip": 0.9, "measurementDateTime": "2026-10-17T08:00:00Z", "stationId": 58, "windDirAvg": 323, "windDirCompass": "NW", "windSpeedAvg": 0.6}, "station_id": "avcan_58"}
+{"fetched_utc": "2026-10-17T09:27:38Z", "row": {"airTempAvg": 3.3, "hourlyPrecip": 1.8, "measurementDateTime": "2026-10-17T09:00:00Z", "stationId": 58, "windDirAvg": 348, "windDirCompass": "N", "windSpeedAvg": 1.5}, "station_id": "avcan_58"}
