@@ -63,6 +63,10 @@ h3 { font-size: 1rem; margin: 1.2rem 0 .4rem; }
 .linkbar a { text-decoration: none; }
 .linkbar a[aria-current] { color: var(--text-primary); font-weight: 600; }
 .subtitle { margin: .2rem 0 0; color: var(--text-secondary); }
+.updated { margin: .3rem 0 0; }
+/* a button that looks like a link; padding keeps it easy to tap */
+.link-button { padding: .3rem .2rem; border: 0; background: none; color: var(--link); font-size: inherit; }
+.link-button:disabled { color: var(--text-secondary); cursor: default; }
 
 /* freshness banner */
 .banner { margin: 1rem 0; padding: .6rem .8rem; border-radius: 8px; border: 1px solid var(--border);

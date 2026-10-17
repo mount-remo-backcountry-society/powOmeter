@@ -31,6 +31,8 @@
   const GAP_H = 6;                         // break a chart line across a longer gap
   const HOVER_H = 2;                       // hover: a station's reading within this of the pointer
   const REFRESH_MIN = 10;
+  const REOPEN_MIN = 2;                    // back on screen after longer than this: refresh
+  const CAM_REFRESH_MIN = 5;               // newest webcam image: fetched afresh at most this often
   const CHART_QUALITIES = ["good", "estimate"];   // suspect values are left out of charts
   const STATION = "powometer";
   const OWN_NAME = "Shames POW-O-METER";
@@ -99,6 +101,15 @@
      *  real value. */
     displayDepth(cm) { return Math.max(0, Math.round(cm)); },
     fmtTemp(c) { return (c < 0 ? "−" : "") + Math.abs(c).toFixed(1) + " °C"; },
+    /** The webcam's newest-image address with a number that changes every
+     *  CAM_REFRESH_MIN, so browsers fetch it afresh (Shames' server lets them
+     *  keep a copy for an hour), while visitors in the same few minutes still
+     *  share one copy. */
+    freshUrl(url, nowMs) {
+      return url + (url.includes("?") ? "&" : "?") + "t=" + Math.floor(nowMs / (CAM_REFRESH_MIN * 60e3));
+    },
+    /** "Updated just now", "Updated 3 min ago": when this phone last fetched the files */
+    updatedText(fetchedMs, nowMs) { return "Updated " + POW.ageText((nowMs - fetchedMs) / H); },
     /** 250 -> "WSW" */
     compass(deg) { return COMPASS[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16]; },
     /** "Kasiks High (1,435 m)"; parentheses in a site name become a comma */
@@ -219,7 +230,7 @@
 
   const state = { latest: null, status: null, sites: null, recent: [], site: null,
                   near: { stations: {} }, nearRows: [], webcams: null, stations: [], hidden: new Set(),
-                  charts: {} };
+                  charts: {}, fetchedMs: null, camLive: [] };
 
   // -- stations: POW-O-METER plus the published nearby stations ------------
   function stationList() {
@@ -474,6 +485,7 @@
       return;
     }
     box.replaceChildren();
+    state.camLive = [];
     for (const cam of idx.cameras) box.append(camera(cam, idx.keep_hours));
     box.append(el("p", { class: "small muted", text: idx.credit }));
   }
@@ -481,8 +493,8 @@
   function camera(cam, keepHours) {
     // the frames of the time lapse, then the newest image from Shames itself
     const frames = cam.frames.map((f) => ({ src: "webcams/" + f.file, ms: POW.ms(f.time_utc) }))
-      .concat([{ src: cam.live_url, ms: null }]);
-    const img = el("img", { class: "cam", alt: `${cam.label} webcam`, loading: "lazy", src: cam.live_url });
+      .concat([{ src: POW.freshUrl(cam.live_url, Date.now()), ms: null }]);
+    const img = el("img", { class: "cam", alt: `${cam.label} webcam`, loading: "lazy", src: frames[frames.length - 1].src });
     const cap = el("figcaption", {});
     const slider = el("input", { type: "range", min: "0", max: String(frames.length - 1),
                                  value: String(frames.length - 1), "aria-label": `${cam.label}: go back in time` });
@@ -504,6 +516,13 @@
       timer = setInterval(() => { if (++i >= frames.length) { i = frames.length - 1; show(); stop(); } else show(); }, 400);
     });
     show();
+    // on refresh: a fresh newest image, swapped in only if it is the one showing
+    state.camLive.push((nowMs) => {
+      const live = frames[frames.length - 1], src = POW.freshUrl(cam.live_url, nowMs);
+      if (live.src === src) return;
+      live.src = src;
+      if (i === frames.length - 1) img.src = src;
+    });
     const controls = frames.length > 1 ? el("div", { class: "controls" }, play, slider)
       : el("p", { class: "small muted", text: "No time lapse yet: no daylight images in the last few days." });
     return el("div", { class: "camera" }, el("h3", { text: cam.label }), el("figure", {}, img, cap), controls);
@@ -589,6 +608,7 @@
     const now = Date.now();
     state.stations = stationList();
     renderBanner(now);
+    renderUpdated(now);
     renderTiles(now);
     renderPicker();
     renderCharts(now);
@@ -617,10 +637,20 @@
     const firstLoad = !state.status;
     Object.assign(state, { latest, status, sites, recent: POW.parseCSV(recent), site: POW.currentSite(sites),
                            near: near || { stations: {} }, nearRows: nearRows ? POW.parseCSV(nearRows) : [] });
+    state.fetchedMs = Date.now();
     if (firstLoad || JSON.stringify(webcams) !== JSON.stringify(state.webcams)) {
       state.webcams = webcams;
       renderWebcams();
+    } else {
+      for (const f of state.camLive) f(state.fetchedMs);
     }
+  }
+
+  // -- "Updated 3 min ago · Refresh" under the title --
+  function renderUpdated(now) {
+    if (state.fetchedMs === null) return;
+    $("updated").hidden = false;
+    $("updated-text").textContent = POW.updatedText(state.fetchedMs, now);
   }
 
   function start() {
@@ -636,15 +666,39 @@
       if (t) t.scrollIntoView();
     };
     window.addEventListener("hashchange", openHash);
-    const refresh = () => load().then(renderAll).catch(() => {
-      const b = $("banner");
-      b.hidden = false;
-      b.className = "banner stale";
-      b.textContent = "Could not load the data. Check your connection; the values shown (if any) may be old.";
-    });
+    const button = $("refresh");
+    let busy = null;                       // the refresh under way, so taps don't pile up
+    const refresh = () => busy || (busy = (async () => {
+      button.disabled = true;
+      button.textContent = "Updating…";
+      try {
+        await load();
+        renderAll();
+      } catch (e) {
+        const b = $("banner");
+        b.hidden = false;
+        b.className = "banner stale";
+        b.textContent = "Could not load the data. Check your connection; the values shown (if any) may be old.";
+      } finally {
+        button.disabled = false;
+        button.textContent = "↻ Refresh";
+        renderUpdated(Date.now());
+        busy = null;
+      }
+    })());
+    const tick = () => { if (state.status) { const n = Date.now(); renderBanner(n); renderTiles(n); renderUpdated(n); } };
+    // A phone app from the home screen has no reload button, and the phone
+    // pauses it in the background: refresh when it is back on screen.
+    const back = () => {
+      if (document.visibilityState !== "visible") return;
+      if (state.fetchedMs === null || Date.now() - state.fetchedMs > REOPEN_MIN * 60e3) refresh(); else tick();
+    };
+    button.addEventListener("click", refresh);
+    document.addEventListener("visibilitychange", back);
+    window.addEventListener("pageshow", (e) => { if (e.persisted) back(); });
     refresh().then(openHash);
-    setInterval(refresh, REFRESH_MIN * 60e3);
-    setInterval(() => { if (state.status) { const n = Date.now(); renderBanner(n); renderTiles(n); } }, 60e3);
+    setInterval(() => { if (document.visibilityState === "visible") refresh(); }, REFRESH_MIN * 60e3);
+    setInterval(tick, 60e3);
     matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (state.status) renderAll(); });
   }
   start();

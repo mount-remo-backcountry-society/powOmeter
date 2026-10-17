@@ -40,6 +40,14 @@
   eq("age: minutes", P.ageText(0.5), "30 min ago");
   eq("age: hours", P.ageText(3.4), "3 h ago");
   eq("age: days", P.ageText(72), "3 days ago");
+  eq("updated line", [P.updatedText(T("2026-12-01T18:00:00Z"), T("2026-12-01T18:00:30Z")),
+                      P.updatedText(T("2026-12-01T18:00:00Z"), T("2026-12-01T18:03:00Z"))],
+     ["Updated just now", "Updated 3 min ago"]);
+  // the webcam's newest image: same address within 5 minutes, a new one after
+  const cam = "https://example.org/cam.png";
+  eq("webcam address: same 5 minutes", P.freshUrl(cam, T("2026-12-01T18:01:00Z")), P.freshUrl(cam, T("2026-12-01T18:04:59Z")));
+  eq("webcam address: next 5 minutes", P.freshUrl(cam, T("2026-12-01T18:04:59Z")) !== P.freshUrl(cam, T("2026-12-01T18:05:00Z")), true);
+  eq("webcam address: keeps its own query", P.freshUrl(cam + "?a=1", 0), cam + "?a=1&t=0");
   eq("fresh up to 6 h", [P.freshness(5.9), P.freshness(6.1), P.freshness(12.1)], ["fresh", "late", "stale"]);
 
   // snow depth below zero shows as 0
