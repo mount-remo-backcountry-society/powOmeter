@@ -13,9 +13,11 @@ the GitHub Actions cache; if that is ever lost, run() takes the frames back
 from the live site, and if that fails too, the time lapse starts again.
 
 A frame is added only if it differs from the camera's previous one (a camera
-that is switched off serves the same image for weeks) and is not a night
+that is switched off serves the same image for weeks), is not a night
 frame (mean brightness below `min_brightness`, 0-255; measured 2026-10-05:
-night about 35, daylight about 125). Its time is the
+night about 35, daylight about 125), and is at least `min_frame_minutes`
+after the previous frame (publish runs every 5 minutes; without this the
+time lapse would grow too big for a phone). Its time is the
 image's Last-Modified time when the server gives one, else the fetch time.
 
 Nothing here may stop publishing (design principle 7): every failure is
@@ -124,6 +126,7 @@ def update(folder: Path, cfg: dict, now: datetime, get: Callable[[str], tuple[by
         old = restore(folder, cfg["site_url"], get)
     old_cams = {c["id"]: c for c in (old or {}).get("cameras", [])}
     keep_from = now - timedelta(hours=cfg.get("keep_hours", 72))
+    min_gap = cfg.get("min_frame_minutes", 0)
     cams = []
     for cam in cfg.get("cameras", []):
         frames = [f for f in old_cams.get(cam["id"], {}).get("frames", [])
@@ -134,7 +137,8 @@ def update(folder: Path, cfg: dict, now: datetime, get: Callable[[str], tuple[by
                 raise ValueError(f"not an image: {headers.get('content-type')!r}")
             sha = hashlib.sha256(data).hexdigest()
             t = _time(headers, now)
-            new = not frames or (frames[-1]["source_sha256"] != sha and frames[-1]["time_utc"] < _utc(t))
+            new = not frames or (frames[-1]["source_sha256"] != sha
+                                 and frames[-1]["time_utc"] < _utc(t - timedelta(minutes=min_gap)))
             if new and brightness(data) < cfg.get("min_brightness", 0):
                 new = False                          # night: nothing to see
             if new:

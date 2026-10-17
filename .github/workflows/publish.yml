@@ -4,8 +4,10 @@ name: publish
 # the newest webcam frames, publish the station page and files, and
 # open/close alarm Issues (design §6.7, phases 2-3).
 #
-# Runs hourly at an off-the-hour minute (GitHub delays jobs scheduled on the
-# hour), and by hand from the Actions tab. Actions minutes and Pages are free
+# Runs every 5 minutes, off the hour (GitHub delays jobs scheduled on the
+# hour), and by hand from the Actions tab. GitHub skips many scheduled runs:
+# set to hourly, it ran about every 5 hours (Oct 2026); at 5 minutes a
+# skipped run costs minutes, not hours. Actions minutes and Pages are free
 # only because the repository is public: it must stay public.
 
 on:
@@ -16,7 +18,7 @@ on:
         required: false
         default: ""
   schedule:
-    - cron: "23 * * * *"
+    - cron: "2-59/5 * * * *"      # :02, :07 ... :57
 
 permissions:
   contents: write     # commit new raw messages

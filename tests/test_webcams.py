@@ -113,3 +113,13 @@ def test_night_frames_are_left_out(tmp_path):
     web.images["https://cam/lift.png"] = (png(30), NOW)            # dark
     idx = webcams.run(tmp_path, NOW, web, {**CFG, "min_brightness": 50})
     assert frames(idx) == [] and len(frames(idx, "lot")) == 1
+
+
+def test_frames_are_spaced_by_min_frame_minutes(tmp_path):
+    # publish runs every 5 minutes; the camera changes every 10
+    web = Cams()
+    cfg = {**CFG, "min_frame_minutes": 55}
+    for m in range(0, 135, 5):
+        web.images["https://cam/lift.png"] = (png(20 + m // 10), NOW + timedelta(minutes=m // 10 * 10))
+        idx = webcams.run(tmp_path, NOW + timedelta(minutes=m), web, cfg)
+    assert frames(idx) == ["2026-12-01T18:00:00Z", "2026-12-01T19:00:00Z", "2026-12-01T20:00:00Z"]

@@ -7,9 +7,9 @@
 # `enabled: true` without it (CLAUDE.md rule 3 applies to images as well).
 #
 # Frames for the time lapse are kept in the published site only, never in
-# git (git keeps every file forever). Each hourly publish run adds the newest
-# frame of each camera, shrunk to `width` pixels, and drops frames older than
-# `keep_hours`.
+# git (git keeps every file forever). A publish run adds the newest frame of
+# each camera when the previous one is at least `min_frame_minutes` old,
+# shrunk to `width` pixels, and drops frames older than `keep_hours`.
 
 enabled: true
 permission: docs/permissions/shames-webcams-2026-10.md
@@ -19,6 +19,7 @@ keep_hours: 72
 width: 960                # pixels, time-lapse frames only
 jpeg_quality: 70
 min_brightness: 50        # 0-255; darker frames (night) are left out of the time lapse
+min_frame_minutes: 55     # time lapse: at most about one frame an hour (publish runs every 5 min)
 # where the published site lives: if the frames saved between runs are ever
 # lost, they are taken back from here
 site_url: https://mount-remo-backcountry-society.github.io/powOmeter/

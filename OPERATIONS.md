@@ -111,7 +111,7 @@ The RockBLOCK history is the backstop if the email intake misses messages.
 
 ## The publish workflow
 
-Every hour the **publish** workflow:
+Every 5 minutes the **publish** workflow (GitHub skips some runs; that is normal):
 1. fetches new satellite messages from the sheet's Messages tab into
    `raw/radio/messages_tab/`, and new readings of the nearby stations into
    `raw/avcan/` (a new file only when there is something new)
@@ -159,7 +159,7 @@ calculates), `style.css` (colours), `terms.html` (terms of use).
   old (normal: the station sends 7 times a day). **Amber:** 6 to 12 hours,
   probably only a delay. **Red, values struck through:** over 12 hours, the
   same limit as the "no message" alarm. A separate red message, "the data
-  processing has stopped", means the hourly workflow itself has not run
+  processing has stopped", means the publish workflow itself has not run
   for 3 hours.
 - **Times on the page** are BC time, a fixed UTC−7 (the constant
   `BC_OFFSET_H` in `app.js`). If BC ever changes its clocks again, change
@@ -221,14 +221,14 @@ Mountain's reply into an AI assistant.
   own address, and a **3-day time lapse**: one daylight frame an hour
   (night frames are left out), shrunk to 960 pixels.
 - The frames are kept **in the published site only, never in git** (git
-  keeps every file forever: about 3 GB a season). Between hourly runs they
+  keeps every file forever: about 3 GB a season). Between runs they
   are kept in the workflow's cache; if that is ever lost, the next run takes
   them back from the live site, and if that fails too, the time lapse
   simply starts again.
 - A camera that is off for the season serves the same image for weeks; it
   is added once and drops out after 3 days.
 - If Shames Mountain changes the image addresses, update the `url:` lines.
-- Nothing about the webcams can stop the hourly publishing.
+- Nothing about the webcams can stop the publishing.
 
 ## Monthly
 
