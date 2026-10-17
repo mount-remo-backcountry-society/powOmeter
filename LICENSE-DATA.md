@@ -9,11 +9,16 @@ You may share and adapt the data for any purpose, provided you give credit:
 
 > POW-O-METER data, Mount Remo Backcountry Society, CC BY 4.0.
 
-**Not covered:** data from third-party stations, such as BC Ministry of
-Transportation & Infrastructure stations shown for comparison. They keep their
-owners' terms, recorded per source in `sites.json`. BC MoTI observation data
-are "Access Only" and are **not** included in this repository or its
-published files unless written permission has been obtained.
+**Not covered:** data from third-party stations. They keep their owners'
+terms, recorded per source in `sites.json`.
+- **BC Ministry of Transportation & Infrastructure** stations (Kasiks High,
+  Kasiks Low, Shames bottom of the hill; `raw/avcan/` and the `nearby_*`
+  files): data courtesy of the Ministry, used with its written permission
+  (`docs/permissions/moti-2026-10.md`). If you reuse them, credit the
+  Ministry. The Ministry is not liable for these data or any use of them.
+- **Webcam images** shown on the station page: © Shames Mountain, used with
+  permission; not to be reused without Shames Mountain's permission. Shames
+  Mountain is not liable for them or any use of them.
 
 **No warranty; not a forecast.** The data come from a volunteer-run automatic
 station and may be wrong, late or missing. Do not rely on them alone for

@@ -598,9 +598,14 @@
   }
 
   function renderCredits() {
+    // one line per owner's terms (the licence text carries the owner's credit)
     const ul = $("nearby-credit");
-    ul.replaceChildren(...state.stations.filter((s) => s.id !== STATION)
-      .map((s) => el("li", { text: `${s.label}: ${s.operator || ""}. ${s.licence || ""}` })));
+    const groups = new Map();
+    for (const s of state.stations.filter((x) => x.id !== STATION)) {
+      const k = s.licence || s.operator || "";
+      groups.set(k, (groups.get(k) || []).concat(s.label));
+    }
+    ul.replaceChildren(...[...groups].map(([terms, labels]) => el("li", { text: `${labels.join(", ")}: ${terms}` })));
     ul.hidden = !ul.children.length;
   }
 

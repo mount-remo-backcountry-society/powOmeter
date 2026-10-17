@@ -89,6 +89,8 @@ station reports one) is the station's own measurement, statistic `point`.
 ## Licence
 
 POW-O-METER data: CC BY 4.0, credit "Mount Remo Backcountry Society". Data
-from other stations, if ever included, keeps its owner's licence, given per
-source in `sites.json`. Station data are not a forecast; see
+from other stations keeps its owner's terms, given per source in
+`sites.json` (`licence`): for the BC Ministry of Transportation &
+Infrastructure stations, credit to the Ministry and a statement that it is
+not liable. Station data are not a forecast; see
 <https://avalanche.ca>.

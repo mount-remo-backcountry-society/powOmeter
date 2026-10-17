@@ -348,8 +348,10 @@ def test_v1_1_only_adds(built):
            "battery_v", "battery_bucket", "decode_errors"}
     assert v10 <= set(st["stations"]["powometer"]) and {"alarms", "built_utc", "info", "schema_version"} <= set(st)
     assert st["stations"]["powometer"]["battery_v_time_utc"] <= st["stations"]["powometer"]["last_observation_utc"]
-    assert st["nearby"] == {}                                   # nothing switched on before permission
-    assert json.load(open(built / "nearby_latest.json", encoding="utf-8"))["stations"] == {}
+    assert set(st["nearby"]) == {"avcan_56", "avcan_57", "avcan_58"}       # switched on with permission
+    assert all({"last_observation_utc", "last_new_data_fetched_utc"} <= set(v) for v in st["nearby"].values())
+    assert set(json.load(open(built / "nearby_latest.json", encoding="utf-8"))["stations"]) \
+        <= {"avcan_56", "avcan_57", "avcan_58"}
 
 
 def test_no_moti_data_published(built):

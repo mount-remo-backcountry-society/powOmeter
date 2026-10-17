@@ -92,9 +92,22 @@ def test_a_failing_station_does_not_stop_the_others(tmp_path):
 
 
 def test_disabled_stations_are_not_fetched(tmp_path):
+    c = load()
+    for s in c.stations:
+        if s["id"] in STATIONS:
+            s.update(enabled=False, publish=False)
     called = []
-    nearby.fetch(load(), tmp_path, T0, lambda url: called.append(url) or [])
-    assert called == []                                          # the real config: all off until permission
+    nearby.fetch(c, tmp_path, T0, lambda url: called.append(url) or [])
+    assert called == []
+
+
+def test_moti_licence_meets_the_permission():
+    """docs/permissions/moti-2026-10.md: credit the Ministry, and say it is not liable."""
+    for s in load().stations:
+        if s["id"] in STATIONS and s["publish"]:
+            assert s["permission"] == "docs/permissions/moti-2026-10.md"
+            assert "Ministry of Transportation & Infrastructure" in s["licence"]
+            assert "not liable" in s["licence"]
 
 
 def test_raw_files_are_never_overwritten(tmp_path):
@@ -164,7 +177,11 @@ def test_corrections_apply_to_nearby_stations():
 
 
 def test_unpublished_stations_are_left_out():
-    df, *_ = nearby.process(load(), records(temps(lambda h: 0.0, lambda h: 0.0, lambda h: 0.0)))
+    c = load()
+    for s in c.stations:
+        if s["id"] in STATIONS:
+            s.update(enabled=False, publish=False)
+    df, *_ = nearby.process(c, records(temps(lambda h: 0.0, lambda h: 0.0, lambda h: 0.0)))
     assert df.empty
 
 

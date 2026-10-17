@@ -100,8 +100,11 @@ def test_switched_off_publishes_nothing(tmp_path):
     assert idx["enabled"] is False and not list(tmp_path.rglob("*.jpg"))
 
 
-def test_real_config_is_off_until_permission_is_filed():
-    assert webcams.load_config()["enabled"] is False
+def test_real_config_meets_the_permission():
+    """docs/permissions/shames-webcams-2026-10.md: credit Shames Mountain, and say it is not liable."""
+    cfg = webcams.load_config()
+    if cfg["enabled"]:
+        assert "Shames Mountain" in cfg["credit"] and "not liable" in cfg["credit"]
     assert validate() == []
 
 

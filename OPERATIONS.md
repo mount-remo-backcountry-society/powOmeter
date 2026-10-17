@@ -184,7 +184,12 @@ Canada's station API, which keeps only about 7 days, so a few days of
 failed fetches lose nothing.
 
 - **Switched on only with the Ministry's written permission on file**
-  (CLAUDE.md rule 3). To switch them on: save the permission in
+  (CLAUDE.md rule 3). They are on: the record is
+  `docs/permissions/moti-2026-10.md`. Its conditions (credit the Ministry,
+  say it is not liable) are met by the `licence` text in
+  `config/stations.yaml`; keep both if you change it. The Ministry asked that
+  its reply not be given to AI tools: never paste it into an assistant.
+  For another station: save a record of the permission in
   `docs/permissions/` (no names or email addresses of people), then in
   `config/stations.yaml` set `permission:` to that file, `licence:` to the
   permission's terms, and `enabled:` and `publish:` to true. `validate`
@@ -207,6 +212,10 @@ Shames Mountain's two webcams (chairlift, parking lot), set up in
 `config/webcams.yaml`. Like the nearby stations, they are **switched on
 only with Shames Mountain's written permission on file**
 (`enabled: true`, `permission:` naming the file in `docs/permissions/`).
+They are on: the record is `docs/permissions/shames-webcams-2026-10.md`.
+Its conditions (credit Shames Mountain, say it is not liable) are met by
+`credit` in `config/webcams.yaml`. As with the Ministry, never paste Shames
+Mountain's reply into an AI assistant.
 
 - The page shows each camera's newest image, loaded from Shames Mountain's
   own address, and a **3-day time lapse**: one daylight frame an hour

@@ -385,10 +385,15 @@ phase 2 (§4).
   because both are marked "PENDING ARCHIVE".
 - **Until permission is on file:** no MoTI values in the public repo, the
   files or on the site. Showing them on a chart also counts as reproduction
-  (F11). Julian reported permission from MoTI and from Shames Mountain
-  (webcams) on 2026-10-05; the texts go in `docs/permissions/`, and
-  `validate` refuses to enable another owner's station, or the webcams,
-  without such a file.
+  (F11). `validate` refuses to enable another owner's station, or the
+  webcams, without a record in `docs/permissions/`.
+- **Permission received** from MoTI and from Shames Mountain (webcams),
+  2026-10-05. Both cover everything POW-O-METER does with them (MoTI: the
+  page, the public raw archive and the downloads; Shames: the live image and
+  the time-lapse copies), and powWX too, on two conditions: credit the owner, and say it is
+  not liable. Both owners asked that their replies not be given to AI tools,
+  so `docs/permissions/` holds Julian's record of the terms, and the
+  originals stay with him, outside the repo (2026-10-16).
 - **Julian's permission request** should name both projects (POW-O-METER and
   powWX), both uses (display and download), and the PCDS-sourced history.
 
@@ -486,9 +491,8 @@ phase 2 (§4).
 **Open questions**
 1. The MRBS organization's second owner; terms of use. (Licences confirmed
    by MRBS, 2026-10.)
-2. MoTI and Shames Mountain permissions: reported received 2026-10-05; to be
-   filed in `docs/permissions/` and checked for scope (public raw archive,
-   downloads, licence and credit wording, powWX).
+2. ~~MoTI and Shames Mountain permissions~~: filed and checked for scope
+   2026-10-16 (§10); they cover powWX too.
 3. Which Google account owns the Apps Script trigger?
 4. What would Avalanche Canada want from v1?
 5. Is Julian's employer comfortable with Aquarius being used for this station?

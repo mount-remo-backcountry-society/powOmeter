@@ -52,7 +52,10 @@ def edit(d: Path, name: str, old: str, new: str):
      "    op: offset\n    params: {value: 1}\n    station: powometer\n    variable: all\n", "needs one variable"),
     ("corrections.yaml", "    message: 2025-01-26T19:01:45Z\n", "    message: '2025-01-26T19:01:45'\n",
      "must be a UTC time"),
-    ("stations.yaml", "    enabled: false\n", "    enabled: true\n", "written permission"),
+    ("stations.yaml", "    permission: docs/permissions/moti-2026-10.md\n", "    permission: null\n",
+     "written permission"),
+    ("stations.yaml", "    permission: docs/permissions/moti-2026-10.md\n",
+     "    permission: docs/permissions/missing.md\n", "written permission"),
 ])
 def test_mistakes_are_reported(cfg, name, old, new, expect):
     edit(cfg, name, old, new)
@@ -71,14 +74,23 @@ def test_time_strings_need_a_zone():
 
 
 def test_permission_on_file_allows_a_nearby_station(cfg, tmp_path):
-    """Rule 3: with the owner's permission filed, the station may be switched on."""
-    (tmp_path / "docs" / "permissions").mkdir(parents=True)
-    (tmp_path / "docs" / "permissions" / "moti.md").write_text("Permission granted ...", encoding="utf-8")
-    on = ("    enabled: true\n    publish: true\n    licence: \"BC MoTI, used with permission\"\n"
-          "    permission: docs/permissions/{}\n")
-    off = ("    enabled: false\n    publish: false\n    licence: \"Access Only (BC MoTI); "
-           "permission requested 2026-10\"\n    permission: null\n")
-    edit(cfg, "stations.yaml", off, on.format("missing.md"))
+    """Rule 3: another owner's station may be on only while its permission
+    record is on file."""
+    perms = tmp_path / "docs" / "permissions"
+    perms.mkdir(parents=True)
+    for f in ("moti-2026-10.md", "shames-webcams-2026-10.md"):
+        (perms / f).write_text("Permission granted ...", encoding="utf-8")
+    assert validate(cfg, tmp_path) == []
+    (perms / "moti-2026-10.md").unlink()
     assert any("written permission" in p for p in validate(cfg, tmp_path))
-    edit(cfg, "stations.yaml", on.format("missing.md"), on.format("moti.md"))
+
+
+def test_switched_off_stations_need_no_permission(cfg, tmp_path):
+    (tmp_path / "docs" / "permissions").mkdir(parents=True)
+    (tmp_path / "docs" / "permissions" / "shames-webcams-2026-10.md").write_text("...", encoding="utf-8")
+    f = cfg / "stations.yaml"
+    s = f.read_text(encoding="utf-8")
+    first = s.index("  - id: avcan_56")                  # POW-O-METER itself stays on
+    f.write_text(s[:first] + s[first:].replace("    enabled: true\n    publish: true\n",
+                                               "    enabled: false\n    publish: false\n"), encoding="utf-8")
     assert validate(cfg, tmp_path) == []

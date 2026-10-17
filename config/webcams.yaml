@@ -11,10 +11,10 @@
 # frame of each camera, shrunk to `width` pixels, and drops frames older than
 # `keep_hours`.
 
-enabled: false
-permission: null
+enabled: true
+permission: docs/permissions/shames-webcams-2026-10.md
 owner: Shames Mountain
-credit: "Webcam images © Shames Mountain, used with permission"
+credit: "Webcam images © Shames Mountain, used with permission. Shames Mountain is not liable for these images or any use of them."
 keep_hours: 72
 width: 960                # pixels, time-lapse frames only
 jpeg_quality: 70

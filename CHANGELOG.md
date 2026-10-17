@@ -16,8 +16,9 @@ Additions only; nothing of v1.0 changes.
   `nearby_recent.csv`, `nearby_latest.json`. New variables `wind_speed`,
   `wind_from_direction`, `precipitation_amount`; statistics `mean` and
   `sum`; source `avcan`; qualifiers `stuck`, `neighbour`,
-  `negative_amount`. Switched on only once the Ministry's written
-  permission is on file.
+  `negative_amount`. Switched on with the Ministry's written permission
+  (2026-10); their `licence` in `sites.json` gives the Ministry's credit and
+  says it is not liable.
 - `sites.json`: sites of the nearby stations.
 
 ## v1.0: 2026-10-04 (published 2026-10-04)
