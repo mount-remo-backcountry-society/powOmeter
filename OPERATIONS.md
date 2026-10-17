@@ -161,6 +161,11 @@ calculates), `style.css` (colours), `terms.html` (terms of use).
   same limit as the "no message" alarm. A separate red message, "the data
   processing has stopped", means the publish workflow itself has not run
   for 3 hours.
+- **"Updated 3 min ago · Refresh"** under the title is when this phone or
+  computer last fetched the files, not the age of the readings. The page
+  fetches them again every 10 minutes, whenever it comes back on screen (a
+  phone app from the home screen has no reload button), and on **Refresh**,
+  which also reloads the newest webcam images.
 - **Times on the page** are BC time, a fixed UTC−7 (the constant
   `BC_OFFSET_H` in `app.js`). If BC ever changes its clocks again, change
   that one line. The data files stay in UTC.
