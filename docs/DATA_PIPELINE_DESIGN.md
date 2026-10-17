@@ -129,7 +129,7 @@ Rule: MRBS assets never depend on Julian's personal projects or tools
  SD card, each visit (drag & drop, zip OK) ─────────────────────┼▶ raw/sd/<visit>/
  (Avalanche Canada / PCDS: only after MoTI permission, §10)     │
                                        config/ · powometer/ (Python) · tests/
-                                       Action "publish" (hourly, off the hour) ──────▶ v1/*.csv, *.json, site
+                                       Action "publish" (every 5 min, off the hour) ▶ v1/*.csv, *.json, site
                                        Action "check" (after publish) ──────────────▶ GitHub Issue on alarm change
 ```
 
@@ -232,8 +232,9 @@ Parquet is added only if a consumer asks for it.
 
 ### 6.7 Publishing and monitoring (F2, F3)
 
-- **Publish** runs hourly at an off-the-hour minute (GitHub delays jobs
-  scheduled on the hour). It always deploys. A decode error marks that
+- **Publish** runs every 5 minutes, off the hour (GitHub delays jobs
+  scheduled on the hour, and skips many scheduled runs: set to hourly, it
+  ran about every 5 hours in October 2026). It always deploys. A decode error marks that
   message `quality: missing` with qualifier `decode_error` and counts it in
   `status.json`; it never stops publishing.
 - **Check** runs after publish. It compares the alarm state with the
@@ -249,7 +250,7 @@ Parquet is added only if a consumer asks for it.
   activity (confirmed), and silently. `OPERATIONS.md` has a first-of-month
   task: open the site, check the build date, commit the dated keep-alive file.
 - **Cost rule** (in `README.md`): the repo must stay public. Actions is only
-  free on public repos; hourly builds would exceed the private allowance.
+  free on public repos; builds every 5 minutes would far exceed the private allowance.
 
 ## 7. Presentation: two linked sites
 
@@ -487,6 +488,7 @@ phase 2 (§4).
 | 2026-10-02 | Labels (`raw`/`qc`/`corrected`; approvals; WaterML2 quality); snow depth in whole cm; CF names; operation log; Aquarius optional; MoTI values withheld until permission; build phases 0–3, park the rest |
 | 2026-10-05 | Phase 3: simple main view with "More"; negative snow depth shown as 0 on the page; BC time as fixed UTC−7; nearby stations and webcams in scope (permission reported); webcam frames kept in the published site, not git; nearby stations published in separate files |
 | 2026-10-03 | Review findings adopted: MRBS organization before publishing; publish-always plus Issue alarms; approval snapshots; firmware-era statistics; snow depth as a derivation; point readings plus an on-the-hour series instead of hourly means; published-CSV intake; pattern-only CI check; smaller output set; handover routines |
+| 2026-10-17 | Publish every 5 minutes instead of hourly (GitHub ran the hourly schedule only about every 5 hours); webcam time lapse kept to about one frame an hour |
 
 **Open questions**
 1. The MRBS organization's second owner; terms of use. (Licences confirmed

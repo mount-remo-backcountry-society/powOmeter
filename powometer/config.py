@@ -253,6 +253,8 @@ def validate(config_dir: Path = CONFIG, root: Path = ROOT) -> list[str]:
                          "owner's written permission, filed in docs/permissions/")
         if not isinstance(w.get("keep_hours"), (int, float)) or not 0 < w["keep_hours"] <= 24 * 7:
             p.append("webcams.yaml: keep_hours must be a number of hours (at most a week)")
+        if not isinstance(w.get("min_frame_minutes", 0), (int, float)) or w.get("min_frame_minutes", 0) < 0:
+            p.append("webcams.yaml: min_frame_minutes must be a number of minutes")
         cam_ids = [x.get("id") for x in w.get("cameras") or []]
         if len(cam_ids) != len(set(cam_ids)) or not all(cam_ids):
             p.append("webcams.yaml: every camera needs an id, and ids must be unique")

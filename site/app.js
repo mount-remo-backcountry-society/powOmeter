@@ -25,7 +25,7 @@
   const BC_LABEL = "BC time (UTC−7)";
   const FRESH_H = 6;                       // radio sends 7x a day; longest normal gap ~5 h
   const STALE_H = 12;                      // = the no-message alarm (config/monitoring.yaml)
-  const BUILD_STALE_H = 3;                 // publish runs hourly
+  const BUILD_STALE_H = 3;                 // publish runs every 5 min (GitHub skips some)
   const CHART_DAYS = 7;
   const TABLE_HOURS = 24;
   const GAP_H = 6;                         // break a chart line across a longer gap
