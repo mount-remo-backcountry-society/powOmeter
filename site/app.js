@@ -525,7 +525,7 @@
   }
   const isMidnight = (ms) => POW.bc(ms).hh === "00";
   const hourOf = (ms) => Number(POW.bc(ms).hh);
-  const hourLabelled = (chart, ms, days) => !isMidnight(ms) && hourOf(ms) % POW.hourStep(pxPerHour(chart, days)) === 0;
+  const hourLabelled = (chart, ms, days) => hourOf(ms) % POW.hourStep(pxPerHour(chart, days)) === 0;   // midnight: "00"
   const hourMarked = (chart, ms, days) => hourOf(ms) % (pxPerHour(chart, days) >= 8 ? 1 : 3) === 0;
 
   // the date row under the time axis: each day's date centred in its part of
@@ -724,7 +724,7 @@
       live.src = src;
       if (i === frames.length - 1) img.src = src;
     });
-    const controls = frames.length > 1 ? el("div", { class: "controls" }, play, prev, slider, next)
+    const controls = frames.length > 1 ? el("div", { class: "controls" }, play, slider, el("span", { class: "steps" }, prev, next))
       : el("p", { class: "small muted", text: "No time lapse yet: no daylight images in the last few days." });
     const note = POW.camNote(cam.latest_utc, Date.now());
     return el("div", { class: "camera" }, el("h3", { text: cam.label }),
