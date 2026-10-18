@@ -45,6 +45,8 @@
   const CHART_QUALITIES = ["good", "estimate"];   // suspect values are left out of charts
   const STATION = "powometer";
   const OWN_NAME = "Shames POW-O-METER";
+  // short names with the values while a chart is touched; other stations use their full name
+  const SHORT_NAMES = { powometer: "Shames High", avcan_56: "Kasiks High", avcan_57: "Kasiks Low", avcan_58: "Shames Low" };
   const REPO = "https://github.com/mount-remo-backcountry-society/powOmeter";
   const SERIES = ["--series-1", "--series-2", "--series-3", "--series-4"];
 
@@ -289,7 +291,8 @@
     return ids.map((sid, i) => {
       const site = siteOf(sid), st = stations.find((s) => s.id === sid) || {};
       const name = sid === STATION ? OWN_NAME : site.name || st.name || sid;
-      return { id: sid, label: POW.stationLabel(name, site.elevation_m), elev: site.elevation_m,
+      return { id: sid, label: POW.stationLabel(name, site.elevation_m), short: SHORT_NAMES[sid] || POW.stationLabel(name),
+               elev: site.elevation_m,
                color: css(SERIES[i % SERIES.length]), operator: st.operator, licence: st.licence };
     }).sort((a, b) => (b.elev || 0) - (a.elev || 0));
   }
@@ -372,19 +375,33 @@
   }
 
   // -- charts --
-  // fmt: the value in the title line while a chart is touched (the unit is in the title)
+  // fmt: the value in the title line while a chart is touched (the unit is in the title);
+  // widest: the widest value a station may show there, to keep room for it (fitHead)
   const CHARTS = [
     // "under 15 cm" is about POW-O-METER's sensor over the heather; other stations show their value
     { id: "chart-depth", variable: "snow_depth", fmt: (v) => `${v} cm`,
       ownFmt: (v) => (v < MIN_DEPTH_CM ? `under ${MIN_DEPTH_CM} cm` : `${v} cm`), axis: (v) => `${v}`,
+      widest: (sid) => (sid === STATION ? `under ${MIN_DEPTH_CM} cm` : "888 cm"),
       transform: POW.displayDepth, y: { min: 0, suggestedMax: 50 }, shallow: true },
     { id: "chart-temp", variable: "air_temperature", fmt: (v) => (v < 0 ? "−" : "") + Math.abs(v).toFixed(1) + "°",
-      axis: (v) => `${v}°`, freezing: true },
+      axis: (v) => `${v}°`, widest: () => "−88.8°", freezing: true },
     { id: "chart-wind", variable: "wind_speed", fmt: (v) => `${Math.round(v)} km/h`, axis: (v) => `${v}`,
-      y: { min: 0, suggestedMax: 20 }, direction: true },
+      widest: () => "88 km/h WSW", y: { min: 0, suggestedMax: 20 }, direction: true },
     { id: "chart-rh", variable: "relative_humidity", fmt: (v) => `${Math.round(v)}%`, axis: (v) => `${v}%`,
-      y: { min: 0, max: 100 } },
+      widest: () => "100%", y: { min: 0, max: 100 } },
   ];
+
+  // The title line keeps the height the values need while a chart is touched
+  // (two rows for four stations on a phone), so the charts below never jump
+  // under the finger. At rest the title sits at the bottom of that space.
+  function fitHead(def, chart) {
+    const head = $(def.id + "-head");
+    head.style.minHeight = "";
+    head.replaceChildren(...chart.data.datasets.filter((d, i) => chart.isDatasetVisible(i))
+      .map((ds) => chart.$readout(ds, null, def.widest(ds.station))));
+    head.style.minHeight = head.offsetHeight + "px";
+    head.textContent = head.dataset.title;
+  }
 
   // Touching or pointing at a chart: every chart's title line shows, for each
   // station, the reading nearest that time, with a hairline at the time and
@@ -457,7 +474,7 @@
       c.restore();
     },
   };
-  // a hairline at 0 degC
+  // a bold line at 0 degC (under the data lines)
   const freezing = {
     id: "freezing",
     beforeDatasetsDraw(chart, _args, opts) {
@@ -465,7 +482,7 @@
       const y = chart.scales.y, { left, right } = chart.chartArea;
       if (y.min > 0 || y.max < 0) return;
       const py = y.getPixelForValue(0), c = chart.ctx;
-      c.save(); c.strokeStyle = css("--axis"); c.lineWidth = 1;
+      c.save(); c.strokeStyle = css("--text-muted"); c.lineWidth = 2;
       c.beginPath(); c.moveTo(left, py); c.lineTo(right, py); c.stroke(); c.restore();
     },
   };
@@ -500,6 +517,8 @@
     return {
       animation: false, parsing: false, normalized: true, maintainAspectRatio: false,
       events: [],                                 // the page handles the pointer itself (listenCharts)
+      // a turned phone fits more values in a row (not while the chart is still being made)
+      onResize: (chart) => { if (chart.$readout) fitHead(def, chart); },
       scales: {
         x: { type: "linear", min, max,
              afterBuildTicks: (ax) => { ax.ticks = POW.ticks(min, max, stepH).map((value) => ({ value })); },
@@ -507,7 +526,10 @@
                       callback(v, i, ticks) { return labelled(this.chart, i, ticks.length) ? POW.tickText(v) : ""; } },
              grid: { color: (ctx) => (ctx.tick && !labelled(ctx.chart, ctx.index, ctx.chart.scales.x.ticks.length) ? "transparent" : grid) },
              border: { color: css("--axis") } },
-        y: { ticks: { color: muted, callback: def.axis, maxTicksLimit: 5 }, grid: { color: grid },
+        // temperature: the 0° label in bold, like its line (freezing)
+        y: { ticks: { color: def.freezing ? (ctx) => (ctx.tick && ctx.tick.value === 0 ? css("--text-primary") : muted) : muted,
+                      font: def.freezing ? (ctx) => (ctx.tick && ctx.tick.value === 0 ? { weight: "bold" } : undefined) : undefined,
+                      callback: def.axis, maxTicksLimit: 5 }, grid: { color: grid },
              border: { display: false }, ...(def.y || {}) },
       },
       plugins: {
@@ -547,18 +569,21 @@
       head.hidden = wrap.hidden = !shown.length;
       if (note) note.hidden = !!shown.length;
       if (!shown.length) continue;
-      const datasets = shown.map((s) => ({ label: s.label, station: s.id, data: series[s.id],
+      const datasets = shown.map((s) => ({ label: s.label, short: s.short, station: s.id, data: series[s.id],
         borderColor: s.color, backgroundColor: s.color, hidden: state.hidden.has(s.id) }));
       const chart = state.charts[def.id] = new Chart($(def.id), { type: "line", data: { datasets },
         options: chartOptions(def, from, now, stepH), plugins: [crosshair, freezing, shallow] });
-      // one station's value in the title line: colour key, value (and wind direction)
-      chart.$readout = (ds, p) => {
-        const fmt = ds.station === STATION && def.ownFmt ? def.ownFmt : def.fmt;
-        let t = fmt(p.y);
-        if (def.direction) { const d = dirs.get(`${ds.station}|${p.x}`); if (d !== undefined) t += " " + POW.compass(d); }
+      // one station's value in the title line: colour key, short name, value (and wind direction)
+      chart.$readout = (ds, p, text) => {
+        if (text === undefined) {
+          const fmt = ds.station === STATION && def.ownFmt ? def.ownFmt : def.fmt;
+          text = fmt(p.y);
+          if (def.direction) { const d = dirs.get(`${ds.station}|${p.x}`); if (d !== undefined) text += " " + POW.compass(d); }
+        }
         const key = el("span", { class: "key line" }); key.style.background = ds.borderColor;
-        return el("span", { class: "item", title: ds.label }, key, t);
+        return el("span", { class: "item", title: ds.label }, key, el("span", { class: "name", text: ds.short }), " ", text);
       };
+      fitHead(def, chart);
     }
   }
 
