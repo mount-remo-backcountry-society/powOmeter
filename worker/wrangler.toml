@@ -15,7 +15,7 @@ crons = ["*/10 * * * *"]
 # the mailbox: messages from RockBLOCK, kept 30 days
 [[kv_namespaces]]
 binding = "MAILBOX"
-id = "SET-ME"
+id = "e5654e6ac0b1486b97c51544294a1fb6"
 
 [vars]
 GITHUB_REPO = "mount-remo-backcountry-society/powOmeter"
