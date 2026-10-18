@@ -261,7 +261,8 @@ Parquet is added only if a consumer asks for it.
     stations as lines that can be ticked on and off, and a hover that
     follows the same time in every chart; a 24 h table, one row per
     reading ("Mon 5 Oct, 14:05"); the webcams with a 3-day time lapse.
-    Negative snow depth shows as 0 there (files keep the real value). A
+    Snow depth under 15 cm shows as "Under 15 cm" there (files keep the
+    real value). A
     warning line appears only when the data are late or stale, or
     processing has stopped. Links open in new tabs
   - **"More"**, loaded only when opened: detailed readings with labels;
@@ -488,6 +489,7 @@ phase 2 (§4).
 | 2026-10-02 | Labels (`raw`/`qc`/`corrected`; approvals; WaterML2 quality); snow depth in whole cm; CF names; operation log; Aquarius optional; MoTI values withheld until permission; build phases 0–3, park the rest |
 | 2026-10-05 | Phase 3: simple main view with "More"; negative snow depth shown as 0 on the page; BC time as fixed UTC−7; nearby stations and webcams in scope (permission reported); webcam frames kept in the published site, not git; nearby stations published in separate files |
 | 2026-10-03 | Review findings adopted: MRBS organization before publishing; publish-always plus Issue alarms; approval snapshots; firmware-era statistics; snow depth as a derivation; point readings plus an on-the-hour series instead of hourly means; published-CSV intake; pattern-only CI check; smaller output set; handover routines |
+| 2026-10-17 | The page shows snow depth under 15 cm as "Under 15 cm" (bare-ground scatter −14 to +7 cm at site B; thin snow squashes the heather); files unchanged |
 | 2026-10-17 | Publish every 5 minutes instead of hourly (GitHub ran the hourly schedule only about every 5 hours); webcam time lapse kept to about one frame an hour |
 
 **Open questions**

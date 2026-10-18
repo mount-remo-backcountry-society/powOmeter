@@ -169,8 +169,12 @@ calculates), `style.css` (colours), `terms.html` (terms of use).
 - **Times on the page** are BC time, a fixed UTC−7 (the constant
   `BC_OFFSET_H` in `app.js`). If BC ever changes its clocks again, change
   that one line. The data files stay in UTC.
-- **Snow depth below zero** shows as 0 on the main view; "More → Detailed
-  readings" and the files keep the real value.
+- **Snow depth under 15 cm** shows as "Under 15 cm" on the main view, and
+  the snow chart shades that band: over bare ground the readings scatter
+  between about −14 and +7 cm, and thin snow squashes the heather, so
+  shallower readings are not a depth yet. "More → Detailed readings" and
+  the files keep the real value. The limit is `MIN_DEPTH_CM` in `app.js`;
+  check it against a probe reading at the first real snowfall.
 - **Changing a link** in the bar at the top (powWX, avalanche.ca): edit it
   in both `site/index.html` and `site/terms.html`.
 - **Check the page's calculations:** open `selftest.html` on the published
