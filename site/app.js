@@ -27,6 +27,8 @@
   const STALE_H = 12;                      // = the no-message alarm (config/monitoring.yaml)
   const BUILD_STALE_H = 3;                 // publish runs every 5 min (GitHub skips some)
   const CHART_DAYS = 7;
+  const MIN_DEPTH_CM = 15;                 // shallower shows as "Under 15 cm": bare-ground readings
+                                           // scatter -14 to +7 cm, and thin snow squashes the heather
   const TABLE_HOURS = 24;
   const GAP_H = 6;                         // break a chart line across a longer gap
   const HOVER_H = 2;                       // hover: a station's reading within this of the pointer
@@ -47,7 +49,7 @@
 
   // ---- pure functions (tested in selftest.html) --------------------------
   const POW = {
-    BC_OFFSET_H, FRESH_H, STALE_H,
+    BC_OFFSET_H, FRESH_H, STALE_H, MIN_DEPTH_CM,
 
     /** CSV text -> array of objects (the published files never quote fields). */
     parseCSV(text) {
@@ -96,10 +98,16 @@
     /** "fresh" | "late" | "stale" */
     freshness(hours) { return hours <= FRESH_H ? "fresh" : hours <= STALE_H ? "late" : "stale"; },
 
-    /** Snow depth for the casual view: below zero shows as 0 (zero is the top
-     *  of the heather; the sensor scatters about +/-8 cm). Files keep the
-     *  real value. */
+    /** Snow depth for the chart: below zero shows as 0 (zero is the top of
+     *  the heather). Files keep the real value. */
     displayDepth(cm) { return Math.max(0, Math.round(cm)); },
+    /** Snow depth for the casual view: "Under 15 cm" below MIN_DEPTH_CM, where
+     *  the sensor cannot tell snow from scatter over the heather. "More ->
+     *  Detailed readings" shows the measured value. */
+    depthText(cm) {
+      const v = Math.round(cm);
+      return v < MIN_DEPTH_CM ? `Under ${MIN_DEPTH_CM} cm` : `${v} cm`;
+    },
     fmtTemp(c) { return (c < 0 ? "−" : "") + Math.abs(c).toFixed(1) + " °C"; },
     /** The webcam's newest-image address with a number that changes every
      *  CAM_REFRESH_MIN, so browsers fetch it afresh (Shames' server lets them
@@ -287,7 +295,7 @@
         (v.state === "stale" ? " · not current" : v.state === "late" ? " · older than usual" : "") }));
   }
   function renderTiles(now) {
-    tile("now-depth", "Snow depth", POW.nowValue(state.latest, "snow_depth", state.site, now), (v) => `${POW.displayDepth(v)} cm`);
+    tile("now-depth", "Snow depth", POW.nowValue(state.latest, "snow_depth", state.site, now), POW.depthText);
     tile("now-temp", "Air temperature", POW.nowValue(state.latest, "air_temperature", state.site, now), POW.fmtTemp);
     tile("now-rh", "Humidity", POW.nowValue(state.latest, "relative_humidity", state.site, now), (v) => `${Math.round(v)}%`);
   }
@@ -312,8 +320,9 @@
 
   // -- charts --
   const CHARTS = [
-    { id: "chart-depth", variable: "snow_depth", fmt: (v) => `${v} cm`, axis: (v) => `${v}`,
-      transform: POW.displayDepth, y: { min: 0, suggestedMax: 50 } },
+    // "Under 15 cm" is about POW-O-METER's sensor over the heather; other stations show their value
+    { id: "chart-depth", variable: "snow_depth", fmt: (v) => `${v} cm`, ownFmt: POW.depthText, axis: (v) => `${v}`,
+      transform: POW.displayDepth, y: { min: 0, suggestedMax: 50 }, shallow: true },
     { id: "chart-temp", variable: "air_temperature", fmt: POW.fmtTemp, axis: (v) => `${v}°`, freezing: true },
     { id: "chart-wind", variable: "wind_speed", fmt: (v) => `${Math.round(v)} km/h`, axis: (v) => `${v}`,
       y: { min: 0, suggestedMax: 20 }, direction: true },
@@ -389,6 +398,24 @@
     },
   };
 
+  // snow chart: a shaded band below MIN_DEPTH_CM, where POW-O-METER's readings are not snow depth yet
+  const shallow = {
+    id: "shallow",
+    beforeDatasetsDraw(chart, _args, opts) {
+      if (!opts.on) return;
+      const y = chart.scales.y, { left, right } = chart.chartArea;
+      const top = y.getPixelForValue(MIN_DEPTH_CM), bottom = y.getPixelForValue(Math.max(0, y.min)), c = chart.ctx;
+      c.save();
+      c.fillStyle = css("--grid");
+      c.fillRect(left, top, right - left, bottom - top);
+      c.fillStyle = css("--text-muted"); c.font = "11px system-ui, sans-serif";
+      const inside = bottom - top >= 20;            // a thin band (tall scale) gets its label above it
+      c.textBaseline = inside ? "top" : "bottom";
+      c.fillText(`POW-O-METER can’t measure under ${MIN_DEPTH_CM} cm`, left + 6, inside ? top + 4 : top - 3);
+      c.restore();
+    },
+  };
+
   function chartOptions(def, min, max, labelOf) {
     const muted = css("--text-muted"), grid = css("--grid");
     return {
@@ -411,6 +438,7 @@
       plugins: {
         legend: { display: false },
         freezing: { on: !!def.freezing },
+        shallow: { on: !!def.shallow },
         tooltip: { backgroundColor: css("--surface-2"), titleColor: css("--text-secondary"),
                    bodyColor: css("--text-primary"), borderColor: css("--border"), borderWidth: 1,
                    usePointStyle: true, boxWidth: 8, boxHeight: 2,
@@ -446,14 +474,15 @@
         borderColor: s.color, backgroundColor: s.color, hidden: state.hidden.has(s.id) }));
       const labelOf = (item) => {
         const ds = item.dataset, p = item.raw;
-        let t = `${def.fmt(p.y)}  ${ds.label}`;
-        if (def.direction) { const d = dirs.get(`${ds.station}|${p.x}`); if (d !== undefined) t = `${def.fmt(p.y)} from ${POW.compass(d)}  ${ds.label}`; }
+        const fmt = ds.station === STATION && def.ownFmt ? def.ownFmt : def.fmt;
+        let t = `${fmt(p.y)}  ${ds.label}`;
+        if (def.direction) { const d = dirs.get(`${ds.station}|${p.x}`); if (d !== undefined) t = `${fmt(p.y)} from ${POW.compass(d)}  ${ds.label}`; }
         const hx = item.chart.$hoverX;
         if (hx !== null && hx !== undefined && Math.abs(p.x - hx) > 20 * 60e3) t += ` (at ${POW.fmtClock(p.x)})`;
         return t;
       };
       state.charts[def.id] = new Chart($(def.id), { type: "line", data: { datasets },
-        options: chartOptions(def, from, now, labelOf), plugins: [crosshair, freezing, sync] });
+        options: chartOptions(def, from, now, labelOf), plugins: [crosshair, freezing, shallow, sync] });
     }
   }
 
@@ -469,7 +498,7 @@
     for (const r of rows) {
       body.append(el("tr", {},
         el("td", { class: "nowrap", text: POW.fmtDateTime(r.ms) }),
-        el("td", { class: "num", text: val(r.snow_depth, (v) => `${POW.displayDepth(v)} cm`) }),
+        el("td", { class: "num", text: val(r.snow_depth, POW.depthText) }),
         el("td", { class: "num", text: val(r.air_temperature, POW.fmtTemp) }),
         el("td", { class: "num", text: val(r.relative_humidity, (v) => `${Math.round(v)}%`) })));
     }

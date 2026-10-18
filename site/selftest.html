@@ -52,6 +52,8 @@
 
   // snow depth below zero shows as 0
   eq("negative depth", [P.displayDepth(-4), P.displayDepth(0), P.displayDepth(12.4)], [0, 0, 12]);
+  eq("shallow depth", [P.depthText(-4), P.depthText(14.4), P.depthText(14.6), P.depthText(80.2)],
+     ["Under 15 cm", "Under 15 cm", "15 cm", "80 cm"]);
   eq("temperature", [P.fmtTemp(-3.44), P.fmtTemp(2)], ["−3.4 °C", "2.0 °C"]);
 
   // only the current site under "Now"
