@@ -249,9 +249,11 @@ calculates), `style.css` (colours), `terms.html` (terms of use).
   `CHANGE_HOURS` and `CHANGE_TOL_H` in `app.js`.
 - **Charts:** the buttons choose 24 h, 3, 7 or 30 days (3 by default,
   `DEFAULT_DAYS`; the browser remembers the choice). Touching or pointing at
-  a chart shows the values in each chart's title line and the time on the
-  time axis; a sideways drag moves through time, and the values clear
-  3 s after the finger lifts.
+  a chart shows the values in each chart's title line, with short station
+  names ("Kasiks High"; `SHORT_NAMES` in `app.js`, add one for a new
+  station), and the time on the time axis; a sideways drag moves through
+  time, and the values clear 3 s after the finger lifts. The temperature
+  chart draws 0 °C as a bold line.
 - **Changing a link** in the bar at the top (powWX, avalanche.ca): edit it
   in both `site/index.html` and `site/terms.html`.
 - **Check the page's calculations:** open `selftest.html` on the published

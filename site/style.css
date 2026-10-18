@@ -99,11 +99,12 @@ h3 { font-size: 1rem; margin: 1.2rem 0 .4rem; }
 .chart.tall { height: 220px; }
 /* sideways drags read the values, up and down still scrolls the page */
 .chart canvas { touch-action: pan-y; }
-/* one line, also while it shows the values, so the charts never jump */
+/* its height is kept for the values (fitHead in app.js), with the title at the bottom */
 .chart-title { font-size: .9rem; color: var(--text-secondary); margin: .2rem 0 .2rem .2rem;
-               white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+               display: flex; flex-wrap: wrap; align-content: flex-end; column-gap: .9rem; }
 .chart-title.reading { color: var(--text-primary); font-variant-numeric: tabular-nums; }
-.chart-title .item { margin-right: .9rem; }
+.chart-title .item { white-space: nowrap; }
+.chart-title .name { color: var(--text-secondary); }
 .legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: .875rem; color: var(--text-secondary); margin: .2rem 0 .6rem; }
 .key { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: .4rem; vertical-align: 0; }
 .key.line { width: 14px; height: 2px; border-radius: 1px; vertical-align: middle; }
