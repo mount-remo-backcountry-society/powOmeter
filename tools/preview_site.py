@@ -15,6 +15,7 @@ Scenarios (times are relative to now, so ages look right):
     alarms            two open alarms in Station health
     nearby_fault      Kasiks High temperature fault (flagged suspect, left out of the chart)
     webcam_off        webcams switched off
+    webcam_stopped    the chairlift camera has sent no new image for 30 h
 
 Nothing here is real data. The files go to a temporary folder.
 """
@@ -39,7 +40,8 @@ from powometer import OUT, build  # noqa: E402
 from powometer.config import load  # noqa: E402
 
 SCENARIOS = ["fresh", "late", "stale", "pipeline_stopped", "storm", "site_a_values", "negative", "alarms",
-             "nearby_fault", "webcam_off"]
+             "nearby_fault", "webcam_off",
+             "webcam_stopped"]
 STEP = timedelta(minutes=67)
 iso = lambda t: t.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -113,7 +115,7 @@ def nearby(scenario, now):
     return rows, {"schema_version": "1.1", "stations": latest}
 
 
-def frames(folder: Path, now, enabled: bool):
+def frames(folder: Path, now, enabled: bool, stopped: bool = False):
     from PIL import Image, ImageDraw
     folder.mkdir(parents=True, exist_ok=True)
     if not enabled:
@@ -134,7 +136,9 @@ def frames(folder: Path, now, enabled: bool):
             fr.append({"time_utc": iso(t), "file": name, "source_sha256": "test"})
         live = folder / f"{cid}-live.jpg"
         shutil.copy(folder / fr[-1]["file"], live)
-        cams.append({"id": cid, "label": label, "live_url": f"webcams/{cid}-live.jpg", "frames": fr})
+        latest = iso(now - timedelta(hours=30)) if stopped and cid == "chairlift" else fr[-1]["time_utc"]
+        cams.append({"id": cid, "label": label, "live_url": f"webcams/{cid}-live.jpg", "latest_utc": latest,
+                     "frames": fr})
     (folder / "index.json").write_text(json.dumps({"enabled": True, "built_utc": iso(now), "keep_hours": 72,
         "credit": "TEST IMAGES (made up for the preview)", "cameras": cams}), encoding="utf-8")
 
@@ -192,7 +196,7 @@ def make(scenario: str, dest: Path, now: datetime | None = None) -> Path:
     nrows, nlatest = nearby(scenario, now)
     write_csv(v1 / "nearby_recent.csv", nrows)
     (v1 / "nearby_latest.json").write_text(json.dumps(nlatest, indent=1), encoding="utf-8")
-    frames(dest / "webcams", now, scenario != "webcam_off")
+    frames(dest / "webcams", now, scenario != "webcam_off", scenario == "webcam_stopped")
     return dest
 
 

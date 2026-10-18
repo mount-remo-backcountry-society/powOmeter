@@ -47,6 +47,10 @@
   const cam = "https://example.org/cam.png";
   eq("webcam address: same 5 minutes", P.freshUrl(cam, T("2026-12-01T18:01:00Z")), P.freshUrl(cam, T("2026-12-01T18:04:59Z")));
   eq("webcam address: next 5 minutes", P.freshUrl(cam, T("2026-12-01T18:04:59Z")) !== P.freshUrl(cam, T("2026-12-01T18:05:00Z")), true);
+  eq("webcam: recent image, no note", P.camNote("2026-12-01T00:00:00Z", T("2026-12-01T20:00:00Z")), null);
+  eq("webcam: no time known, no note", P.camNote(undefined, T("2026-12-01T20:00:00Z")), null);
+  eq("webcam: stopped", P.camNote("2026-11-30T23:50:00Z", T("2026-12-02T01:00:00Z")),
+     "No new image since Mon 30 Nov, 16:50 BC: the camera may be off.");
   eq("webcam address: keeps its own query", P.freshUrl(cam + "?a=1", 0), cam + "?a=1&t=0");
   eq("fresh up to 6 h", [P.freshness(5.9), P.freshness(6.1), P.freshness(12.1)], ["fresh", "late", "stale"]);
 

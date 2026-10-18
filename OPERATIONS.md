@@ -236,6 +236,9 @@ Mountain's reply into an AI assistant.
   simply starts again.
 - A camera that is off for the season serves the same image for weeks; it
   is added once and drops out after 3 days.
+- When a camera has sent no new image for 24 hours (longer than a night),
+  the page says "No new image since …: the camera may be off" under its
+  name. The cameras belong to Shames Mountain; tell them if it lasts.
 - If Shames Mountain changes the image addresses, update the `url:` lines.
 - Nothing about the webcams can stop the publishing.
 
