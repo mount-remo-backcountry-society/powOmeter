@@ -149,7 +149,11 @@ figure { margin: 0 0 .5rem; }
 img.cam { width: 100%; height: auto; display: block; border-radius: 8px; background: var(--grid); aspect-ratio: 16 / 9; }
 figcaption { font-size: .85rem; color: var(--text-secondary); margin-top: .25rem; }
 .controls { display: flex; gap: .6rem; align-items: center; }
-.controls input[type=range] { flex: 1; }
+.controls input[type=range] { flex: 1; min-width: 0; }
+/* one image back / forward: big enough to tap */
+.controls button { white-space: nowrap; }
+.controls .step { padding: .1rem .7rem; font-size: 1.4rem; line-height: 1.2; }
+.controls button:disabled { color: var(--text-muted); cursor: default; opacity: .5; }
 button { font: inherit; padding: .35rem .9rem; border-radius: 8px; border: 1px solid var(--axis);
          background: var(--surface-2); color: var(--text-primary); cursor: pointer; }
 
