@@ -1,0 +1,26 @@
+# The POW-O-METER intake Worker on Cloudflare (see src/index.js).
+# Deployed by .github/workflows/worker.yml when anything in worker/ changes
+# on main. Nothing here is secret; the secrets (STATION_IMEI, READ_KEY,
+# GH_DISPATCH_TOKEN) are set in the Cloudflare dashboard (OPERATIONS.md).
+
+name = "powometer-intake"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[triggers]
+# request a publish run every 10 minutes (GitHub's own schedule is unreliable)
+crons = ["*/10 * * * *"]
+
+# the mailbox: messages from RockBLOCK, kept 30 days
+[[kv_namespaces]]
+binding = "MAILBOX"
+id = "SET-ME"
+
+[vars]
+GITHUB_REPO = "mount-remo-backcountry-society/powOmeter"
+GITHUB_WORKFLOW = "publish.yml"
+GITHUB_REF = "main"
+
+[observability]
+enabled = true

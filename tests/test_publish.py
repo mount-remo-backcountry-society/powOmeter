@@ -56,6 +56,39 @@ def test_changed_sheet_layout_fails_loudly(raw):
         intake.fetch("", raw, NOW, "MOMSN,When,Data\n1,2,3\n")
 
 
+def mailbox(*msgs):
+    """The Worker's /messages answer (worker/src/index.js)."""
+    return json.dumps({"messages": [{"transmit_utc": t, "momsn": n, "cep_km": 4, "payload_hex": p.encode().hex()}
+                                    for t, n, p in msgs]})
+
+
+def test_mailbox_saves_only_new_messages_in_a_new_file(raw):
+    box = mailbox(("2026-09-29T18:16:25Z", 3149, old_payload()), ("2026-10-05T00:31:42Z", 3190, "0417313381+07096"))
+    path = intake.fetch_mailbox("", "", raw, NOW, box)
+    assert path.relative_to(raw).as_posix() == "radio/worker/2026-10-05T050000Z_worker.jsonl"
+    recs = [json.loads(line) for line in open(path, encoding="utf-8")]
+    assert [(r["momsn"], r["transmit_utc"], r["payload_text"], r["intake"]) for r in recs] == [
+        (3190, "2026-10-05T00:31:42Z", "0417313381+07096", "worker")]
+    assert intake.fetch_mailbox("", "", raw, NOW + timedelta(hours=1), box) is None     # nothing new
+    assert sum(m.payload_text == "0417313381+07096" for m in load_all(raw)) == 1
+
+
+def test_a_message_that_comes_both_ways_is_one_message(raw):
+    intake.fetch_mailbox("", "", raw, NOW, mailbox(("2026-10-05T00:31:42Z", 3190, "0417313381+07096")))
+    path = intake.fetch("", raw, NOW + timedelta(minutes=5), CSV.format(old=old_payload()))
+    recs = [json.loads(line) for line in open(path, encoding="utf-8")]
+    assert [r["transmit_utc"] for r in recs] == ["2026-10-05T00:31:10Z"]      # only the empty session is new
+    same = [m for m in load_all(raw) if m.payload_text == "0417313381+07096"]
+    assert len(same) == 1 and same[0].session_status is None
+    assert sorted(s.split(":")[0] for s in same[0].sources) == ["worker"]
+
+
+def test_malformed_mailbox_fails_without_saving(raw):
+    with pytest.raises(ValueError):
+        intake.fetch_mailbox("", "", raw, NOW, mailbox(("17/Oct/2026", 1, "0417313381+07096")))
+    assert not (raw / "radio" / "worker").exists()
+
+
 # --- health checks --------------------------------------------------------
 
 def msg(minutes_ago, payload="0417313381+07096"):

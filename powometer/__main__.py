@@ -2,9 +2,11 @@
 
   validate   check the files in config/ and print any problems
   build      rebuild everything from raw/ and config/ into out/
-  fetch      save new satellite messages from the sheet's Messages tab into
-             raw/radio/messages_tab/ (needs the MESSAGES_CSV_URL setting),
-             and new readings of the enabled nearby stations into raw/avcan/
+  fetch      save new satellite messages from the Worker's mailbox into
+             raw/radio/worker/ (MAILBOX_URL, MAILBOX_READ_KEY; skipped if not
+             set) and from the sheet's Messages tab into raw/radio/messages_tab/
+             (needs the MESSAGES_CSV_URL setting), and new readings of the
+             enabled nearby stations into raw/avcan/
   webcams    add the newest webcam frames to a 3-day time lapse:
              webcams <folder>   (normally out/webcams; never fails the run)
   approve    freeze a reviewed period:
@@ -67,7 +69,19 @@ def main(argv: list[str]) -> int:
         import os
         from . import nearby
         from .config import load
-        from .intake import fetch
+        from .intake import fetch, fetch_mailbox
+        # the Worker's mailbox (RockBLOCK direct): a failure is reported, never
+        # fatal; the mailbox keeps 30 days and the sheet carries the same messages
+        box, box_key = os.environ.get("MAILBOX_URL", ""), os.environ.get("MAILBOX_READ_KEY", "")
+        if box and box_key:
+            try:
+                path = fetch_mailbox(box, box_key)
+                print(f"fetch: new messages from the mailbox saved to {path.relative_to(path.parents[3]).as_posix()}"
+                      if path else "fetch: no new messages in the mailbox")
+            except Exception as e:                       # noqa: BLE001
+                print(f"fetch: mailbox FAILED ({type(e).__name__}: {e})")
+        else:
+            print("fetch: mailbox not set up (MAILBOX_URL, MAILBOX_READ_KEY)")
         url = os.environ.get("MESSAGES_CSV_URL", "")
         if not url:
             print("fetch: MESSAGES_CSV_URL is not set (a GitHub secret; see OPERATIONS.md)")

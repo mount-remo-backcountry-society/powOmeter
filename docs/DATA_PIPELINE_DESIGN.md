@@ -124,12 +124,13 @@ Rule: MRBS assets never depend on Julian's personal projects or tools
 
 ```
  INTAKE                                   STATION REPO (public)                         PUBLISHED (Pages)
- RockBLOCK → Gmail → Apps Script ─▶ Messages tab ─published CSV─┐
+ RockBLOCK → Worker (Cloudflare) mailbox ─────────────────────────┐
+ RockBLOCK → Gmail → Apps Script ─▶ Messages tab ─published CSV─┤
  RockBLOCK console export (backstop) ───────────────────────────┼▶ raw/radio/
  SD card, each visit (drag & drop, zip OK) ─────────────────────┼▶ raw/sd/<visit>/
  (Avalanche Canada / PCDS: only after MoTI permission, §10)     │
                                        config/ · powometer/ (Python) · tests/
-                                       Action "publish" (every 5 min, off the hour) ▶ v1/*.csv, *.json, site
+                                       Action "publish" (Worker: 10 min + per message) ▶ v1/*.csv, *.json, site
                                        Action "check" (after publish) ──────────────▶ GitHub Issue on alarm change
 ```
 
@@ -139,6 +140,16 @@ Rule: MRBS assets never depend on Julian's personal projects or tools
   Action reads the sheet's `Messages` tab through its **published CSV link**
   (no secret in the repo, F8) and appends new messages to `raw/radio/`. It
   parses the text, never date cells.
+- **Radio, direct (added 2026-10-17):** RockBLOCK also delivers each message
+  by HTTP to a Cloudflare Worker (`worker/`, free plan), which checks
+  RockBLOCK's signature (RS256 JWT) and the IMEI, keeps the published fields
+  only (not IMEI, serial or position) in a KV mailbox for 30 days, and starts
+  a publish run. Each run saves new mailbox messages to `raw/radio/worker/`;
+  a message that comes both ways is one message (key `(transmit_utc,
+  payload)`). The Worker also starts a run every 10 minutes, because GitHub's
+  schedule ran only every 2–5 hours. Goal: the site stops depending on the
+  Gmail/Apps Script/Sheet chain; the sheet stays while Avalanche Canada and
+  Looker read it.
 - **Backstop:** the RockBLOCK console export (email delivery has no documented
   retry). The loader accepts its format (`29/Sep/2026 18:16:25`, hex
   payload), and `OPERATIONS.md` explains how to re-export it and drop it in.
@@ -152,6 +163,7 @@ Rule: MRBS assets never depend on Julian's personal projects or tools
 | Path | Content |
 |---|---|
 | `raw/radio/messages_tab/<fetch>.jsonl` | **One new file per fetch**, holding only messages not seen before: `transmit_utc, momsn, session_status, cep_km, payload_text, payload_hex, intake, received_utc`. Files are never appended to: messages can arrive months late (MOMSN 2430 from March 2026 was ingested on 2026-09-22), and the raw-immutability check rejects any change to an existing file. Key `(transmit_utc, payload)`; MOMSN where known. (Corrected 2026-10-04 from a monthly-file layout, which would have required appends) |
+| `raw/radio/worker/<fetch>.jsonl` | The same, from the Worker's mailbox (`intake: worker`; no session status: RockBLOCK delivers completed sessions only). Only messages not already archived by either route |
 | `raw/radio/rockblock-export-2026-09-29.csv` | Console history, 2,588 messages since 2024-04-18; **the `Approx Lat/Lng` column dropped for all rows** (F10). Original kept locally, with its checksum in `data/RockBLOCK/README.md` |
 | `raw/sd/<visit-id>/` | SD files as downloaded (17 download folders from 14 visit dates so far) |
 
@@ -453,8 +465,9 @@ phase 2 (§4).
 **Parked:**
 - powWX integration
 - Avalanche Canada on v1
-- RockBLOCK HTTP intake: it must answer HTTP 200 within 3 s; retries 14
-  times over about 6 days; fields documented (F15)
+- ~~RockBLOCK HTTP intake~~: built 2026-10-17 as the Cloudflare Worker
+  (§6.1). Retiring the sheet intake waits for Avalanche Canada and Looker
+  to move to the published files
 - review app
 - importing past Aquarius seasons
 - Windy / CWOP / Zenodo publishing
@@ -490,6 +503,7 @@ phase 2 (§4).
 | 2026-10-05 | Phase 3: simple main view with "More"; negative snow depth shown as 0 on the page; BC time as fixed UTC−7; nearby stations and webcams in scope (permission reported); webcam frames kept in the published site, not git; nearby stations published in separate files |
 | 2026-10-03 | Review findings adopted: MRBS organization before publishing; publish-always plus Issue alarms; approval snapshots; firmware-era statistics; snow depth as a derivation; point readings plus an on-the-hour series instead of hourly means; published-CSV intake; pattern-only CI check; smaller output set; handover routines |
 | 2026-10-17 | The page shows snow depth under 15 cm as "Under 15 cm" (bare-ground scatter −14 to +7 cm at site B; thin snow squashes the heather); files unchanged |
+| 2026-10-17 | Cloudflare Worker (station's account): direct RockBLOCK HTTP intake into a KV mailbox, and a publish run every 10 minutes and per message; deployed from the repo by GitHub; mailbox read with a key; first step towards leaving the Google Sheet |
 | 2026-10-17 | Publish every 5 minutes instead of hourly (GitHub ran the hourly schedule only about every 5 hours); webcam time lapse kept to about one frame an hour |
 
 **Open questions**
@@ -504,8 +518,10 @@ phase 2 (§4).
 **Unverified assumptions**
 - Whether commits made by the build itself count as activity for GitHub's
   60-day rule. The monthly human keep-alive covers this either way.
-- Whether RockBLOCK HTTP delivery follows the redirect that an Apps Script
-  web app responds with (only relevant if the parked intake is built).
+- Which fields RockBLOCK's signed token (JWT) carries: the documentation
+  gives the key, not the claims. The Worker requires the payload to be
+  signed and refuses (RockBLOCK then retries for ~6 days) otherwise; the
+  first real delivery shows it.
 - PCDS latency and DST handling (deferred tests, `data/PCDS/README.md`).
 - Research-report items marked *[unverified]*.
 
