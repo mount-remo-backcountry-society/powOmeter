@@ -111,10 +111,15 @@ The RockBLOCK history is the backstop if the email intake misses messages.
 
 ## The publish workflow
 
-Every 5 minutes the **publish** workflow (GitHub skips some runs; that is normal):
-1. fetches new satellite messages from the sheet's Messages tab into
-   `raw/radio/messages_tab/`, and new readings of the nearby stations into
-   `raw/avcan/` (a new file only when there is something new)
+The **publish** workflow is started every 10 minutes and whenever a
+satellite message arrives, by the intake Worker (next section). GitHub's own
+5-minute schedule is a backup only: on its own GitHub ran it about every 2–5
+hours. Each run:
+1. fetches new satellite messages from the Worker's mailbox into
+   `raw/radio/worker/` and from the sheet's Messages tab into
+   `raw/radio/messages_tab/` (a message that comes both ways is kept once),
+   and new readings of the nearby stations into `raw/avcan/` (a new file
+   only when there is something new)
 2. rebuilds everything
 3. adds the newest webcam frames to the time lapse
 4. publishes the station page and the files
@@ -132,6 +137,68 @@ Every 5 minutes the **publish** workflow (GitHub skips some runs; that is normal
 - **If the workflow itself fails** (red cross in the Actions tab), GitHub
   emails whoever last changed the workflow. Open the failed run and read the
   first red step.
+
+## The intake Worker (Cloudflare)
+
+A small program on Cloudflare's free plan, in the station's Cloudflare
+account (signed up with the station's Gmail address). Its code is in
+`worker/`; GitHub deploys it by itself when a change to `worker/` reaches
+`main` (workflow **worker**). It:
+- receives each satellite message from RockBLOCK directly (in addition to
+  the email), checks RockBLOCK's signature and the station's IMEI, keeps
+  only what is published anyway (not the IMEI or the position) for 30 days,
+  and starts a publish run;
+- starts a publish run every 10 minutes;
+- hands its mailbox to each publish run (with the read key).
+
+**Secrets, and where they live.** Never put any of them in a file.
+
+| Secret | Where | What |
+|---|---|---|
+| `STATION_IMEI` | Cloudflare: Worker → Settings → Variables and Secrets | the station's IMEI (RockBLOCK console) |
+| `READ_KEY` | Cloudflare, same place | a long random string; also GitHub `MAILBOX_READ_KEY` |
+| `GH_DISPATCH_TOKEN` | Cloudflare, same place | GitHub key that may start runs (below) |
+| `MAILBOX_URL` | GitHub: Settings → Secrets and variables → Actions | the Worker's address, e.g. `https://powometer-intake.<name>.workers.dev` |
+| `MAILBOX_READ_KEY` | GitHub, same place | the same string as `READ_KEY` |
+| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub, same place | let the **worker** workflow deploy |
+
+**Setting it up (once):**
+1. Sign up at dash.cloudflare.com with the station's Gmail address (Free
+   plan). Under Workers & Pages, pick the `workers.dev` name.
+2. Storage & Databases → Workers KV → Create: name `powometer-mailbox`.
+   Put its ID (not secret) into `worker/wrangler.toml` (`id = "…"`).
+3. My Profile → API Tokens → Create Token → template "Edit Cloudflare
+   Workers" → your account → Create. Store it in GitHub as
+   `CLOUDFLARE_API_TOKEN`, and the Account ID (Workers & Pages overview,
+   right-hand side) as `CLOUDFLARE_ACCOUNT_ID`.
+4. Run the **worker** workflow (Actions tab → worker → Run workflow) or
+   merge the change with the KV id: it deploys the Worker.
+5. The GitHub key: github.com → your picture → Settings → Developer
+   settings → Personal access tokens → Fine-grained tokens → Generate.
+   Resource owner `mount-remo-backcountry-society`; only the `powOmeter`
+   repository; permission **Actions: Read and write**, nothing else; the
+   longest expiry allowed. The organization may have to approve it
+   (organization Settings → Personal access tokens → Pending requests).
+6. Make a read key on your own computer, e.g. in PowerShell
+   `[guid]::NewGuid().ToString() + [guid]::NewGuid().ToString()`.
+7. In Cloudflare (Worker → Settings → Variables and Secrets → Add, type
+   *Secret*): `STATION_IMEI`, `READ_KEY`, `GH_DISPATCH_TOKEN`.
+8. In GitHub: `MAILBOX_URL` and `MAILBOX_READ_KEY`.
+9. Check: within 10 minutes the Actions tab shows a publish run started by
+   "workflow_dispatch", and the Worker's Logs (Cloudflare) show no errors.
+10. RockBLOCK (when decided): RockBLOCK console → Delivery Groups → add an
+    **HTTP_POST** destination `<Worker address>/rockblock` next to the email.
+    Keep the email.
+
+**Checks and trouble:**
+- *No runs every 10 minutes:* Cloudflare → Worker → Logs. "GH_DISPATCH_TOKEN
+  is not set" or "HTTP 401" means the GitHub key is missing or expired.
+- *"rejected" in the Logs:* a message failed the signature or IMEI check.
+  RockBLOCK retries for about 6 days, and the email route still carries it.
+- *"mailbox FAILED" in a publish run:* the read key or address in GitHub
+  does not match the Worker. Publishing continues from the sheet.
+- The GitHub key belongs to the person who made it and expires: renew it
+  (Yearly) and when handing over.
 
 ## When an alarm Issue opens
 
@@ -251,6 +318,9 @@ Mountain's reply into an AI assistant.
    with no activity for 60 days; this prevents it.
 
 ## Yearly
+Renew the GitHub key `GH_DISPATCH_TOKEN` before it expires (GitHub emails a
+week ahead): make a new one as in "The intake Worker", step 5, and replace the
+Cloudflare secret.
 *(phase 2)* Sign in to the station's Gmail account; upgrade day for software
 versions (`requirements.in` → `requirements.txt`); archive the repository to
 Zenodo or an MRBS drive.

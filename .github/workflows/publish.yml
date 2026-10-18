@@ -4,10 +4,11 @@ name: publish
 # the newest webcam frames, publish the station page and files, and
 # open/close alarm Issues (design §6.7, phases 2-3).
 #
-# Runs every 5 minutes, off the hour (GitHub delays jobs scheduled on the
-# hour), and by hand from the Actions tab. GitHub skips many scheduled runs:
-# set to hourly, it ran about every 5 hours (Oct 2026); at 5 minutes a
-# skipped run costs minutes, not hours. Actions minutes and Pages are free
+# Started by the intake Worker on Cloudflare (worker/) every 10 minutes and
+# when a satellite message arrives, by hand from the Actions tab, and by
+# GitHub's own schedule as a backup. That schedule alone is not enough: set
+# to hourly or to every 5 minutes, GitHub ran it only about every 2-5 hours
+# (Oct 2026). Actions minutes and Pages are free
 # only because the repository is public: it must stay public.
 
 on:
@@ -46,12 +47,15 @@ jobs:
 
       - name: Fetch new satellite messages and nearby-station readings
         env:
+          MAILBOX_URL: ${{ secrets.MAILBOX_URL }}
+          MAILBOX_READ_KEY: ${{ secrets.MAILBOX_READ_KEY }}
           MESSAGES_CSV_URL: ${{ secrets.MESSAGES_CSV_URL }}
         run: python -m powometer fetch
 
       - name: Save new raw messages to the repository
         run: |
           git add raw/radio/messages_tab
+          if [ -d raw/radio/worker ]; then git add raw/radio/worker; fi
           if [ -d raw/avcan ]; then git add raw/avcan; fi
           if git diff --cached --quiet; then
             echo "nothing new"

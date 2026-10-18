@@ -8,10 +8,12 @@ Two sources, combined into one list of messages:
   tab (MOMSN, session status, CEP). Files are only ever ADDED, one per fetch,
   never appended to, because raw/ is immutable and messages can arrive
   months late.
+* `worker/*.jsonl`: the same, from the Cloudflare Worker's mailbox (RockBLOCK
+  delivers each message there directly; worker/src/index.js).
 
-A message is identified by (transmit_utc, payload text). When both sources
-have it, the result keeps the export's payload and adds the MOMSN, status and
-CEP from the Messages tab.
+A message is identified by (transmit_utc, payload text). When several
+sources have it, the result keeps the export's payload and adds the MOMSN,
+status and CEP from the others.
 """
 from __future__ import annotations
 
@@ -57,6 +59,9 @@ def load_console_export(path: Path) -> list[Message]:
     return out
 
 
+JSONL_INTAKES = ("messages_tab", "worker")      # folders of raw/radio/ with one .jsonl per fetch
+
+
 def load_messages_tab(path: Path) -> list[Message]:
     out = []
     with open(path, encoding="utf-8") as f:
@@ -73,7 +78,7 @@ def load_messages_tab(path: Path) -> list[Message]:
                 momsn=r.get("momsn"),
                 session_status=r.get("session_status"),
                 cep_km=r.get("cep_km"),
-                sources=(f"messages_tab:{path.name}",),
+                sources=(f"{path.parent.name}:{path.name}",),
             ))
     return out
 
@@ -86,8 +91,9 @@ def load_all(raw_dir: Path = RAW) -> list[Message]:
     msgs: list[Message] = []
     for p in sorted(radio.glob("rockblock-export-*.csv")):
         msgs += load_console_export(p)
-    for p in sorted((radio / "messages_tab").glob("*.jsonl")):
-        msgs += load_messages_tab(p)
+    for folder in JSONL_INTAKES:
+        for p in sorted((radio / folder).glob("*.jsonl")):
+            msgs += load_messages_tab(p)
 
     merged: dict[tuple[datetime, str], Message] = {}
     for m in msgs:

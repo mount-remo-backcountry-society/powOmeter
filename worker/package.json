@@ -1,0 +1,9 @@
+{
+  "name": "powometer-intake",
+  "private": true,
+  "type": "module",
+  "description": "POW-O-METER intake Worker; tests: node --test",
+  "scripts": {
+    "test": "node --test"
+  }
+}

@@ -22,6 +22,7 @@ published data, and the documentation** to run it.
 | `scripts/` | Station firmware, field card, the Google Apps Script intake, older processing scripts |
 | `docs/` | Design, plan, research, independent review |
 | `tools/` | Privacy and raw-data checks |
+| `worker/` | The intake Worker on Cloudflare: receives RockBLOCK messages, starts publish runs |
 | `OPERATIONS.md` | How to run the station's data, in plain language |
 | `CLAUDE.md` | Instructions for AI assistants working on this repository |
 
