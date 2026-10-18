@@ -124,16 +124,38 @@ def parse_mailbox(text: str, fetched: datetime) -> list[dict]:
 
 
 def fetch_mailbox(url: str, read_key: str, raw_dir: Path = RAW, now: datetime | None = None,
-                  text: str | None = None) -> Path | None:
+                  text: str | None = None) -> tuple[Path | None, list[dict]]:
     """Read the Worker's mailbox and archive the messages not seen before
-    (by either route). Returns the new file, or None."""
+    (by either route). Returns the new file (or None) and everything the
+    mailbox holds."""
     now = now or datetime.now(timezone.utc)
     if text is None:
         req = urllib.request.Request(url.rstrip("/") + "/messages",
                                      headers={"Authorization": f"Bearer {read_key}", "User-Agent": "powometer"})
         with urllib.request.urlopen(req, timeout=60) as r:
             text = r.read().decode("utf-8")
-    return _archive(parse_mailbox(text, now), raw_dir, "worker", f"{now:%Y-%m-%dT%H%M%SZ}_worker.jsonl")
+    records = parse_mailbox(text, now)
+    return _archive(records, raw_dir, "worker", f"{now:%Y-%m-%dT%H%M%SZ}_worker.jsonl"), records
+
+
+def mailbox_report(records: list[dict], raw_dir: Path = RAW) -> str:
+    """One line for the run's log: what the mailbox holds, and whether the
+    newest message that came by the sheet is in it (the two routes should
+    carry the same messages)."""
+    from .radio import load_all
+    if records:
+        last = max(records, key=lambda r: r["transmit_utc"])
+        held = f"{len(records)} message(s), newest MOMSN {last['momsn']} sent {last['transmit_utc']}"
+    else:
+        held = "empty"
+    sheet = [m for m in load_all(raw_dir) if any(s.startswith("messages_tab:") for s in m.sources)]
+    if not sheet:
+        return f"mailbox: {held}"
+    s = sheet[-1]
+    t = f"{s.transmit_utc:%Y-%m-%dT%H:%M:%SZ}"
+    inbox = any(r["transmit_utc"] == t and r["payload_text"] == s.payload_text for r in records)
+    return (f"mailbox: {held}; newest sheet message (MOMSN {s.momsn}, sent {t}) "
+            + ("is in the mailbox" if inbox else "is NOT in the mailbox"))
 
 
 def _archive(records: list[dict], raw_dir: Path, folder: str, name: str) -> Path | None:

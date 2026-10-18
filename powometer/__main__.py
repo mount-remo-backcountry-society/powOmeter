@@ -69,16 +69,18 @@ def main(argv: list[str]) -> int:
         import os
         from . import nearby
         from .config import load
-        from .intake import fetch, fetch_mailbox
+        from .intake import fetch, fetch_mailbox, mailbox_report
         # the Worker's mailbox (RockBLOCK direct): a failure is reported, never
         # fatal; the mailbox keeps 30 days and the sheet carries the same messages
         box, box_key = os.environ.get("MAILBOX_URL", ""), os.environ.get("MAILBOX_READ_KEY", "")
+        held = None
         if box and box_key:
             try:
-                path = fetch_mailbox(box, box_key)
+                path, held = fetch_mailbox(box, box_key)
                 print(f"fetch: new messages from the mailbox saved to {path.relative_to(path.parents[3]).as_posix()}"
                       if path else "fetch: no new messages in the mailbox")
             except Exception as e:                       # noqa: BLE001
+                held = None
                 print(f"fetch: mailbox FAILED ({type(e).__name__}: {e})")
         else:
             print("fetch: mailbox not set up (MAILBOX_URL, MAILBOX_READ_KEY)")
@@ -89,6 +91,8 @@ def main(argv: list[str]) -> int:
         path = fetch(url)
         print(f"fetch: new messages saved to {path.relative_to(path.parents[3]).as_posix()}" if path
               else "fetch: no new messages")
+        if held is not None:
+            print("fetch: " + mailbox_report(held))
         # nearby stations: a failure is reported, never fatal (their API keeps 7 days)
         path, report = nearby.fetch(load())
         for station, r in report.items():

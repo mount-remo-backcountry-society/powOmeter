@@ -64,12 +64,13 @@ def mailbox(*msgs):
 
 def test_mailbox_saves_only_new_messages_in_a_new_file(raw):
     box = mailbox(("2026-09-29T18:16:25Z", 3149, old_payload()), ("2026-10-05T00:31:42Z", 3190, "0417313381+07096"))
-    path = intake.fetch_mailbox("", "", raw, NOW, box)
+    path, held = intake.fetch_mailbox("", "", raw, NOW, box)
+    assert len(held) == 2
     assert path.relative_to(raw).as_posix() == "radio/worker/2026-10-05T050000Z_worker.jsonl"
     recs = [json.loads(line) for line in open(path, encoding="utf-8")]
     assert [(r["momsn"], r["transmit_utc"], r["payload_text"], r["intake"]) for r in recs] == [
         (3190, "2026-10-05T00:31:42Z", "0417313381+07096", "worker")]
-    assert intake.fetch_mailbox("", "", raw, NOW + timedelta(hours=1), box) is None     # nothing new
+    assert intake.fetch_mailbox("", "", raw, NOW + timedelta(hours=1), box)[0] is None  # nothing new
     assert sum(m.payload_text == "0417313381+07096" for m in load_all(raw)) == 1
 
 
@@ -81,6 +82,16 @@ def test_a_message_that_comes_both_ways_is_one_message(raw):
     same = [m for m in load_all(raw) if m.payload_text == "0417313381+07096"]
     assert len(same) == 1 and same[0].session_status is None
     assert sorted(s.split(":")[0] for s in same[0].sources) == ["worker"]
+
+
+def test_mailbox_report_says_whether_the_newest_sheet_message_came_both_ways(raw):
+    last = [m for m in load_all(raw) if any(s.startswith("messages_tab:") for s in m.sources)][-1]
+    t = f"{last.transmit_utc:%Y-%m-%dT%H:%M:%SZ}"
+    _, held = intake.fetch_mailbox("", "", raw, NOW, mailbox((t, last.momsn, last.payload_text)))
+    assert intake.mailbox_report(held, raw) == (f"mailbox: 1 message(s), newest MOMSN {last.momsn} sent {t}; "
+                                                f"newest sheet message (MOMSN {last.momsn}, sent {t}) is in the mailbox")
+    assert intake.mailbox_report([], raw).startswith("mailbox: empty; ")
+    assert intake.mailbox_report([], raw).endswith("is NOT in the mailbox")
 
 
 def test_malformed_mailbox_fails_without_saving(raw):
