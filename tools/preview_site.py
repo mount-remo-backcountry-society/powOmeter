@@ -54,13 +54,13 @@ def row(t, variable, value, unit, site="shames_top_b", station="powometer", stat
 
 
 def own_rows(scenario, now, last):
-    """About 8 days of station readings ending at `last`."""
+    """About 31 days of station readings ending at `last` (the page offers up to 30)."""
     out, i = [], 0
-    n = int(timedelta(days=8) / STEP)
+    n = int(timedelta(days=31) / STEP)
     for t in (last - k * STEP for k in range(n, -1, -1)):         # ends exactly at `last`
         h = (t - (last - timedelta(days=8))).total_seconds() / 3600
         temp = -4 + 4 * math.sin((t.hour - 15) / 24 * 2 * math.pi) - h / 60
-        depth = 0 if h < 60 else min(80, (h - 60) * 0.9)          # a storm builds snow from day 2.5
+        depth = 0 if h < 60 else min(80, (h - 60) * 0.6)          # a storm builds snow from 5.5 days ago
         if scenario == "negative":
             depth = -4 + (i % 3)
         storm_gap = scenario == "storm" and last - t < timedelta(hours=6)
@@ -91,7 +91,8 @@ def nearby(scenario, now):
     rows, latest = [], {}
     t0 = now.replace(minute=0, second=0, microsecond=0)
     for sid, (site, elev) in stations.items():
-        for k in range(8 * 24):
+        first = len(rows)                                            # this station's newest row
+        for k in range(31 * 24):
             t = t0 - timedelta(hours=k)
             temp = -2 + 4 * math.sin((t.hour - 15) / 24 * 2 * math.pi) - (elev - 1150) * 0.0065
             q, ql = "good", ""
@@ -106,9 +107,9 @@ def nearby(scenario, now):
                 rows.append(row(t, "wind_from_direction", (200 + 7 * k) % 360, "degree", site=site, station=sid,
                                 statistic="mean", source="avcan"))
             if sid == "avcan_56":                                     # and Kasiks High a snow sensor
-                rows.append(row(t, "snow_depth", round(160 - k * 0.3), "cm", site=site, station=sid,
+                rows.append(row(t, "snow_depth", round(160 - k * 0.1), "cm", site=site, station=sid,
                                 source="avcan"))
-        r0 = rows[-8 * 24]
+        r0 = rows[first]
         latest[sid] = {"values": {"air_temperature": {
             "time_utc": r0["time_utc"], "value": float(r0["value"]), "unit": "degC", "statistic": "mean",
             "quality": r0["quality"], "approval": "working", "site_id": site}}}

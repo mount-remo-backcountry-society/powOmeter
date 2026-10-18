@@ -26,12 +26,17 @@
   const FRESH_H = 6;                       // radio sends 7x a day; longest normal gap ~5 h
   const STALE_H = 12;                      // = the no-message alarm (config/monitoring.yaml)
   const BUILD_STALE_H = 3;                 // publish runs every 5 min (GitHub skips some)
-  const CHART_DAYS = 7;
-  const MIN_DEPTH_CM = 15;                 // shallower shows as "Under 15 cm": bare-ground readings
+  const CHART_DAYS = [1, 3, 7, 30];        // the range buttons; recent.csv holds 30 days
+  const DEFAULT_DAYS = 3;
+  const MIN_DEPTH_CM = 15;                // shallower shows as "Under 15 cm": bare-ground readings
                                            // scatter -14 to +7 cm, and thin snow squashes the heather
   const TABLE_HOURS = 24;
   const GAP_H = 6;                         // break a chart line across a longer gap
   const HOVER_H = 2;                       // hover: a station's reading within this of the pointer
+  const HOVER_KEEP_S = 3;                  // after the finger lifts, the values stay this long
+  const CHANGE_HOURS = [24, 48, 72];       // depth change under the snow depth (avalanche standard)
+  const CHANGE_TOL_H = 3;                  // its start: the reading nearest that time, within this
+                                           // (the radio sends about every 3.4 h)
   const REFRESH_MIN = 10;
   const REOPEN_MIN = 2;                    // back on screen after longer than this: refresh
   const CAM_REFRESH_MIN = 5;               // newest webcam image: fetched afresh at most this often
@@ -80,13 +85,20 @@
     fmtDateTime(ms) { const b = POW.bc(ms); return `${b.dow} ${b.day} ${b.mon}, ${b.hh}:${b.mm}`; },
     /** "14:05" */
     fmtClock(ms) { const b = POW.bc(ms); return `${b.hh}:${b.mm}`; },
-    /** BC midnights (ms) from a to b. */
-    midnights(a, b) {
-      const off = BC_OFFSET_H * H;
-      let t = Math.ceil((a + off) / (24 * H)) * 24 * H - off;
+    /** BC times (ms) from a to b, every stepH hours from BC midnight. */
+    ticks(a, b, stepH = 24) {
+      const off = BC_OFFSET_H * H, step = stepH * H;
+      let t = Math.ceil((a + off) / step) * step - off;
       const out = [];
-      for (; t <= b; t += 24 * H) out.push(t);
+      for (; t <= b; t += step) out.push(t);
       return out;
+    },
+    /** BC midnights (ms) from a to b. */
+    midnights(a, b) { return POW.ticks(a, b, 24); },
+    /** A time-axis label: "Fri 2 Oct" at midnight, else "06:00". */
+    tickText(ms) {
+      const b = POW.bc(ms);
+      return b.hh === "00" && b.mm === "00" ? POW.fmtDay(ms) : POW.fmtClock(ms);
     },
 
     ageHours(iso, nowMs) { return (nowMs - POW.ms(iso)) / H; },
@@ -188,6 +200,28 @@
       return out;
     },
 
+    /** Change in POW-O-METER's snow depth (cm) over `hours` up to its newest
+     *  reading at the site, or null: when no reading lies within CHANGE_TOL_H
+     *  of the start, or either end is under MIN_DEPTH_CM (not a depth yet).
+     *  A change in depth, not new snow: new snow settles, and wind moves it. */
+    depthChange(rows, site, hours) {
+      const pts = rows.filter((r) => r.station_id === STATION && r.site_id === site && r.variable === "snow_depth" &&
+          r.statistic === "median" && r.value !== "" && CHART_QUALITIES.includes(r.quality))
+        .map((r) => ({ ms: POW.ms(r.time_utc), cm: Number(r.value) }));
+      if (!pts.length) return null;
+      const end = pts.reduce((a, p) => (p.ms > a.ms ? p : a));
+      const t = end.ms - hours * H;
+      const start = pts.reduce((a, p) => (Math.abs(p.ms - t) < Math.abs(a.ms - t) ? p : a));
+      if (Math.abs(start.ms - t) > CHANGE_TOL_H * H) return null;
+      if (Math.round(start.cm) < MIN_DEPTH_CM || Math.round(end.cm) < MIN_DEPTH_CM) return null;
+      return Math.round(end.cm) - Math.round(start.cm);
+    },
+    /** "+18 cm", "−5 cm", "0 cm"; "–" for no value */
+    changeText(cm) {
+      if (cm === null || cm === undefined) return "–";
+      return (cm > 0 ? "+" : cm < 0 ? "−" : "") + Math.abs(cm) + " cm";
+    },
+
     /** For hovering: in each series, the index of the point nearest to x
      *  (within HOVER_H), or -1. */
     nearestEach(seriesList, x) {
@@ -238,14 +272,14 @@
   const getJSON = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(u); return r.json(); });
   const getText = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(u); return r.text(); });
   const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  const store = {          // remembers the ticked stations in this browser only
+  const store = {          // remembers the ticked stations and the time range, in this browser only
     get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode */ } },
   };
 
   const state = { latest: null, status: null, sites: null, recent: [], site: null,
                   near: { stations: {} }, nearRows: [], webcams: null, stations: [], hidden: new Set(),
-                  charts: {}, fetchedMs: null, camLive: [] };
+                  charts: {}, days: DEFAULT_DAYS, fetchedMs: null, camLive: [] };
 
   // -- stations: POW-O-METER plus the published nearby stations ------------
   function stationList() {
@@ -301,8 +335,20 @@
       el("div", { class: "tile-age", text: `${POW.ageText(v.age)} · ${POW.fmtDateTime(v.ms)}` +
         (v.state === "stale" ? " · not current" : v.state === "late" ? " · older than usual" : "") }));
   }
+  // under the snow depth: its change over 24, 48 and 72 h (not with old data, nor before there is snow)
+  function depthChanges(v) {
+    if (!v || v.state === "stale") return;
+    const ch = CHANGE_HOURS.map((h) => [h, POW.depthChange(state.recent, state.site, h)]);
+    if (ch.every(([, cm]) => cm === null)) return;
+    $("now-depth").append(el("div", { class: "tile-change" },
+      el("div", { class: "tile-label", text: "Depth change" }),
+      el("div", { class: "changes" }, ...ch.map(([h, cm]) => el("div", {},
+        el("div", { class: "tile-age", text: `${h} h` }), el("div", { class: "change-value", text: POW.changeText(cm) }))))));
+  }
   function renderTiles(now) {
-    tile("now-depth", "Snow depth", POW.nowValue(state.latest, "snow_depth", state.site, now), POW.depthText);
+    const depth = POW.nowValue(state.latest, "snow_depth", state.site, now);
+    tile("now-depth", "Snow depth", depth, POW.depthText);
+    depthChanges(depth);
     tile("now-temp", "Air temperature", POW.nowValue(state.latest, "air_temperature", state.site, now), POW.fmtTemp);
     tile("now-rh", "Humidity", POW.nowValue(state.latest, "relative_humidity", state.site, now), (v) => `${Math.round(v)}%`);
   }
@@ -326,62 +372,66 @@
   }
 
   // -- charts --
+  // fmt: the value in the title line while a chart is touched (the unit is in the title)
   const CHARTS = [
-    // "Under 15 cm" is about POW-O-METER's sensor over the heather; other stations show their value
-    { id: "chart-depth", variable: "snow_depth", fmt: (v) => `${v} cm`, ownFmt: POW.depthText, axis: (v) => `${v}`,
+    // "under 15 cm" is about POW-O-METER's sensor over the heather; other stations show their value
+    { id: "chart-depth", variable: "snow_depth", fmt: (v) => `${v} cm`,
+      ownFmt: (v) => (v < MIN_DEPTH_CM ? `under ${MIN_DEPTH_CM} cm` : `${v} cm`), axis: (v) => `${v}`,
       transform: POW.displayDepth, y: { min: 0, suggestedMax: 50 }, shallow: true },
-    { id: "chart-temp", variable: "air_temperature", fmt: POW.fmtTemp, axis: (v) => `${v}°`, freezing: true },
+    { id: "chart-temp", variable: "air_temperature", fmt: (v) => (v < 0 ? "−" : "") + Math.abs(v).toFixed(1) + "°",
+      axis: (v) => `${v}°`, freezing: true },
     { id: "chart-wind", variable: "wind_speed", fmt: (v) => `${Math.round(v)} km/h`, axis: (v) => `${v}`,
       y: { min: 0, suggestedMax: 20 }, direction: true },
     { id: "chart-rh", variable: "relative_humidity", fmt: (v) => `${Math.round(v)}%`, axis: (v) => `${v}%`,
       y: { min: 0, max: 100 } },
   ];
 
-  // Hover: every chart shows, for each station, the reading nearest the
-  // pointer's time, and all charts follow the same time.
-  Chart.Interaction.modes.nearestEach = (chart, e) => {
-    const x = chart.scales.x.getValueForPixel(e.x);
-    return POW.nearestEach(chart.data.datasets.map((d, i) => chart.isDatasetVisible(i) ? d.data : []), x)
-      .map((index, datasetIndex) => index < 0 ? null : { datasetIndex, index,
-        element: chart.getDatasetMeta(datasetIndex).data[index] })
-      .filter(Boolean);
-  };
-  let syncing = false;
-  function showAt(chart, x) {
-    if (x === null) {
-      chart.$hoverX = null;
-      chart.setActiveElements([]); chart.tooltip.setActiveElements([], { x: 0, y: 0 });
-    } else {
+  // Touching or pointing at a chart: every chart's title line shows, for each
+  // station, the reading nearest that time, with a hairline at the time and
+  // the time itself on the time axis. Nothing covers the plot (no callouts).
+  function showAt(x) {
+    for (const def of CHARTS) {
+      const chart = state.charts[def.id], head = $(def.id + "-head");
+      if (!chart) continue;
       chart.$hoverX = x;
-      const active = POW.nearestEach(chart.data.datasets.map((d, i) => chart.isDatasetVisible(i) ? d.data : []), x)
-        .map((index, datasetIndex) => ({ datasetIndex, index })).filter((a) => a.index >= 0);
-      const px = chart.scales.x.getPixelForValue(x);
-      chart.setActiveElements(active);
-      chart.tooltip.setActiveElements(active, { x: px, y: chart.chartArea.top });
+      const idx = x === null ? [] : POW.nearestEach(chart.data.datasets.map((d, i) => chart.isDatasetVisible(i) ? d.data : []), x);
+      chart.setActiveElements(idx.map((index, datasetIndex) => ({ datasetIndex, index })).filter((a) => a.index >= 0));
+      chart.update("none");
+      head.classList.toggle("reading", x !== null);
+      if (x === null) { head.textContent = head.dataset.title; continue; }
+      const items = idx.map((index, i) => (index < 0 ? null : chart.$readout(chart.data.datasets[i], chart.data.datasets[i].data[index])))
+        .filter(Boolean);
+      head.replaceChildren(...(items.length ? items : [el("span", { class: "muted", text: "no reading at this time" })]));
     }
-    chart.update("none");
   }
-  const sync = {
-    id: "sync",
-    beforeEvent(chart, args) {                    // the pointer's time, before this chart's tooltip is built
-      const e = args.event;
-      if (e.type === "mouseout" || !args.inChartArea) chart.$hoverX = null;
-      else chart.$hoverX = chart.scales.x.getValueForPixel(e.x);
-    },
-    afterEvent(chart, args) {
-      if (syncing) return;
-      const e = args.event;
-      const out = e.type === "mouseout" || !args.inChartArea;
-      if (!out && !["mousemove", "touchstart", "touchmove", "click"].includes(e.type)) return;
-      const x = out ? null : chart.scales.x.getValueForPixel(e.x);
-      chart.$hoverX = x;
-      args.changed = true;                        // redraw this chart's crosshair too
-      syncing = true;
-      for (const c of Object.values(state.charts)) if (c !== chart) showAt(c, x);
-      syncing = false;
-    },
-  };
-  // a vertical hairline at the hovered time, and a hairline at 0 degC
+  // Pointer events cover mouse and touch alike. A sideways drag reads the
+  // values; up and down scrolls the page (touch-action in style.css), which
+  // cancels the reading. Lifting the finger keeps the values HOVER_KEEP_S.
+  function listenCharts() {
+    let next = null, frame = 0, keep = 0;
+    const show = (x) => {
+      clearTimeout(keep);
+      next = x;
+      if (!frame) frame = requestAnimationFrame(() => { frame = 0; showAt(next); });
+    };
+    for (const def of CHARTS) {
+      const canvas = $(def.id);
+      const at = (e) => {
+        const chart = state.charts[def.id];
+        if (!chart) return null;
+        const { left, right } = chart.chartArea;
+        return e.offsetX < left || e.offsetX > right ? null : chart.scales.x.getValueForPixel(e.offsetX);
+      };
+      canvas.addEventListener("pointerdown", (e) => show(at(e)));
+      canvas.addEventListener("pointermove", (e) => show(at(e)));
+      canvas.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") show(null); });
+      canvas.addEventListener("pointercancel", () => show(null));
+      canvas.addEventListener("pointerup", (e) => {
+        if (e.pointerType !== "mouse") keep = setTimeout(() => show(null), HOVER_KEEP_S * 1000);
+      });
+    }
+  }
+  // a vertical hairline at the hovered time, with the time over the time axis
   const crosshair = {
     id: "crosshair",
     afterDraw(chart) {
@@ -390,9 +440,24 @@
       if (x < left || x > right) return;
       const c = chart.ctx;
       c.save(); c.strokeStyle = css("--axis"); c.lineWidth = 1;
-      c.beginPath(); c.moveTo(x, top); c.lineTo(x, bottom); c.stroke(); c.restore();
+      c.beginPath(); c.moveTo(x, top); c.lineTo(x, bottom); c.stroke();
+      const text = POW.fmtDateTime(chart.$hoverX);
+      c.font = "600 11px system-ui, sans-serif";
+      const w = c.measureText(text).width + 10, py = bottom + 2, h = Math.max(16, chart.scales.x.bottom - py);
+      const px = Math.min(Math.max(x - w / 2, left), right - w);
+      c.fillStyle = css("--surface-1");               // the axis shows only this time meanwhile,
+      c.fillRect(left - 2, py, chart.width, chart.height - py);   // keeping the "0" of the other axis
+      c.fillRect(0, bottom + 8, left, chart.height);
+      c.fillStyle = css("--surface-2");
+      c.beginPath();
+      if (c.roundRect) c.roundRect(px, py, w, h, 4); else c.rect(px, py, w, h);
+      c.fill(); c.stroke();
+      c.fillStyle = css("--text-primary"); c.textBaseline = "middle";
+      c.fillText(text, px + 5, py + h / 2 + 0.5);
+      c.restore();
     },
   };
+  // a hairline at 0 degC
   const freezing = {
     id: "freezing",
     beforeDatasetsDraw(chart, _args, opts) {
@@ -423,22 +488,25 @@
     },
   };
 
-  function chartOptions(def, min, max, labelOf) {
+  // time axis: as many labels (and grid lines) as fit, about 70 px each, the
+  // newest kept; 7 days shows every other day, 30 days every 7th
+  function labelled(chart, i, n) {
+    const step = Math.ceil(70 / (chart.width / Math.max(1, n)));
+    return (n - 1 - i) % step === 0;
+  }
+
+  function chartOptions(def, min, max, stepH) {
     const muted = css("--text-muted"), grid = css("--grid");
     return {
       animation: false, parsing: false, normalized: true, maintainAspectRatio: false,
-      interaction: { mode: "nearestEach", intersect: false },
-      events: ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
+      events: [],                                 // the page handles the pointer itself (listenCharts)
       scales: {
         x: { type: "linear", min, max,
-             afterBuildTicks: (ax) => { ax.ticks = POW.midnights(min, max).map((value) => ({ value })); },
+             afterBuildTicks: (ax) => { ax.ticks = POW.ticks(min, max, stepH).map((value) => ({ value })); },
              ticks: { color: muted, maxRotation: 0, autoSkip: false,
-                      // every day if there is room, else every other day (newest kept)
-                      callback(v, i, ticks) {
-                        const step = this.chart.width / Math.max(1, ticks.length) < 70 ? 2 : 1;
-                        return (ticks.length - 1 - i) % step ? "" : POW.fmtDay(v);
-                      } },
-             grid: { color: grid }, border: { color: css("--axis") } },
+                      callback(v, i, ticks) { return labelled(this.chart, i, ticks.length) ? POW.tickText(v) : ""; } },
+             grid: { color: (ctx) => (ctx.tick && !labelled(ctx.chart, ctx.index, ctx.chart.scales.x.ticks.length) ? "transparent" : grid) },
+             border: { color: css("--axis") } },
         y: { ticks: { color: muted, callback: def.axis, maxTicksLimit: 5 }, grid: { color: grid },
              border: { display: false }, ...(def.y || {}) },
       },
@@ -446,50 +514,51 @@
         legend: { display: false },
         freezing: { on: !!def.freezing },
         shallow: { on: !!def.shallow },
-        tooltip: { backgroundColor: css("--surface-2"), titleColor: css("--text-secondary"),
-                   bodyColor: css("--text-primary"), borderColor: css("--border"), borderWidth: 1,
-                   usePointStyle: true, boxWidth: 8, boxHeight: 2,
-                   itemSort: (a, b) => (b.raw.y ?? 0) - (a.raw.y ?? 0),
-                   callbacks: {
-                     title: (items) => items.length ? POW.fmtDateTime(items[0].chart.$hoverX ?? items[0].parsed.x) + " BC" : "",
-                     label: labelOf,
-                     labelPointStyle: () => ({ pointStyle: "line", rotation: 0 }),
-                   } },
+        tooltip: { enabled: false },
       },
-      elements: { point: { radius: 0, hoverRadius: 4, hitRadius: 12 },
+      elements: { point: { radius: 0, hoverRadius: 4 },
                   line: { borderWidth: 2, tension: 0, borderJoinStyle: "round", borderCapStyle: "round" } },
       spanGaps: false,
     };
   }
 
+  // -- time range buttons: one choice for all charts, remembered in this browser --
+  function renderRange() {
+    for (const b of document.querySelectorAll("#range button")) {
+      b.setAttribute("aria-pressed", String(Number(b.dataset.days) === state.days));
+    }
+    $("charts-heading").textContent = state.days === 1 ? "Last 24 hours" : `Last ${state.days} days`;
+  }
+
   function renderCharts(now) {
-    const from = now - CHART_DAYS * 24 * H;
+    const from = now - state.days * 24 * H, stepH = state.days === 1 ? 6 : 24;
     const rows = state.recent.concat(state.nearRows);
-    const dirs = new Map();                     // wind direction at a station and time, for the tooltip
+    const dirs = new Map();                     // wind direction at a station and time, for the title line
     for (const r of state.nearRows) {
       if (r.variable === "wind_from_direction" && r.value !== "") dirs.set(`${r.station_id}|${POW.ms(r.time_utc)}`, Number(r.value));
     }
     for (const def of CHARTS) {
       const series = POW.series(rows, def.variable, from, { transform: def.transform });
       const shown = state.stations.filter((s) => series[s.id] && series[s.id].some((p) => p.y !== null));
-      const wrap = $(def.id).parentElement, note = $(def.id + "-none");
+      const wrap = $(def.id).parentElement, note = $(def.id + "-none"), head = $(def.id + "-head");
       if (state.charts[def.id]) { state.charts[def.id].destroy(); delete state.charts[def.id]; }
-      wrap.hidden = !shown.length;
+      head.textContent = head.dataset.title;
+      head.classList.remove("reading");
+      head.hidden = wrap.hidden = !shown.length;
       if (note) note.hidden = !!shown.length;
       if (!shown.length) continue;
       const datasets = shown.map((s) => ({ label: s.label, station: s.id, data: series[s.id],
         borderColor: s.color, backgroundColor: s.color, hidden: state.hidden.has(s.id) }));
-      const labelOf = (item) => {
-        const ds = item.dataset, p = item.raw;
+      const chart = state.charts[def.id] = new Chart($(def.id), { type: "line", data: { datasets },
+        options: chartOptions(def, from, now, stepH), plugins: [crosshair, freezing, shallow] });
+      // one station's value in the title line: colour key, value (and wind direction)
+      chart.$readout = (ds, p) => {
         const fmt = ds.station === STATION && def.ownFmt ? def.ownFmt : def.fmt;
-        let t = `${fmt(p.y)}  ${ds.label}`;
-        if (def.direction) { const d = dirs.get(`${ds.station}|${p.x}`); if (d !== undefined) t = `${fmt(p.y)} from ${POW.compass(d)}  ${ds.label}`; }
-        const hx = item.chart.$hoverX;
-        if (hx !== null && hx !== undefined && Math.abs(p.x - hx) > 20 * 60e3) t += ` (at ${POW.fmtClock(p.x)})`;
-        return t;
+        let t = fmt(p.y);
+        if (def.direction) { const d = dirs.get(`${ds.station}|${p.x}`); if (d !== undefined) t += " " + POW.compass(d); }
+        const key = el("span", { class: "key line" }); key.style.background = ds.borderColor;
+        return el("span", { class: "item", title: ds.label }, key, t);
       };
-      state.charts[def.id] = new Chart($(def.id), { type: "line", data: { datasets },
-        options: chartOptions(def, from, now, labelOf), plugins: [crosshair, freezing, shallow, sync] });
     }
   }
 
@@ -694,6 +763,19 @@
   function start() {
     for (const e of document.querySelectorAll(".bc-label")) e.textContent = BC_LABEL;
     state.hidden = new Set(store.get("powometer.hidden") || []);
+    const days = store.get("powometer.days");
+    if (CHART_DAYS.includes(days)) state.days = days;
+    for (const b of document.querySelectorAll("#range button")) {
+      b.addEventListener("click", () => {
+        state.days = Number(b.dataset.days);
+        store.set("powometer.days", state.days);
+        renderRange();
+        if (state.status) renderCharts(Date.now());
+      });
+    }
+    renderRange();
+    for (const def of CHARTS) { const head = $(def.id + "-head"); head.dataset.title = head.textContent; }
+    listenCharts();
     for (const d of document.querySelectorAll("details[data-section]")) {
       d.addEventListener("toggle", () => { if (d.open && state.status) runSection(d.dataset.section); });
     }
