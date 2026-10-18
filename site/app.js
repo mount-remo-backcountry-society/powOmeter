@@ -35,6 +35,8 @@
   const REFRESH_MIN = 10;
   const REOPEN_MIN = 2;                    // back on screen after longer than this: refresh
   const CAM_REFRESH_MIN = 5;               // newest webcam image: fetched afresh at most this often
+  const CAM_OFF_H = 24;                    // no new webcam image for longer: "the camera may be off"
+                                           // (longer than a night, when a camera may rest)
   const CHART_QUALITIES = ["good", "estimate"];   // suspect values are left out of charts
   const STATION = "powometer";
   const OWN_NAME = "Shames POW-O-METER";
@@ -115,6 +117,11 @@
      *  share one copy. */
     freshUrl(url, nowMs) {
       return url + (url.includes("?") ? "&" : "?") + "t=" + Math.floor(nowMs / (CAM_REFRESH_MIN * 60e3));
+    },
+    /** A line for a webcam whose newest image is older than CAM_OFF_H, else null. */
+    camNote(latestIso, nowMs) {
+      if (!latestIso || POW.ageHours(latestIso, nowMs) <= CAM_OFF_H) return null;
+      return `No new image since ${POW.fmtDateTime(POW.ms(latestIso))} BC: the camera may be off.`;
     },
     /** "Updated just now", "Updated 3 min ago": when this phone last fetched the files */
     updatedText(fetchedMs, nowMs) { return "Updated " + POW.ageText((nowMs - fetchedMs) / H); },
@@ -554,7 +561,9 @@
     });
     const controls = frames.length > 1 ? el("div", { class: "controls" }, play, slider)
       : el("p", { class: "small muted", text: "No time lapse yet: no daylight images in the last few days." });
-    return el("div", { class: "camera" }, el("h3", { text: cam.label }), el("figure", {}, img, cap), controls);
+    const note = POW.camNote(cam.latest_utc, Date.now());
+    return el("div", { class: "camera" }, el("h3", { text: cam.label }),
+      note ? el("p", { class: "small muted cam-note", text: note }) : null, el("figure", {}, img, cap), controls);
   }
 
   // ---- "More" sections, filled when opened ----------------------------------

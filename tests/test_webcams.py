@@ -123,3 +123,14 @@ def test_frames_are_spaced_by_min_frame_minutes(tmp_path):
         web.images["https://cam/lift.png"] = (png(20 + m // 10), NOW + timedelta(minutes=m // 10 * 10))
         idx = webcams.run(tmp_path, NOW + timedelta(minutes=m), web, cfg)
     assert frames(idx) == ["2026-12-01T18:00:00Z", "2026-12-01T19:00:00Z", "2026-12-01T20:00:00Z"]
+
+
+def test_latest_image_time_is_kept_even_without_a_new_frame(tmp_path):
+    web = Cams()
+    latest = lambda idx, cam: next(c["latest_utc"] for c in idx["cameras"] if c["id"] == cam)
+    idx = webcams.run(tmp_path, NOW, web, {**CFG, "min_brightness": 50})
+    assert latest(idx, "lift") == "2026-12-01T18:00:00Z"                  # a night image: no frame, but a time
+    assert frames(idx) == []
+    del web.images["https://cam/lift.png"]                                 # camera unreachable: last time kept
+    idx = webcams.run(tmp_path, NOW + timedelta(hours=2), web, CFG)
+    assert latest(idx, "lift") == "2026-12-01T18:00:00Z"

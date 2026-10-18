@@ -127,6 +127,7 @@ dd ul, .plain { margin: 0; padding-left: 1.1rem; }
 
 /* webcams */
 .camera { margin-bottom: 1rem; }
+.cam-note { margin: 0 0 .4rem; }
 figure { margin: 0 0 .5rem; }
 img.cam { width: 100%; height: auto; display: block; border-radius: 8px; background: var(--grid); aspect-ratio: 16 / 9; }
 figcaption { font-size: .85rem; color: var(--text-secondary); margin-top: .25rem; }

@@ -19,6 +19,8 @@ night about 35, daylight about 125), and is at least `min_frame_minutes`
 after the previous frame (publish runs every 5 minutes; without this the
 time lapse would grow too big for a phone). Its time is the
 image's Last-Modified time when the server gives one, else the fetch time.
+`latest_utc` in index.json is the time of the camera's newest image, frame
+or not, so the page can say when a camera has stopped sending.
 
 Nothing here may stop publishing (design principle 7): every failure is
 printed and skipped.
@@ -131,12 +133,14 @@ def update(folder: Path, cfg: dict, now: datetime, get: Callable[[str], tuple[by
     for cam in cfg.get("cameras", []):
         frames = [f for f in old_cams.get(cam["id"], {}).get("frames", [])
                   if (folder / f["file"]).is_file()]
+        latest = old_cams.get(cam["id"], {}).get("latest_utc")
         try:
             data, headers = get(cam["url"])
             if not headers.get("content-type", "").startswith("image/"):
                 raise ValueError(f"not an image: {headers.get('content-type')!r}")
             sha = hashlib.sha256(data).hexdigest()
             t = _time(headers, now)
+            latest = _utc(t)
             new = not frames or (frames[-1]["source_sha256"] != sha
                                  and frames[-1]["time_utc"] < _utc(t - timedelta(minutes=min_gap)))
             if new and brightness(data) < cfg.get("min_brightness", 0):
@@ -150,7 +154,8 @@ def update(folder: Path, cfg: dict, now: datetime, get: Callable[[str], tuple[by
         except Exception as e:                       # noqa: BLE001 - never stops publishing
             print(f"webcams {cam['id']}: skipped ({type(e).__name__}: {e})")
         frames = [f for f in frames if f["time_utc"] >= _utc(keep_from)]
-        cams.append({"id": cam["id"], "label": cam["label"], "live_url": cam["url"], "frames": frames})
+        cams.append({"id": cam["id"], "label": cam["label"], "live_url": cam["url"], "latest_utc": latest,
+                     "frames": frames})
     index = {"enabled": True, "built_utc": _utc(now), "keep_hours": cfg.get("keep_hours", 72),
              "credit": cfg.get("credit", ""), "cameras": cams}
     # remove frames no longer listed
