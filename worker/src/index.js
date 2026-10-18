@@ -169,6 +169,7 @@ async function receive(request, env, ctx) {
   const rec = record(fields);
   const key = `${PREFIX}${rec.transmit_utc}/${rec.momsn ?? "x"}`;      // a retried delivery overwrites itself
   await env.MAILBOX.put(key, JSON.stringify(rec), { metadata: rec, expirationTtl: KEEP_DAYS * 86400 });
+  console.log(`stored message ${rec.momsn} sent ${rec.transmit_utc}`);
   ctx.waitUntil(requestRun(env, `message ${rec.momsn}`));
   return text("ok");
 }
