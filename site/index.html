@@ -35,29 +35,31 @@
   </section>
 
   <section>
-    <h2>Last 7 days</h2>
+    <h2 id="charts-heading">Last 3 days</h2>
+    <div id="range" class="range" role="group" aria-label="Time shown in the charts">
+      <button type="button" data-days="1">24 h</button><button type="button" data-days="3">3 days</button><button
+        type="button" data-days="7">7 days</button><button type="button" data-days="30">30 days</button>
+    </div>
     <div id="station-picker" class="picker" role="group" aria-label="Stations shown in the charts" hidden></div>
 
-    <p class="chart-title">Snow depth (cm)</p>
+    <!-- while a chart is touched or pointed at, its title line shows the values at that time -->
+    <p id="chart-depth-head" class="chart-title">Snow depth (cm)</p>
     <div class="chart tall"><canvas id="chart-depth" role="img"
-      aria-label="Snow depth over the last 7 days; the values are in the table below and in the downloads"></canvas></div>
-    <p id="chart-depth-none" class="small muted" hidden>No snow-depth readings in the last 7 days.</p>
+      aria-label="Snow depth chart; the values are in the table below and in the downloads"></canvas></div>
+    <p id="chart-depth-none" class="small muted" hidden>No snow-depth readings in this time.</p>
 
-    <p class="chart-title">Air temperature (°C)</p>
-    <div class="chart"><canvas id="chart-temp" role="img" aria-label="Air temperature over the last 7 days"></canvas></div>
-    <p id="chart-temp-none" class="small muted" hidden>No temperature readings in the last 7 days.</p>
+    <p id="chart-temp-head" class="chart-title">Air temperature (°C)</p>
+    <div class="chart"><canvas id="chart-temp" role="img" aria-label="Air temperature chart"></canvas></div>
+    <p id="chart-temp-none" class="small muted" hidden>No temperature readings in this time.</p>
 
-    <p class="chart-title">Wind speed (km/h)</p>
-    <div class="chart"><canvas id="chart-wind" role="img" aria-label="Wind speed at the nearby stations over the last 7 days"></canvas></div>
+    <p id="chart-wind-head" class="chart-title">Wind speed (km/h), nearby stations</p>
+    <div class="chart"><canvas id="chart-wind" role="img" aria-label="Wind speed at the nearby stations chart"></canvas></div>
     <p id="chart-wind-none" class="small muted" hidden>No wind data yet.</p>
-    <p class="small muted">POW-O-METER has no wind sensor; wind comes from the nearby stations (hourly averages).</p>
 
-    <p class="chart-title">Relative humidity (%)</p>
-    <div class="chart"><canvas id="chart-rh" role="img" aria-label="Relative humidity over the last 7 days"></canvas></div>
-    <p id="chart-rh-none" class="small muted" hidden>No humidity readings in the last 7 days.</p>
+    <p id="chart-rh-head" class="chart-title">Relative humidity (%)</p>
+    <div class="chart"><canvas id="chart-rh" role="img" aria-label="Relative humidity chart"></canvas></div>
+    <p id="chart-rh-none" class="small muted" hidden>No humidity readings in this time.</p>
 
-    <p class="small muted">Point at or touch a chart to see the values at that time in all charts. Readings flagged as
-      suspect (for example a faulty sensor) are left out.</p>
     <ul id="nearby-credit" class="plain small muted" hidden></ul>
   </section>
 
@@ -92,7 +94,11 @@
         negative values: zero is the top of the alpine heather under the sensor, and over bare ground the readings
         scatter between about −14 and +7 cm. That is why the rest of the page shows anything below 15 cm as
         “Under 15 cm”. <strong>Provisional</strong> values have only had automatic checks; <strong>Approved</strong> ones have
-        been reviewed; values are provisional unless a line under them says otherwise.</p>
+        been reviewed; values are provisional unless a line under them says otherwise. Readings flagged as suspect
+        (for example a faulty sensor) are left out of the charts.</p>
+      <p class="small"><strong>Depth change</strong> (under the snow depth) is how much the measured depth changed in
+        24, 48 and 72 hours up to the newest reading. It is not the same as new snow: new snow settles, and wind
+        moves it. It shows only when the depth is at least 15 cm at both ends.</p>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Time</th><th class="num">Snow</th><th class="num">Temp.</th><th class="num">Humidity</th></tr></thead>
@@ -131,10 +137,7 @@
     <summary>Download the data</summary>
     <div class="section-body small">
       <p>All times in the files are <strong>UTC</strong>. POW-O-METER data: CC BY 4.0, credit “Mount Remo Backcountry
-        Society”. Nearby-station data: courtesy of the BC Ministry of
-        Transportation &amp; Infrastructure, used with permission; not covered by CC BY 4.0, and the Ministry is not
-        liable for these data or any use of them (see
-        <a href="v1/sites.json" target="_blank" rel="noopener">sites.json</a> and the <a href="terms.html">terms</a>).</p>
+        Society”.</p>
       <div class="table-wrap">
         <table>
           <tbody>
@@ -143,7 +146,6 @@
             <tr><td><a href="v1/best.csv" target="_blank" rel="noopener">best.csv</a></td><td>Best readings, the whole record (large)</td></tr>
             <tr><td><a href="v1/observations.csv" target="_blank" rel="noopener">observations.csv</a></td><td>Every reading with every label (large)</td></tr>
             <tr><td><a href="v1/latest.json" target="_blank" rel="noopener">latest.json</a></td><td>Newest value of each variable</td></tr>
-            <tr><td><a href="v1/nearby_recent.csv" target="_blank" rel="noopener">nearby_recent.csv</a>, <a href="v1/nearby_best.csv" target="_blank" rel="noopener">nearby_best.csv</a>, <a href="v1/nearby_latest.json" target="_blank" rel="noopener">nearby_latest.json</a></td><td>Nearby stations</td></tr>
             <tr><td><a href="v1/status.json" target="_blank" rel="noopener">status.json</a></td><td>Station health and alarms</td></tr>
             <tr><td><a href="v1/sites.json" target="_blank" rel="noopener">sites.json</a></td><td>Stations, sites, coordinates, licences</td></tr>
             <tr><td><a href="v1/SCHEMA.md" target="_blank" rel="noopener">SCHEMA.md</a></td><td>What every column means</td></tr>

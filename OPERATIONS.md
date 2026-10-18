@@ -242,6 +242,16 @@ calculates), `style.css` (colours), `terms.html` (terms of use).
   shallower readings are not a depth yet. "More → Detailed readings" and
   the files keep the real value. The limit is `MIN_DEPTH_CM` in `app.js`;
   check it against a probe reading at the first real snowfall.
+- **Depth change** (24, 48, 72 h, under the snow depth) compares the newest
+  reading with the one nearest 24/48/72 h before it (within 3 h). It is a
+  change in depth, not new snow (snow settles, wind moves it), and shows
+  only when both are 15 cm or more; with old data it is hidden. Settings:
+  `CHANGE_HOURS` and `CHANGE_TOL_H` in `app.js`.
+- **Charts:** the buttons choose 24 h, 3, 7 or 30 days (3 by default,
+  `DEFAULT_DAYS`; the browser remembers the choice). Touching or pointing at
+  a chart shows the values in each chart's title line and the time on the
+  time axis; a sideways drag moves through time, and the values clear
+  3 s after the finger lifts.
 - **Changing a link** in the bar at the top (powWX, avalanche.ca): edit it
   in both `site/index.html` and `site/terms.html`.
 - **Check the page's calculations:** open `selftest.html` on the published

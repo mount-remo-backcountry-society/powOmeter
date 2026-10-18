@@ -35,6 +35,10 @@
   eq("date and time", P.fmtDateTime(T("2026-12-01T06:30:00Z")), "Mon 30 Nov, 23:30");
   eq("BC midnights", P.midnights(T("2026-12-01T00:00:00Z"), T("2026-12-03T00:00:00Z")).map((t) => new Date(t).toISOString()),
      ["2026-12-01T07:00:00.000Z", "2026-12-02T07:00:00.000Z"]);
+  eq("6-hourly ticks in BC time", P.ticks(T("2026-12-01T00:00:00Z"), T("2026-12-01T20:00:00Z"), 6).map((t) => P.fmtClock(t)),
+     ["18:00", "00:00", "06:00", "12:00"]);
+  eq("tick labels: day at midnight, else the clock",
+     [P.tickText(T("2026-12-02T07:00:00Z")), P.tickText(T("2026-12-02T13:00:00Z"))], ["Wed 2 Dec", "06:00"]);
 
   // ages
   eq("age: minutes", P.ageText(0.5), "30 min ago");
@@ -98,6 +102,22 @@
     "2026-09-26T21:00:00Z,powometer,b,snow_depth,max,9,cm,radio,qc,working,good,\n"),
     "snow_depth", 0, { transform: P.displayDepth });
   eq("snow depth never joined across sites; median only; below 0 shows 0", moved.powometer.map((p) => p.y), [0, null, 3]);
+
+  // depth change: newest good median reading at the site, against the one nearest 24/48/72 h earlier
+  const dc = P.parseCSV(csv.split("\n")[0] + "\n" +
+    "2026-11-28T12:00:00Z,powometer,b,snow_depth,median,10,cm,radio,qc,working,good,\n" +
+    "2026-11-29T08:00:00Z,powometer,b,snow_depth,median,30,cm,radio,qc,working,good,\n" +
+    "2026-11-30T12:30:00Z,powometer,b,snow_depth,median,42.4,cm,radio,qc,working,good,\n" +
+    "2026-12-01T12:00:00Z,powometer,b,snow_depth,median,60.2,cm,radio,qc,working,good,\n" +
+    "2026-12-01T12:00:00Z,powometer,b,snow_depth,max,90,cm,radio,qc,working,good,\n" +
+    "2026-12-01T13:00:00Z,powometer,b,snow_depth,median,200,cm,radio,qc,working,suspect,spike\n" +
+    "2026-12-01T14:00:00Z,powometer,a,snow_depth,median,5,cm,sd,qc,working,good,\n");
+  eq("depth change 24 h (start 30 min off; suspect, max and other site left out)", P.depthChange(dc, "b", 24), 18);
+  eq("depth change: no reading within 3 h of the start", P.depthChange(dc, "b", 48), null);
+  eq("depth change: under 15 cm at the start", P.depthChange(dc, "b", 72), null);
+  eq("depth change: no readings", P.depthChange([], "b", 24), null);
+  eq("depth change text", [P.changeText(18), P.changeText(-5), P.changeText(0), P.changeText(null)],
+     ["+18 cm", "−5 cm", "0 cm", "–"]);
 
   // station names, wind, hover
   eq("station label", [P.stationLabel("Shames POW-O-METER", 1150), P.stationLabel("Shames (bottom of the hill)", 740)],

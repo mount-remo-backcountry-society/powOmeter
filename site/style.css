@@ -88,15 +88,31 @@ h3 { font-size: 1rem; margin: 1.2rem 0 .4rem; }
 .tile.stale .tile-age { color: var(--critical); font-weight: 600; }
 .tile.late { border-left: 4px solid var(--warning); }
 .tile.late .tile-age { font-weight: 600; }
+/* depth change under the snow depth: 24, 48, 72 h */
+.tile-change { margin-top: .5rem; padding-top: .45rem; border-top: 1px solid var(--grid); }
+.tile-change .changes { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.tile-change .change-value { font-size: 1.2rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* charts */
 .chart { position: relative; height: 170px; background: var(--surface-1); border: 1px solid var(--border);
          border-radius: 10px; padding: .4rem .3rem .2rem; margin-bottom: .6rem; }
 .chart.tall { height: 220px; }
-.chart-title { font-size: .9rem; color: var(--text-secondary); margin: .2rem 0 .2rem .2rem; }
+/* sideways drags read the values, up and down still scrolls the page */
+.chart canvas { touch-action: pan-y; }
+/* one line, also while it shows the values, so the charts never jump */
+.chart-title { font-size: .9rem; color: var(--text-secondary); margin: .2rem 0 .2rem .2rem;
+               white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chart-title.reading { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.chart-title .item { margin-right: .9rem; }
 .legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: .875rem; color: var(--text-secondary); margin: .2rem 0 .6rem; }
 .key { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: .4rem; vertical-align: 0; }
 .key.line { width: 14px; height: 2px; border-radius: 1px; vertical-align: middle; }
+
+/* time range buttons above the charts */
+.range { display: inline-flex; margin: 0 0 .6rem; border: 1px solid var(--axis); border-radius: 8px; overflow: hidden; }
+.range button { border: 0; border-radius: 0; padding: .35rem .8rem; font-size: .875rem; background: var(--surface-1); }
+.range button + button { border-left: 1px solid var(--axis); }
+.range button[aria-pressed="true"] { background: var(--link); color: var(--page); font-weight: 600; }
 
 /* station tick-boxes above the charts */
 .picker { display: flex; flex-wrap: wrap; gap: .35rem .5rem; margin: 0 0 .8rem; }
