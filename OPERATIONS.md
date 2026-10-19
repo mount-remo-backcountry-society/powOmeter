@@ -254,6 +254,9 @@ calculates), `style.css` (colours), `terms.html` (terms of use).
   station), and the time on the time axis; a sideways drag moves through
   time, and the values clear 3 s after the finger lifts. The temperature
   chart draws 0 °C as a bold line.
+- **Time axis:** up to 3 days, hours (24 h clock, as many as fit: every
+  1, 3, 6 or 12 h) with the date in a row underneath; 7 days, only the
+  dates (weekdays on a phone); 30 days, a date about every 7th day.
 - **Changing a link** in the bar at the top (powWX, avalanche.ca): edit it
   in both `site/index.html` and `site/terms.html`.
 - **Check the page's calculations:** open `selftest.html` on the published
@@ -307,7 +310,8 @@ Mountain's reply into an AI assistant.
 
 - The page shows each camera's newest image, loaded from Shames Mountain's
   own address, and a **3-day time lapse**: one daylight frame an hour
-  (night frames are left out), shrunk to 960 pixels.
+  (night frames are left out), shrunk to 960 pixels. Visitors play it,
+  drag the slider, or step one image back or forward with ‹ and ›.
 - The frames are kept **in the published site only, never in git** (git
   keeps every file forever: about 3 GB a season). Between runs they
   are kept in the workflow's cache; if that is ever lost, the next run takes

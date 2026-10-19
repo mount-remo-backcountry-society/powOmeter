@@ -97,11 +97,12 @@
     },
     /** BC midnights (ms) from a to b. */
     midnights(a, b) { return POW.ticks(a, b, 24); },
-    /** A time-axis label: "Fri 2 Oct" at midnight, else "06:00". */
-    tickText(ms) {
-      const b = POW.bc(ms);
-      return b.hh === "00" && b.mm === "00" ? POW.fmtDay(ms) : POW.fmtClock(ms);
-    },
+    /** Hours between hour labels on the time axis: the first of 1, 3, 6, 12
+     *  that leaves at least 22 px per label ("18"), else 24 (none). */
+    hourStep(pxPerHour) { return [1, 3, 6, 12].find((s) => s * pxPerHour >= 22) || 24; },
+    /** A day's date for the row under the time axis, longest first:
+     *  ["Sun 18 Oct", "Sun 18", "Sun"]. */
+    dayTexts(ms) { const b = POW.bc(ms); return [`${b.dow} ${b.day} ${b.mon}`, `${b.dow} ${b.day}`, b.dow]; },
 
     ageHours(iso, nowMs) { return (nowMs - POW.ms(iso)) / H; },
     /** "just now", "40 min ago", "3 h ago", "2 days ago" */
@@ -460,7 +461,7 @@
       c.beginPath(); c.moveTo(x, top); c.lineTo(x, bottom); c.stroke();
       const text = POW.fmtDateTime(chart.$hoverX);
       c.font = "600 11px system-ui, sans-serif";
-      const w = c.measureText(text).width + 10, py = bottom + 2, h = Math.max(16, chart.scales.x.bottom - py);
+      const w = c.measureText(text).width + 10, py = bottom + 2, h = 18;
       const px = Math.min(Math.max(x - w / 2, left), right - w);
       c.fillStyle = css("--surface-1");               // the axis shows only this time meanwhile,
       c.fillRect(left - 2, py, chart.width, chart.height - py);   // keeping the "0" of the other axis
@@ -505,15 +506,58 @@
     },
   };
 
-  // time axis: as many labels (and grid lines) as fit, about 70 px each, the
-  // newest kept; 7 days shows every other day, 30 days every 7th
+  // Time axis, by range:
+  //  - up to 3 days: hours in a top row (every 1, 3, 6 or 12 h, as many as
+  //    fit), a short mark every hour (every 3 h when closer than 8 px), and
+  //    the date in a row under them;
+  //  - 7 days: only the date row;
+  //  - 30 days: a date ("20 Sep") at every 7th midnight or so (as many as
+  //    fit, about 70 px each, the newest kept).
+  // Midnights get a stronger grid line up to 7 days.
+  const HOURS_MAX_DAYS = 3, DAY_ROW_MAX_DAYS = 7;
   function labelled(chart, i, n) {
     const step = Math.ceil(70 / (chart.width / Math.max(1, n)));
     return (n - 1 - i) % step === 0;
   }
+  function pxPerHour(chart, days) {
+    const width = chart.chartArea ? chart.chartArea.width : chart.width - 50;   // before the first layout
+    return width / (days * 24);
+  }
+  const isMidnight = (ms) => POW.bc(ms).hh === "00";
+  const hourOf = (ms) => Number(POW.bc(ms).hh);
+  const hourLabelled = (chart, ms, days) => hourOf(ms) % POW.hourStep(pxPerHour(chart, days)) === 0;   // midnight: "00"
+  const hourMarked = (chart, ms, days) => hourOf(ms) % (pxPerHour(chart, days) >= 8 ? 1 : 3) === 0;
 
-  function chartOptions(def, min, max, stepH) {
-    const muted = css("--text-muted"), grid = css("--grid");
+  // the date row under the time axis: each day's date centred in its part of
+  // the chart. Whole days all get the same form, the longest that fits them
+  // ("Sun 18 Oct", "Sun 18", "Sun"); a part day at either end may be shorter,
+  // or left out
+  const dayRow = {
+    id: "dayRow",
+    afterDraw(chart, _args, opts) {
+      if (!opts.on) return;
+      const x = chart.scales.x, { left, right } = chart.chartArea, c = chart.ctx, f = Chart.defaults.font;
+      c.save();
+      c.font = `${f.size}px ${f.family}`; c.fillStyle = css("--text-muted");
+      c.textAlign = "center"; c.textBaseline = "bottom";
+      const spans = POW.midnights(x.min - 24 * H, x.max).map((m) => ({ m,
+        a: Math.max(left, x.getPixelForValue(m)), b: Math.min(right, x.getPixelForValue(m + 24 * H)),
+        whole: m >= x.min && m + 24 * H <= x.max }));
+      const fits = (s, t) => c.measureText(t).width + 8 <= s.b - s.a;
+      const forms = [0, 1, 2], whole = spans.filter((s) => s.whole);
+      const form = forms.find((k) => whole.every((s) => fits(s, POW.dayTexts(s.m)[k])));
+      for (const s of spans) {
+        if (form === undefined) break;
+        const texts = POW.dayTexts(s.m).slice(form);
+        const text = s.whole ? texts[0] : texts.find((t) => fits(s, t));
+        if (text && fits(s, text)) c.fillText(text, (s.a + s.b) / 2, x.bottom - 1);
+      }
+      c.restore();
+    },
+  };
+
+  function chartOptions(def, min, max, days) {
+    const muted = css("--text-muted"), grid = css("--grid"), axisLine = css("--axis");
     return {
       animation: false, parsing: false, normalized: true, maintainAspectRatio: false,
       events: [],                                 // the page handles the pointer itself (listenCharts)
@@ -521,11 +565,29 @@
       onResize: (chart) => { if (chart.$readout) fitHead(def, chart); },
       scales: {
         x: { type: "linear", min, max,
-             afterBuildTicks: (ax) => { ax.ticks = POW.ticks(min, max, stepH).map((value) => ({ value })); },
+             afterBuildTicks: (ax) => {
+               ax.ticks = POW.ticks(min, max, days <= HOURS_MAX_DAYS ? 1 : 24).map((value) => ({ value }));
+             },
              ticks: { color: muted, maxRotation: 0, autoSkip: false,
-                      callback(v, i, ticks) { return labelled(this.chart, i, ticks.length) ? POW.tickText(v) : ""; } },
-             grid: { color: (ctx) => (ctx.tick && !labelled(ctx.chart, ctx.index, ctx.chart.scales.x.ticks.length) ? "transparent" : grid) },
-             border: { color: css("--axis") } },
+                      callback(v, i, ticks) {
+                        // two lines up to 3 days (the second is the date row), one for 7 days
+                        if (days <= HOURS_MAX_DAYS) return [hourLabelled(this.chart, v, days) ? POW.bc(v).hh : "", ""];
+                        if (days <= DAY_ROW_MAX_DAYS) return "";
+                        if (!labelled(this.chart, i, ticks.length)) return "";
+                        const b = POW.bc(v);
+                        return `${b.day} ${b.mon}`;
+                      } },
+             grid: { color: (ctx) => {
+                       if (!ctx.tick) return grid;
+                       const v = ctx.tick.value;
+                       if (days <= DAY_ROW_MAX_DAYS) return isMidnight(v) ? axisLine : days <= HOURS_MAX_DAYS && hourLabelled(ctx.chart, v, days) ? grid : "transparent";
+                       return labelled(ctx.chart, ctx.index, ctx.chart.scales.x.ticks.length) ? grid : "transparent";
+                     },
+                     // short marks between the hours up to 3 days (every midnight beyond)
+                     tickColor: (ctx) => (!ctx.tick || isMidnight(ctx.tick.value) ||
+                       (days <= HOURS_MAX_DAYS && hourMarked(ctx.chart, ctx.tick.value, days)) ? axisLine : "transparent"),
+                     tickLength: 4 },
+             border: { color: axisLine } },
         // temperature: the 0° label in bold, like its line (freezing)
         y: { ticks: { color: def.freezing ? (ctx) => (ctx.tick && ctx.tick.value === 0 ? css("--text-primary") : muted) : muted,
                       font: def.freezing ? (ctx) => (ctx.tick && ctx.tick.value === 0 ? { weight: "bold" } : undefined) : undefined,
@@ -536,6 +598,7 @@
         legend: { display: false },
         freezing: { on: !!def.freezing },
         shallow: { on: !!def.shallow },
+        dayRow: { on: days <= DAY_ROW_MAX_DAYS },
         tooltip: { enabled: false },
       },
       elements: { point: { radius: 0, hoverRadius: 4 },
@@ -553,7 +616,7 @@
   }
 
   function renderCharts(now) {
-    const from = now - state.days * 24 * H, stepH = state.days === 1 ? 6 : 24;
+    const from = now - state.days * 24 * H;
     const rows = state.recent.concat(state.nearRows);
     const dirs = new Map();                     // wind direction at a station and time, for the title line
     for (const r of state.nearRows) {
@@ -572,7 +635,7 @@
       const datasets = shown.map((s) => ({ label: s.label, short: s.short, station: s.id, data: series[s.id],
         borderColor: s.color, backgroundColor: s.color, hidden: state.hidden.has(s.id) }));
       const chart = state.charts[def.id] = new Chart($(def.id), { type: "line", data: { datasets },
-        options: chartOptions(def, from, now, stepH), plugins: [crosshair, freezing, shallow] });
+        options: chartOptions(def, from, now, state.days), plugins: [dayRow, crosshair, freezing, shallow] });
       // one station's value in the title line: colour key, short name, value (and wind direction)
       chart.$readout = (ds, p, text) => {
         if (text === undefined) {
@@ -629,15 +692,23 @@
     const slider = el("input", { type: "range", min: "0", max: String(frames.length - 1),
                                  value: String(frames.length - 1), "aria-label": `${cam.label}: go back in time` });
     const play = el("button", { type: "button", text: "▶ Last " + Math.round(keepHours / 24) + " days" });
+    // one image back or forward
+    const prev = el("button", { type: "button", class: "step", text: "‹", "aria-label": `${cam.label}: earlier image` });
+    const next = el("button", { type: "button", class: "step", text: "›", "aria-label": `${cam.label}: later image` });
     let i = frames.length - 1, timer = null;
     const show = () => {
       img.src = frames[i].src;
       cap.textContent = frames[i].ms === null ? `${cam.label}: newest image (its time is printed on it)`
         : `${cam.label}: ${POW.fmtDateTime(frames[i].ms)} BC · ${i + 1} of ${frames.length - 1}`;
       slider.value = String(i);
+      prev.disabled = i === 0;
+      next.disabled = i === frames.length - 1;
     };
     const stop = () => { clearInterval(timer); timer = null; play.textContent = "▶ Last " + Math.round(keepHours / 24) + " days"; };
     slider.addEventListener("input", () => { if (timer) stop(); i = Number(slider.value); show(); });
+    for (const [b, d] of [[prev, -1], [next, 1]]) {
+      b.addEventListener("click", () => { if (timer) stop(); i = Math.min(frames.length - 1, Math.max(0, i + d)); show(); });
+    }
     play.addEventListener("click", () => {
       if (timer) { stop(); return; }
       frames.forEach((f) => { const p = new Image(); p.src = f.src; });     // preload
@@ -653,7 +724,7 @@
       live.src = src;
       if (i === frames.length - 1) img.src = src;
     });
-    const controls = frames.length > 1 ? el("div", { class: "controls" }, play, slider)
+    const controls = frames.length > 1 ? el("div", { class: "controls" }, play, slider, el("span", { class: "steps" }, prev, next))
       : el("p", { class: "small muted", text: "No time lapse yet: no daylight images in the last few days." });
     const note = POW.camNote(cam.latest_utc, Date.now());
     return el("div", { class: "camera" }, el("h3", { text: cam.label }),
