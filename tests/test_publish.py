@@ -1,5 +1,6 @@
 """Phase 2: fetching messages, health checks, alarm Issues."""
 import importlib.util
+import io
 import json
 import shutil
 from datetime import datetime, timedelta, timezone
@@ -92,6 +93,35 @@ def test_mailbox_report_says_whether_the_newest_sheet_message_came_both_ways(raw
                                                 f"newest sheet message (MOMSN {last.momsn}, sent {t}) is in the mailbox")
     assert intake.mailbox_report([], raw).startswith("mailbox: empty; ")
     assert intake.mailbox_report([], raw).endswith("is NOT in the mailbox")
+
+
+class FakeGoogle:
+    """Stands in for urlopen: records each request, refuses some links."""
+    def __init__(self, refuse=lambda url: False):
+        self.requests, self.refuse = [], refuse
+
+    def __call__(self, req, timeout):
+        self.requests.append(req)
+        if self.refuse(req.full_url):
+            raise intake.urllib.error.HTTPError(req.full_url, 400, "Bad Request", {}, None)
+        return io.BytesIO(HEADER.encode())
+
+
+def test_sheet_is_asked_for_a_fresh_copy(monkeypatch):
+    google = FakeGoogle()
+    monkeypatch.setattr(intake.urllib.request, "urlopen", google)
+    assert intake.download("https://example.org/pub?output=csv", now=NOW) == HEADER
+    (req,) = google.requests
+    assert req.full_url == f"https://example.org/pub?output=csv&nocache={int(NOW.timestamp())}"
+    assert req.get_header("Cache-control") == "no-cache"
+
+
+def test_plain_link_if_google_refuses_the_extra_parameter(monkeypatch):
+    google = FakeGoogle(refuse=lambda url: "nocache=" in url)
+    monkeypatch.setattr(intake.urllib.request, "urlopen", google)
+    assert intake.download("https://example.org/pub", now=NOW) == HEADER
+    assert [r.full_url for r in google.requests] == [f"https://example.org/pub?nocache={int(NOW.timestamp())}",
+                                                     "https://example.org/pub"]
 
 
 def test_malformed_mailbox_fails_without_saving(raw):
