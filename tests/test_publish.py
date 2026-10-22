@@ -95,9 +95,11 @@ def test_mailbox_report_says_whether_the_newest_sheet_message_came_both_ways(raw
 
 
 def test_malformed_mailbox_fails_without_saving(raw):
+    worker = raw / "radio" / "worker"
+    before = sorted(worker.iterdir()) if worker.exists() else []    # the real archive's files
     with pytest.raises(ValueError):
         intake.fetch_mailbox("", "", raw, NOW, mailbox(("17/Oct/2026", 1, "0417313381+07096")))
-    assert not (raw / "radio" / "worker").exists()
+    assert (sorted(worker.iterdir()) if worker.exists() else []) == before
 
 
 # --- health checks --------------------------------------------------------
