@@ -7,12 +7,19 @@ Issue when an alarm starts and close it when the alarm clears
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .config import Config
 from .decoders.powometer_payload import parse_payload
 
 DECODE_WINDOW = timedelta(hours=24)       # a decode error alarms for a day, then clears
+ROUTE_WINDOW = timedelta(hours=24)        # so does a message that one route never delivered
+ROUTES = {"worker": "Cloudflare Worker", "messages_tab": "Google Sheet"}   # raw/radio/ folder: name
+ROUTE_HINTS = {
+    "worker": "check the Worker's Observability tab in Cloudflare (\"rejected:\" lines) and the RockBLOCK "
+              "delivery status of its HTTP_JSON destination",
+    "messages_tab": "Avalanche Canada reads the Sheet: check its Messages tab and the Apps Script's Executions",
+}
 
 
 def battery_upper_v(bucket: int) -> float | None:
@@ -30,6 +37,35 @@ def in_season(cfg: Config, now: datetime) -> bool:
 
 def alarm(id_: str, message: str) -> dict:
     return {"id": id_, "message": message}
+
+
+def came_by(m, route: str) -> bool:
+    return any(s.startswith(route + ":") for s in m.sources)
+
+
+def _utc(v) -> datetime:
+    t = v if isinstance(v, datetime) else datetime.fromisoformat(str(v).replace("Z", "+00:00"))
+    return t if t.tzinfo else t.replace(tzinfo=timezone.utc)
+
+
+def route_alarms(lim: dict, messages, now: datetime) -> list[dict]:
+    """A message that came by one route (Worker, Sheet) but is still missing
+    from the other after `route_missing_hours`. Only messages since
+    `routes_since` (both routes live) and from the last day count."""
+    hours, since = lim.get("route_missing_hours"), lim.get("routes_since")
+    if not hours or not since:
+        return []
+    since, out = _utc(since), []
+    for route, name in ROUTES.items():
+        other = next(r for r in ROUTES if r != route)
+        missing = [m for m in messages
+                   if m.transmit_utc >= since and timedelta(hours=hours) < now - m.transmit_utc <= ROUTE_WINDOW
+                   and came_by(m, other) and not came_by(m, route)]
+        if missing:
+            which = ", ".join(f"MOMSN {m.momsn} sent {m.transmit_utc:%Y-%m-%d %H:%M} UTC" for m in missing[-3:])
+            out.append(alarm(f"route_{route}", f"{len(missing)} message(s) came by the {ROUTES[other]} but not by "
+                                               f"the {name} within {hours} h ({which}); {ROUTE_HINTS[route]}"))
+    return out
 
 
 def check(cfg: Config, messages, now: datetime, build_alarms: list[str] = (),
@@ -69,6 +105,8 @@ def check(cfg: Config, messages, now: datetime, build_alarms: list[str] = (),
         if len(bad) >= lim["decode_errors"]:
             out.append(alarm("decode_errors", f"{len(bad)} message(s) in the last 24 h could not be decoded, "
                                               f"latest {bad[-1].transmit_utc:%Y-%m-%d %H:%M} UTC"))
+
+    out += route_alarms(lim, messages, now)
 
     for text in build_alarms:
         out.append(alarm("build-" + hashlib.sha1(text.encode()).hexdigest()[:10], text))

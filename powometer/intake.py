@@ -16,7 +16,8 @@ columns are derived by the Apps Script and are recomputed here anyway.
 
 The Worker's mailbox (address and read key: GitHub secrets MAILBOX_URL and
 MAILBOX_READ_KEY) is saved the same way, to raw/radio/worker/. A message
-that comes both ways is recognised as one by radio.load_all.
+that comes both ways is saved by both (each route only skips what it saved
+itself), so the routes can be compared; radio.load_all counts it once.
 """
 from __future__ import annotations
 
@@ -97,14 +98,17 @@ def _key(transmit_utc: str, momsn, payload: str) -> tuple:
     return (transmit_utc, momsn, payload)
 
 
-def known_keys(raw_dir: Path = RAW) -> set[tuple]:
-    """Keys of every message already archived, including "No Data" sessions."""
+def known_keys(raw_dir: Path = RAW, route: str | None = None) -> set[tuple]:
+    """Keys of every message already archived, including "No Data" sessions.
+    With `route` (a folder of JSONL_INTAKES), only the console exports and
+    that route's own files: a message that already came the other way is
+    still saved, so the two routes can be compared (monitor.check)."""
     keys = set()
     radio = raw_dir / "radio"
     for p in sorted(radio.glob("rockblock-export-*.csv")):
         for m in load_console_export(p):
             keys.add(_key(f"{m.transmit_utc:%Y-%m-%dT%H:%M:%SZ}", m.momsn, m.payload_text))
-    for folder in JSONL_INTAKES:
+    for folder in ([route] if route else JSONL_INTAKES):
         for p in sorted((radio / folder).glob("*.jsonl")):
             for m in load_messages_tab(p):
                 keys.add(_key(f"{m.transmit_utc:%Y-%m-%dT%H:%M:%SZ}", m.momsn, m.payload_text))
@@ -175,11 +179,12 @@ def mailbox_report(records: list[dict], raw_dir: Path = RAW) -> str:
 
 
 def _archive(records: list[dict], raw_dir: Path, folder: str, name: str) -> Path | None:
-    known = known_keys(raw_dir)
+    known = known_keys(raw_dir, folder)
     new, seen = [], set()
     for r in records:
         k = _key(r["transmit_utc"], r["momsn"], r["payload_text"])
-        if k not in known and k not in seen:
+        no_momsn = (k[0], None, k[2])                   # how a console export (no MOMSN) has it
+        if k not in known and no_momsn not in known and k not in seen:
             new.append(r)
             seen.add(k)
     if not new:
