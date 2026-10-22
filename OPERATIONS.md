@@ -185,16 +185,21 @@ account (signed up with the station's Gmail address). Its code is in
    *Secret*): `STATION_IMEI`, `READ_KEY`, `GH_DISPATCH_TOKEN`.
 8. In GitHub: `MAILBOX_URL` and `MAILBOX_READ_KEY`.
 9. Check: within 10 minutes the Actions tab shows a publish run started by
-   "workflow_dispatch", and the Worker's Logs (Cloudflare) show no errors.
+   "workflow_dispatch", and the Worker's Observability tab (Cloudflare)
+   shows no errors.
 10. RockBLOCK (when decided): RockBLOCK console → Delivery Groups → add an
-    **HTTP_POST** destination `<Worker address>/rockblock` next to the email.
-    Keep the email.
+    **HTTP_JSON** destination `<Worker address>/rockblock` next to the email.
+    Keep the email. Not HTTP_POST or HTTP_POST_INSECURE: they send no
+    signature, so the Worker rejects every message (checked 2026-10-22).
 
 **Checks and trouble:**
-- *No runs every 10 minutes:* Cloudflare → Worker → Logs. "GH_DISPATCH_TOKEN
-  is not set" or "HTTP 401" means the GitHub key is missing or expired.
-- *"rejected" in the Logs:* a message failed the signature or IMEI check.
-  RockBLOCK retries for about 6 days, and the email route still carries it.
+- *No runs every 10 minutes:* Cloudflare → Worker → Observability.
+  "GH_DISPATCH_TOKEN is not set" or "HTTP 401" means the GitHub key is
+  missing or expired.
+- *"rejected" in Observability:* a message failed the signature or IMEI
+  check; RockBLOCK shows it as "Invalid Response". RockBLOCK retries for
+  about 6 days, and the email route still carries it. "no valid RockBLOCK
+  signature" on every message: check that the destination is HTTP_JSON.
 - *"mailbox FAILED" in a publish run:* the read key or address in GitHub
   does not match the Worker. Publishing continues from the sheet.
 - The GitHub key belongs to the person who made it and expires: renew it
