@@ -23,6 +23,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -37,8 +38,23 @@ TIME_FORMAT = "%Y-%m-%d %H:%M:%S"           # the sheet writes "2026-05-24 0:24:
 COLUMNS = ("MOMSN", "Transmit Time (UTC)", "Session Status", "CEP (km)", "Payload")
 
 
-def download(url: str, timeout: int = 60) -> str:
-    with urllib.request.urlopen(url, timeout=timeout) as r:
+def download(url: str, timeout: int = 60, now: datetime | None = None) -> str:
+    """The published CSV, asked for fresh. The plain link can come back hours
+    out of date: on 2026-10-22 MOMSN 3306 was in the sheet from 18:26Z and a
+    browser got it, but the runs kept getting the 16:10Z copy until at least
+    21:10Z. A throw-away parameter and no-cache headers ask for a new copy;
+    if Google refuses the parameter, the plain link is used."""
+    stamp = int((now or datetime.now(timezone.utc)).timestamp())
+    fresh = f"{url}{'&' if '?' in url else '?'}nocache={stamp}"
+    headers = {"Cache-Control": "no-cache", "Pragma": "no-cache", "User-Agent": "powometer"}
+    try:
+        return _get(fresh, headers, timeout)
+    except urllib.error.HTTPError:
+        return _get(url, headers, timeout)
+
+
+def _get(url: str, headers: dict, timeout: int) -> str:
+    with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=timeout) as r:
         return r.read().decode("utf-8")
 
 
@@ -99,7 +115,7 @@ def fetch(url: str, raw_dir: Path = RAW, now: datetime | None = None, text: str 
     """Download the tab and archive the messages not seen before. Returns the
     new file, or None when there was nothing new."""
     now = now or datetime.now(timezone.utc)
-    records = parse(download(url) if text is None else text, now)
+    records = parse(download(url, now=now) if text is None else text, now)
     return _archive(records, raw_dir, "messages_tab", f"{now:%Y-%m-%dT%H%M%SZ}_published-csv.jsonl")
 
 
