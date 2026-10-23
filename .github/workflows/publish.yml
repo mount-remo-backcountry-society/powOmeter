@@ -36,7 +36,12 @@ jobs:
     runs-on: ubuntu-24.04       # pinned: ubuntu-latest changes under us (Ubuntu 26 from 2026-10-19)
     timeout-minutes: 30
     steps:
+      # The newest commit on the branch, not the one from when this run was
+      # started: a run queued behind another must see the messages that run
+      # saved, or it saves them again and its push collides (Oct 2026).
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -61,9 +66,10 @@ jobs:
             echo "nothing new"
           else
             python tools/privacy_check.py --staged
-            git -c user.name="github-actions[bot]" \
-                -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-                commit -q -m "Fetch satellite messages"
+            # for the rebase as well as the commit: a rebase records a name too
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -q -m "Fetch satellite messages"
             git pull -q --rebase
             git push -q
           fi
