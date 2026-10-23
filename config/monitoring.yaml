@@ -10,3 +10,9 @@ alarms:
   clock_offset_minutes: 30    # station clock vs transmit time
   battery_volts_below: 3.5
   decode_errors: 1            # any payload that fails to decode
+  # a message that came by one route (Cloudflare Worker, Google Sheet) but
+  # not the other within this many hours; only messages from routes_since
+  # (the Worker's first message, MOMSN 3306). Remove both to switch it off,
+  # e.g. once the Sheet is retired.
+  route_missing_hours: 1
+  routes_since: "2026-10-22T18:21:00Z"

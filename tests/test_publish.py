@@ -79,10 +79,14 @@ def test_a_message_that_comes_both_ways_is_one_message(raw):
     intake.fetch_mailbox("", "", raw, NOW, mailbox(("2026-10-05T00:31:42Z", 3190, "0417313381+07096")))
     path = intake.fetch("", raw, NOW + timedelta(minutes=5), CSV.format(old=old_payload()))
     recs = [json.loads(line) for line in open(path, encoding="utf-8")]
-    assert [r["transmit_utc"] for r in recs] == ["2026-10-05T00:31:10Z"]      # only the empty session is new
+    # the sheet saves its own copy of what the Worker already had (the routes are compared)
+    assert [r["transmit_utc"] for r in recs] == ["2026-10-05T00:31:10Z", "2026-10-05T00:31:42Z"]
     same = [m for m in load_all(raw) if m.payload_text == "0417313381+07096"]
-    assert len(same) == 1 and same[0].session_status is None
-    assert sorted(s.split(":")[0] for s in same[0].sources) == ["worker"]
+    assert len(same) == 1 and same[0].session_status == 0
+    assert sorted(s.split(":")[0] for s in same[0].sources) == ["messages_tab", "worker"]
+    assert intake.fetch("", raw, NOW + timedelta(minutes=15), CSV.format(old=old_payload())) is None
+    assert intake.fetch_mailbox("", "", raw, NOW + timedelta(minutes=15),
+                                mailbox(("2026-10-05T00:31:42Z", 3190, "0417313381+07096")))[0] is None
 
 
 def test_mailbox_report_says_whether_the_newest_sheet_message_came_both_ways(raw):
@@ -171,6 +175,35 @@ def test_clock_battery_and_decode_alarms():
     assert "decode_errors" in ids(monitor.check(load(), [msg(30), bad], NOW))
     old_bad = Message(NOW - timedelta(days=2), "garbled")
     assert "decode_errors" not in ids(monitor.check(load(), [old_bad, msg(30)], NOW))
+
+
+LIVE = datetime(2026, 10, 23, 12, 0, tzinfo=timezone.utc)
+ROUTES = {"route_missing_hours": 1, "routes_since": "2026-10-22T18:21:00Z"}
+
+
+def by(minutes_ago, *routes, momsn=3310):
+    return Message(LIVE - timedelta(minutes=minutes_ago), "2304003385+00490", momsn=momsn,
+                   sources=tuple(f"{r}:x.jsonl" for r in routes))
+
+
+def test_route_alarm_when_one_route_misses_a_message_for_an_hour():
+    assert monitor.route_alarms(ROUTES, [by(90, "worker", "messages_tab")], LIVE) == []
+    assert monitor.route_alarms(ROUTES, [by(30, "worker")], LIVE) == []            # the sheet is slower
+    (a,) = monitor.route_alarms(ROUTES, [by(90, "worker", momsn=3309), by(30, "worker")], LIVE)
+    assert a["id"] == "route_messages_tab"
+    assert a["message"].startswith("1 message(s) came by the Cloudflare Worker but not by the Google Sheet "
+                                   "within 1 h (MOMSN 3309 sent 2026-10-23 10:30 UTC); Avalanche Canada")
+    (a,) = monitor.route_alarms(ROUTES, [by(90, "messages_tab")], LIVE)
+    assert a["id"] == "route_worker" and "Observability" in a["message"]
+
+
+def test_route_alarm_ignores_old_messages_and_can_be_switched_off():
+    before = Message(datetime(2026, 10, 22, 16, 8, tzinfo=timezone.utc), "2208073382-01795",
+                     sources=("messages_tab:x.jsonl",))                    # MOMSN 3305: no Worker yet
+    assert monitor.route_alarms(ROUTES, [before], datetime(2026, 10, 22, 20, tzinfo=timezone.utc)) == []
+    assert monitor.route_alarms(ROUTES, [by(25 * 60, "worker")], LIVE) == []       # older than a day: cleared
+    assert monitor.route_alarms({}, [by(90, "worker")], LIVE) == []
+    assert "route_messages_tab" in ids(monitor.check(load(), [by(90, "worker")], LIVE))  # config is on
 
 
 def test_build_and_injected_alarms_have_stable_ids():
