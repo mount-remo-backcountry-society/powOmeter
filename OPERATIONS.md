@@ -202,6 +202,12 @@ account (signed up with the station's Gmail address). Its code is in
   signature" on every message: check that the destination is HTTP_JSON.
 - *"mailbox FAILED" in a publish run:* the read key or address in GitHub
   does not match the Worker. Publishing continues from the sheet.
+- *"Messages tab FAILED" in a publish run:* Google did not hand over the
+  sheet's Messages tab (it answered "HTTP Error 401" twice in Oct 2026, then
+  worked again). Publishing continues from the Worker; the next run tries
+  again. If it lasts, the route alarm opens within about an hour of the next
+  message. Check that the tab is still published (File → Share → Publish to
+  web) and that the secret `MESSAGES_CSV_URL` is its CSV link.
 - The GitHub key belongs to the person who made it and expires: renew it
   (Yearly) and when handing over.
 

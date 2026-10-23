@@ -88,9 +88,16 @@ def main(argv: list[str]) -> int:
         if not url:
             print("fetch: MESSAGES_CSV_URL is not set (a GitHub secret; see OPERATIONS.md)")
             return 1
-        path = fetch(url)
-        print(f"fetch: new messages saved to {path.relative_to(path.parents[3]).as_posix()}" if path
-              else "fetch: no new messages")
+        # the sheet: a failure is reported, never fatal, so the run still builds
+        # and raises alarms (Google answered 401 on 2026-10-16 and -17). A
+        # message the Worker gets meanwhile opens the route alarm after an hour.
+        try:
+            path = fetch(url)
+            print(f"fetch: new messages saved to {path.relative_to(path.parents[3]).as_posix()}" if path
+                  else "fetch: no new messages")
+        except Exception as e:                           # noqa: BLE001
+            error = str(e).replace(url, "<MESSAGES_CSV_URL>")      # the link is private
+            print(f"fetch: Messages tab FAILED ({type(e).__name__}: {error})")
         if held is not None:
             print("fetch: " + mailbox_report(held))
         # nearby stations: a failure is reported, never fatal (their API keeps 7 days)

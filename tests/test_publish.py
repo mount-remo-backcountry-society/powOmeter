@@ -8,7 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from powometer import RAW, intake, monitor
+from powometer import RAW, intake, monitor, nearby
+from powometer.__main__ import main
 from powometer.config import load
 from powometer.radio import Message, load_all
 
@@ -55,6 +56,27 @@ def test_fetch_never_overwrites_a_raw_file(raw):
 def test_changed_sheet_layout_fails_loudly(raw):
     with pytest.raises(ValueError, match="expected columns"):
         intake.fetch("", raw, NOW, "MOMSN,When,Data\n1,2,3\n")
+
+
+@pytest.mark.parametrize("error", [
+    lambda url: intake.urllib.error.HTTPError(url + "?nocache=1", 401, "Unauthorized", {}, None),
+    lambda url: ValueError(f"unknown url type: {url!r}"),
+])
+def test_a_failed_sheet_does_not_stop_the_run(monkeypatch, capsys, error):
+    url = "https://docs.example/private-sheet-id/pub?output=csv"
+    monkeypatch.setenv("MESSAGES_CSV_URL", url)
+    monkeypatch.delenv("MAILBOX_URL", raising=False)
+
+    def google_fails(u):
+        raise error(u)
+    nearby_asked = []
+    monkeypatch.setattr(intake, "fetch", google_fails)
+    monkeypatch.setattr(nearby, "fetch", lambda cfg: nearby_asked.append(1) or (None, {}))
+    assert main(["powometer", "fetch"]) == 0
+    out = capsys.readouterr().out
+    assert "fetch: Messages tab FAILED" in out
+    assert "private-sheet-id" not in out
+    assert nearby_asked
 
 
 def mailbox(*msgs):
