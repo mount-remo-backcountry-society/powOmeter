@@ -271,6 +271,15 @@ calculates), `style.css` (colours), `terms.html` (terms of use).
   dates (weekdays on a phone); 30 days, a date about every 7th day.
 - **Changing a link** in the bar at the top (powWX, avalanche.ca): edit it
   in both `site/index.html` and `site/terms.html`.
+- **Visit counts:** <https://powometer.goatcounter.com> (sign in with the
+  GoatCounter account; hand it over with the station). One count per page
+  load, no cookies; what is recorded is in the terms, §7. Leave "individual
+  pageviews" off, or §7 must change. The page loads GoatCounter's script
+  from `site/vendor/goatcounter-count.js` (a checked copy; see
+  `GOATCOUNTER_LICENSE.md` there), so only the count itself goes to
+  GoatCounter. Previews on your own computer are not counted; to stop
+  counting one browser, open the page with `#toggle-goatcounter` at the end
+  of the address (again to undo).
 - **Check the page's calculations:** open `selftest.html` on the published
   site; every line should say OK.
 - **(computer) See the page in any state** (fresh, late, stale, storm,
