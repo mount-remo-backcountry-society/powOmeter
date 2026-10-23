@@ -1,7 +1,8 @@
 /* POW-O-METER station page.
  *
  * Reads the published files in v1/ (and webcams/) and draws the page. No
- * cookies, no tracking. The only outside requests are the webcams' newest
+ * cookies. Visits are counted by GoatCounter (index.html, terms §7): one
+ * request per page load. The only other outside requests are the webcams' newest
  * images, loaded from Shames Mountain's own address once the webcams are
  * switched on.
  *
