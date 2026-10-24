@@ -1,0 +1,3 @@
+{"fetched_utc": "2026-10-24T15:10:51Z", "row": {"measurementDateTime": "2026-10-24T15:00:00Z", "stationId": 56, "windDirAvg": 81, "windDirCompass": "E", "windSpeedAvg": 47.3}, "station_id": "avcan_56"}
+{"fetched_utc": "2026-10-24T15:10:51Z", "row": {"airTempAvg": 1.8, "measurementDateTime": "2026-10-24T15:00:00Z", "stationId": 57}, "station_id": "avcan_57"}
+{"fetched_utc": "2026-10-24T15:10:51Z", "row": {"airTempAvg": 2.4, "hourlyPrecip": -0.2, "measurementDateTime": "2026-10-24T15:00:00Z", "snowHeight": 0, "stationId": 58, "windDirAvg": 356, "windDirCompass": "N", "windSpeedAvg": 10.8}, "station_id": "avcan_58"}
