@@ -105,6 +105,8 @@ h3 { font-size: 1rem; margin: 1.2rem 0 .4rem; }
 .chart-title.reading { color: var(--text-primary); font-variant-numeric: tabular-nums; }
 .chart-title .item { white-space: nowrap; }
 .chart-title .name { color: var(--text-secondary); }
+/* a line under a chart (wind arrows, precipitation totals), close to its chart */
+.chart-foot { margin: -.3rem .2rem .7rem; }
 .legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: .875rem; color: var(--text-secondary); margin: .2rem 0 .6rem; }
 .key { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: .4rem; vertical-align: 0; }
 .key.line { width: 14px; height: 2px; border-radius: 1px; vertical-align: middle; }

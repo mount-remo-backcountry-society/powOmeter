@@ -266,6 +266,16 @@ calculates), `style.css` (colours), `terms.html` (terms of use).
   station), and the time on the time axis; a sideways drag moves through
   time, and the values clear 3 s after the finger lifts. The temperature
   chart draws 0 °C as a bold line.
+- **Wind arrows** on the wind chart point the way the wind blows
+  (downwind), at the same hours for every station, as often as fits (every
+  1 to 48 h, at least `ARROW_PX` apart); none below `CALM_KMH`. The title
+  line names the direction the wind comes from ("WSW").
+- **Precipitation** (only Shames bottom has a gauge) shows hourly bars up
+  to 3 days, 6-hour sums for 7 days and daily sums for 30 days
+  (`PRECIP_BIN_H` in `app.js`); a bar with hours missing says so ("in 4 of
+  6 h"). Under the chart: each station's total for the range, with the
+  hours that have no reading. Whether an hour's value is stamped at its
+  start or its end is not verified (see `SCHEMA.md`).
 - **Time axis:** up to 3 days, hours (24 h clock, as many as fit: every
   1, 3, 6 or 12 h) with the date in a row underneath; 7 days, only the
   dates (weekdays on a phone); 30 days, a date about every 7th day.
