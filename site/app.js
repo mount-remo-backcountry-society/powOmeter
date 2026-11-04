@@ -44,6 +44,12 @@
   const CAM_OFF_H = 24;                    // no new webcam image for longer: "the camera may be off"
                                            // (longer than a night, when a camera may rest)
   const CHART_QUALITIES = ["good", "estimate"];   // suspect values are left out of charts
+  const ARROW_PX = 22;                     // wind arrows: at least this far apart on the time axis
+  const ARROW_STEPS_H = [1, 2, 3, 6, 12, 24, 48];   // hours between arrows: the first that fits
+  const CALM_KMH = 1;                      // slower: no arrow (a vane's direction means little)
+  // precipitation bars: hours summed into one bar, by the range shown
+  // (hourly bars over 7 or 30 days would be thinner than a pixel on a phone)
+  const PRECIP_BIN_H = { 1: 1, 3: 1, 7: 6, 30: 24 };
   const STATION = "powometer";
   const OWN_NAME = "Shames POW-O-METER";
   // short names with the values while a chart is touched; other stations use their full name
@@ -141,6 +147,47 @@
     },
     /** "Updated just now", "Updated 3 min ago": when this phone last fetched the files */
     updatedText(fetchedMs, nowMs) { return "Updated " + POW.ageText((nowMs - fetchedMs) / H); },
+    /** Hours between wind arrows, so they stay ARROW_PX apart: 1, 2, 3, 6, 12, 24 or 48. */
+    arrowStep(pxPerHour) { return ARROW_STEPS_H.find((s) => s * pxPerHour >= ARROW_PX) || ARROW_STEPS_H[ARROW_STEPS_H.length - 1]; },
+    /** Whether a reading time (ms) gets a wind arrow: whole BC hours that are
+     *  a multiple of stepH (so every station's arrows fall at the same times). */
+    arrowAt(ms, stepH) {
+      const h = (ms + BC_OFFSET_H * H) / H;
+      return Math.abs(h - Math.round(h)) < 0.02 && ((Math.round(h) % stepH) + stepH) % stepH === 0;
+    },
+    /** Hourly precipitation [{x, y}] (null y = a gap) summed into bars of
+     *  stepH hours from BC midnight: [{x, y, n, hours}], n = hours with a reading.
+     *  An hourly bar stands at the reading's own time (whether that is the
+     *  start or the end of the hour is not verified); longer bars at their middle. */
+    precipBins(points, stepH) {
+      const off = BC_OFFSET_H * H, step = stepH * H, by = new Map();
+      for (const p of points) {
+        if (p.y === null) continue;
+        const k = Math.floor((p.x + off) / step);
+        const b = by.get(k) || { x: stepH === 1 ? p.x : k * step - off + step / 2, sum: 0, n: 0 };
+        b.sum += p.y; b.n++;
+        by.set(k, b);
+      }
+      return [...by.values()].sort((a, b) => a.x - b.x)
+        .map((b) => ({ x: b.x, y: Math.round(b.sum * 10) / 10, n: b.n, hours: stepH }));
+    },
+    /** Total precipitation (mm) from fromMs to the newest hourly reading, and
+     *  how many hours in that time have no reading: {mm, missing}, or null. */
+    precipTotal(points, fromMs) {
+      const pts = points.filter((p) => p.y !== null && p.x >= fromMs);
+      if (!pts.length) return null;
+      const newest = Math.max(...pts.map((p) => p.x));
+      const expected = Math.floor((newest - Math.ceil(fromMs / H) * H) / H) + 1;
+      const mm = Math.round(pts.reduce((a, p) => a + p.y, 0) * 10) / 10;
+      return { mm, missing: Math.max(0, expected - pts.length) };
+    },
+    /** A precipitation bar's value: "1.2 mm", "3.4 mm in 6 h", "3.4 mm in 4 of 6 h" */
+    precipText(p) {
+      const mm = `${p.y.toFixed(1)} mm`;
+      if (!p.hours || p.hours === 1) return mm;
+      return p.n < p.hours ? `${mm} in ${p.n} of ${p.hours} h` : `${mm} in ${p.hours} h`;
+    },
+
     /** 250 -> "WSW" */
     compass(deg) { return COMPASS[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16]; },
     /** "Kasiks High (1,435 m)"; parentheses in a site name become a comma */
@@ -227,8 +274,8 @@
     },
 
     /** For hovering: in each series, the index of the point nearest to x
-     *  (within HOVER_H), or -1. */
-    nearestEach(seriesList, x) {
+     *  (within maxH hours), or -1. */
+    nearestEach(seriesList, x, maxH = HOVER_H) {
       return seriesList.map((data) => {
         let best = -1, bd = Infinity;
         for (let i = 0; i < data.length; i++) {
@@ -236,7 +283,7 @@
           const d = Math.abs(data[i].x - x);
           if (d < bd) { bd = d; best = i; }
         }
-        return bd <= HOVER_H * H ? best : -1;
+        return bd <= maxH * H ? best : -1;
       });
     },
 
@@ -389,6 +436,9 @@
       axis: (v) => `${v}°`, widest: () => "−88.8°", freezing: true },
     { id: "chart-wind", variable: "wind_speed", fmt: (v) => `${Math.round(v)} km/h`, axis: (v) => `${v}`,
       widest: () => "88 km/h WSW", y: { min: 0, suggestedMax: 20 }, direction: true },
+    // bars: hourly amounts, summed over longer times for 7 and 30 days (PRECIP_BIN_H)
+    { id: "chart-precip", variable: "precipitation_amount", fmt: (v, p) => POW.precipText(p), axis: (v) => `${v}`,
+      widest: () => "88.8 mm in 23 of 24 h", y: { min: 0, suggestedMax: 2 }, bars: true },
     { id: "chart-rh", variable: "relative_humidity", fmt: (v) => `${Math.round(v)}%`, axis: (v) => `${v}%`,
       widest: () => "100%", y: { min: 0, max: 100 } },
   ];
@@ -413,7 +463,8 @@
       const chart = state.charts[def.id], head = $(def.id + "-head");
       if (!chart) continue;
       chart.$hoverX = x;
-      const idx = x === null ? [] : POW.nearestEach(chart.data.datasets.map((d, i) => chart.isDatasetVisible(i) ? d.data : []), x);
+      const reach = Math.max(HOVER_H, (chart.$binH || 0) / 2);    // a bar answers over its whole width
+      const idx = x === null ? [] : POW.nearestEach(chart.data.datasets.map((d, i) => chart.isDatasetVisible(i) ? d.data : []), x, reach);
       chart.setActiveElements(idx.map((index, datasetIndex) => ({ datasetIndex, index })).filter((a) => a.index >= 0));
       chart.update("none");
       head.classList.toggle("reading", x !== null);
@@ -486,6 +537,40 @@
       const py = y.getPixelForValue(0), c = chart.ctx;
       c.save(); c.strokeStyle = css("--text-muted"); c.lineWidth = 2;
       c.beginPath(); c.moveTo(left, py); c.lineTo(right, py); c.stroke(); c.restore();
+    },
+  };
+
+  // wind chart: an arrow on each station's line every few hours (ARROW_PX
+  // apart), pointing the way the wind blows; none in a calm
+  const arrows = {
+    id: "arrows",
+    afterDatasetsDraw(chart, _args, opts) {
+      if (!opts.on || !chart.$dirs) return;
+      const x = chart.scales.x, { left, right, top, bottom } = chart.chartArea, c = chart.ctx;
+      const step = POW.arrowStep(x.getPixelForValue(x.min + H) - x.getPixelForValue(x.min));
+      const halo = css("--surface-1"), L = 14, head = 5.5, wing = 3.5;
+      c.save();
+      c.lineCap = "round"; c.lineJoin = "round";
+      chart.data.datasets.forEach((ds, i) => {
+        if (!chart.isDatasetVisible(i)) return;
+        const meta = chart.getDatasetMeta(i);
+        ds.data.forEach((p, j) => {
+          if (p.y === null || p.y < CALM_KMH || !POW.arrowAt(p.x, step)) return;
+          const from = chart.$dirs.get(`${ds.station}|${p.x}`), pt = meta.data[j];
+          if (from === undefined || !pt || pt.x < left || pt.x > right || pt.y < top || pt.y > bottom) return;
+          const b = (from + 180) * Math.PI / 180, dx = Math.sin(b), dy = -Math.cos(b);   // downwind; screen y points down
+          const tx = pt.x + dx * L / 2, ty = pt.y + dy * L / 2;                          // the tip
+          const hx = tx - dx * head, hy = ty - dy * head;                                // the base of the head
+          const shape = () => {
+            c.beginPath(); c.moveTo(pt.x - dx * L / 2, pt.y - dy * L / 2); c.lineTo(hx, hy); c.stroke();
+            c.beginPath(); c.moveTo(tx, ty); c.lineTo(hx - dy * wing, hy + dx * wing); c.lineTo(hx + dy * wing, hy - dx * wing);
+            c.closePath(); c.fill(); c.stroke();
+          };
+          c.strokeStyle = c.fillStyle = halo; c.lineWidth = 4; shape();          // a halo, to stand off the line
+          c.strokeStyle = c.fillStyle = ds.borderColor; c.lineWidth = 1.6; shape();
+        });
+      });
+      c.restore();
     },
   };
 
@@ -599,6 +684,7 @@
         legend: { display: false },
         freezing: { on: !!def.freezing },
         shallow: { on: !!def.shallow },
+        arrows: { on: !!def.direction },
         dayRow: { on: days <= DAY_ROW_MAX_DAYS },
         tooltip: { enabled: false },
       },
@@ -619,10 +705,11 @@
   function renderCharts(now) {
     const from = now - state.days * 24 * H;
     const rows = state.recent.concat(state.nearRows);
-    const dirs = new Map();                     // wind direction at a station and time, for the title line
-    for (const r of state.nearRows) {
-      if (r.variable === "wind_from_direction" && r.value !== "") dirs.set(`${r.station_id}|${POW.ms(r.time_utc)}`, Number(r.value));
+    const dirs = new Map();                     // wind direction at a station and time: title line and arrows
+    for (const [sid, pts] of Object.entries(POW.series(rows, "wind_from_direction", from))) {
+      for (const p of pts) if (p.y !== null) dirs.set(`${sid}|${p.x}`, p.y);
     }
+    const binH = PRECIP_BIN_H[state.days] || 1;
     for (const def of CHARTS) {
       const series = POW.series(rows, def.variable, from, { transform: def.transform });
       const shown = state.stations.filter((s) => series[s.id] && series[s.id].some((p) => p.y !== null));
@@ -630,18 +717,25 @@
       if (state.charts[def.id]) { state.charts[def.id].destroy(); delete state.charts[def.id]; }
       head.textContent = head.dataset.title;
       head.classList.remove("reading");
+      const foot = $(def.id + "-foot");
       head.hidden = wrap.hidden = !shown.length;
+      if (foot) foot.hidden = !shown.length;
       if (note) note.hidden = !!shown.length;
       if (!shown.length) continue;
-      const datasets = shown.map((s) => ({ label: s.label, short: s.short, station: s.id, data: series[s.id],
-        borderColor: s.color, backgroundColor: s.color, hidden: state.hidden.has(s.id) }));
+      if (def.bars) renderPrecipTotal(shown, series, from);
+      const datasets = shown.map((s) => ({ label: s.label, short: s.short, station: s.id,
+        data: def.bars ? POW.precipBins(series[s.id], binH) : series[s.id],
+        borderColor: s.color, backgroundColor: s.color, hidden: state.hidden.has(s.id),
+        ...(def.bars ? { type: "bar", barPercentage: 0.85, categoryPercentage: 1, borderWidth: 0 } : {}) }));
       const chart = state.charts[def.id] = new Chart($(def.id), { type: "line", data: { datasets },
-        options: chartOptions(def, from, now, state.days), plugins: [dayRow, crosshair, freezing, shallow] });
+        options: chartOptions(def, from, now, state.days), plugins: [dayRow, crosshair, freezing, shallow, arrows] });
+      chart.$dirs = dirs;
+      chart.$binH = def.bars ? binH : 0;
       // one station's value in the title line: colour key, short name, value (and wind direction)
       chart.$readout = (ds, p, text) => {
         if (text === undefined) {
           const fmt = ds.station === STATION && def.ownFmt ? def.ownFmt : def.fmt;
-          text = fmt(p.y);
+          text = fmt(p.y, p);
           if (def.direction) { const d = dirs.get(`${ds.station}|${p.x}`); if (d !== undefined) text += " " + POW.compass(d); }
         }
         const key = el("span", { class: "key line" }); key.style.background = ds.borderColor;
@@ -649,6 +743,17 @@
       };
       fitHead(def, chart);
     }
+  }
+
+  // under the precipitation chart: each shown station's total for the range
+  function renderPrecipTotal(shown, series, from) {
+    const parts = shown.filter((s) => !state.hidden.has(s.id)).map((s) => {
+      const t = POW.precipTotal(series[s.id], from);
+      if (!t) return null;
+      return `${s.short} ${t.mm.toFixed(1)} mm` + (t.missing ? ` (${t.missing} h without a reading)` : "");
+    }).filter(Boolean);
+    const range = state.days === 1 ? "24 hours" : `${state.days} days`;
+    $("chart-precip-total").textContent = parts.length ? `Total in the last ${range}: ${parts.join(", ")}.` : "";
   }
 
   function renderTable(now) {

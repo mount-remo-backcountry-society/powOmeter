@@ -106,6 +106,11 @@ def nearby(scenario, now):
                                 statistic="mean", source="avcan"))
                 rows.append(row(t, "wind_from_direction", (200 + 7 * k) % 360, "degree", site=site, station=sid,
                                 statistic="mean", source="avcan"))
+            if sid == "avcan_58":                                     # Shames bottom has a precipitation gauge:
+                rain = max(0.0, 2.2 * math.sin(k / 11) - 0.6)          # wet spells and dry ones
+                if k != 5:                                            # (one hour without a reading)
+                    rows.append(row(t, "precipitation_amount", round(rain, 1), "mm", site=site, station=sid,
+                                    statistic="sum", source="avcan"))
             if sid == "avcan_56":                                     # and Kasiks High a snow sensor
                 rows.append(row(t, "snow_depth", round(160 - k * 0.1), "cm", site=site, station=sid,
                                 source="avcan"))

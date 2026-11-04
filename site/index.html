@@ -52,9 +52,20 @@
     <div class="chart"><canvas id="chart-temp" role="img" aria-label="Air temperature chart"></canvas></div>
     <p id="chart-temp-none" class="small muted" hidden>No temperature readings in this time.</p>
 
-    <p id="chart-wind-head" class="chart-title">Wind speed (km/h), nearby stations</p>
-    <div class="chart"><canvas id="chart-wind" role="img" aria-label="Wind speed at the nearby stations chart"></canvas></div>
+    <p id="chart-wind-head" class="chart-title">Wind speed (km/h) and direction, nearby stations</p>
+    <div class="chart"><canvas id="chart-wind" role="img"
+      aria-label="Wind speed and direction at the nearby stations chart"></canvas></div>
+    <p id="chart-wind-foot" class="chart-foot small muted" hidden>Arrows point the way the wind blows: ↓ is a north
+      wind. No arrow when it is calm.</p>
     <p id="chart-wind-none" class="small muted" hidden>No wind data yet.</p>
+
+    <p id="chart-precip-head" class="chart-title">Precipitation (mm of water), nearby stations</p>
+    <div class="chart"><canvas id="chart-precip" role="img"
+      aria-label="Precipitation at the nearby stations chart"></canvas></div>
+    <p id="chart-precip-foot" class="chart-foot small muted" hidden><span id="chart-precip-total"></span>
+      Rain and melted snow together. Hourly bars; over 7 days, 6-hour totals; over 30 days, daily totals. A gauge in
+      the valley can get rain while it snows higher up.</p>
+    <p id="chart-precip-none" class="small muted" hidden>No precipitation data yet.</p>
 
     <p id="chart-rh-head" class="chart-title">Relative humidity (%)</p>
     <div class="chart"><canvas id="chart-rh" role="img" aria-label="Relative humidity chart"></canvas></div>
