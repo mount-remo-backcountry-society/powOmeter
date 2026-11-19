@@ -45,9 +45,9 @@
   eq("age: minutes", P.ageText(0.5), "30 min ago");
   eq("age: hours", P.ageText(3.4), "3 h ago");
   eq("age: days", P.ageText(72), "3 days ago");
-  eq("updated line", [P.updatedText(T("2026-12-01T18:00:00Z"), T("2026-12-01T18:00:30Z")),
-                      P.updatedText(T("2026-12-01T18:00:00Z"), T("2026-12-01T18:03:00Z"))],
-     ["Updated just now", "Updated 3 min ago"]);
+  eq("reading line", [P.readingText(T("2026-12-01T19:12:00Z"), T("2026-12-01T22:20:00Z")),
+                      P.readingText(null, T("2026-12-01T22:20:00Z"))],
+     ["Latest reading Tue 1 Dec, 12:12 (3 h ago)", "No current reading"]);
   // the webcam's newest image: same address within 5 minutes, a new one after
   const cam = "https://example.org/cam.png";
   eq("webcam address: same 5 minutes", P.freshUrl(cam, T("2026-12-01T18:01:00Z")), P.freshUrl(cam, T("2026-12-01T18:04:59Z")));

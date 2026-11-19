@@ -145,8 +145,12 @@
       if (!latestIso || POW.ageHours(latestIso, nowMs) <= CAM_OFF_H) return null;
       return `No new image since ${POW.fmtDateTime(POW.ms(latestIso))} BC: the camera may be off.`;
     },
-    /** "Updated just now", "Updated 3 min ago": when this phone last fetched the files */
-    updatedText(fetchedMs, nowMs) { return "Updated " + POW.ageText((nowMs - fetchedMs) / H); },
+    /** The one line under the title saying how old the readings are:
+     *  "Latest reading Thu 19 Nov, 11:12 (3 h ago)" */
+    readingText(ms, nowMs) {
+      return ms === null ? "No current reading"
+        : `Latest reading ${POW.fmtDateTime(ms)} (${POW.ageText((nowMs - ms) / H)})`;
+    },
     /** Hours between wind arrows, so they stay ARROW_PX apart: 1, 2, 3, 6, 12, 24 or 48. */
     arrowStep(pxPerHour) { return ARROW_STEPS_H.find((s) => s * pxPerHour >= ARROW_PX) || ARROW_STEPS_H[ARROW_STEPS_H.length - 1]; },
     /** Whether a reading time (ms) gets a wind arrow: whole BC hours that are
@@ -362,19 +366,19 @@
         `These files were built ${POW.ageText(built)}, so everything below may be older than it looks.`);
     } else if (f === "stale") {
       b.className = "banner stale";
-      b.append(el("strong", { text: "No recent data: don’t rely on these values. " }),
-        lastObs ? `The latest reading is from ${POW.fmtDateTime(POW.ms(lastObs))} (${POW.ageText(age)}).` : "");
+      b.append(el("strong", { text: "No recent data: don’t rely on these values." }));
     } else if (f === "late") {
       b.className = "banner late";
       b.append(el("strong", { text: "Later than usual. " }),
-        `The latest reading is ${POW.ageText(age)} old; the station sends 7 times a day, so this may only be a delay.`);
+        "The station sends 7 times a day, so this may only be a delay.");
     } else {
       b.hidden = true;
     }
   }
 
-  // -- Now tiles --
-  function tile(id, label, v, fmt) {
+  // -- Now tiles: just the value; the time is in the line under the title,
+  //    unless this tile's reading is older than the latest one --
+  function tile(id, label, v, fmt, latestMs) {
     const t = $(id);
     t.replaceChildren();
     t.className = "tile" + (v ? " " + v.state : "");
@@ -383,9 +387,11 @@
       t.append(el("div", { class: "tile-value", text: "–" }), el("div", { class: "tile-age", text: "no current reading" }));
       return;
     }
-    t.append(el("div", { class: "tile-value", text: fmt(v.value) }),
-      el("div", { class: "tile-age", text: `${POW.ageText(v.age)} · ${POW.fmtDateTime(v.ms)}` +
+    t.append(el("div", { class: "tile-value", text: fmt(v.value) }));
+    if (v.ms < latestMs) {
+      t.append(el("div", { class: "tile-age", text: `${POW.fmtDateTime(v.ms)} (${POW.ageText(v.age)})` +
         (v.state === "stale" ? " · not current" : v.state === "late" ? " · older than usual" : "") }));
+    }
   }
   // under the snow depth: its change over 24, 48 and 72 h (not with old data, nor before there is snow)
   function depthChanges(v) {
@@ -399,10 +405,14 @@
   }
   function renderTiles(now) {
     const depth = POW.nowValue(state.latest, "snow_depth", state.site, now);
-    tile("now-depth", "Snow depth", depth, POW.depthText);
+    const temp = POW.nowValue(state.latest, "air_temperature", state.site, now);
+    const rh = POW.nowValue(state.latest, "relative_humidity", state.site, now);
+    const times = [depth, temp, rh].filter(Boolean).map((v) => v.ms);
+    state.readingMs = times.length ? Math.max(...times) : null;
+    tile("now-depth", "Snow depth", depth, POW.depthText, state.readingMs);
     depthChanges(depth);
-    tile("now-temp", "Air temperature", POW.nowValue(state.latest, "air_temperature", state.site, now), POW.fmtTemp);
-    tile("now-rh", "Humidity", POW.nowValue(state.latest, "relative_humidity", state.site, now), (v) => `${Math.round(v)}%`);
+    tile("now-temp", "Air temperature", temp, POW.fmtTemp, state.readingMs);
+    tile("now-rh", "Humidity", rh, (v) => `${Math.round(v)}%`, state.readingMs);
   }
 
   // -- station tick-boxes (one row above the charts, for all charts) --
@@ -917,8 +927,8 @@
     const now = Date.now();
     state.stations = stationList();
     renderBanner(now);
-    renderUpdated(now);
     renderTiles(now);
+    renderUpdated(now);
     renderPicker();
     renderCharts(now);
     renderTable(now);
@@ -955,11 +965,11 @@
     }
   }
 
-  // -- "Updated 3 min ago · Refresh" under the title --
+  // -- "Latest reading Thu 19 Nov, 11:12 (3 h ago) · Refresh" under the title --
   function renderUpdated(now) {
-    if (state.fetchedMs === null) return;
+    if (state.fetchedMs === null || state.readingMs === undefined) return;
     $("updated").hidden = false;
-    $("updated-text").textContent = POW.updatedText(state.fetchedMs, now);
+    $("updated-text").textContent = POW.readingText(state.readingMs, now);
   }
 
   function start() {
