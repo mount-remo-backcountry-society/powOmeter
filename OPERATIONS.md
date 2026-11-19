@@ -234,6 +234,13 @@ GitHub emails everyone who watches the repository (top right: **Watch** →
 files are in `site/`: `index.html` (text and layout), `app.js` (what it
 calculates), `style.css` (colours), `terms.html` (terms of use).
 
+**Demo page:** <https://mount-remo-backcountry-society.github.io/powOmeter/demo/>,
+for showing the page to others. Real POW-O-METER readings; the nearby
+stations ("Example Ridge" etc.) and the webcam picture are made up in
+`powometer/demo.py`, so nothing from the Ministry or Shames Mountain is in it.
+Each publish run rebuilds it; if that step fails, the real page still
+publishes and the demo keeps its last version.
+
 - **What the colours mean:** no colour, the newest reading is under 6 hours
   old (normal: the station sends 7 times a day). **Amber:** 6 to 12 hours,
   probably only a delay. **Red, values struck through:** over 12 hours, the
