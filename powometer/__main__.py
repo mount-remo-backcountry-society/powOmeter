@@ -9,6 +9,9 @@
              enabled nearby stations into raw/avcan/
   webcams    add the newest webcam frames to a 3-day time lapse:
              webcams <folder>   (normally out/webcams; never fails the run)
+  demo       the demo page (real POW-O-METER data, made-up nearby stations
+             and webcam): demo <site folder> <out folder>, normally
+             demo site out; reads out/v1, writes out/demo
   approve    freeze a reviewed period:
              approve <variable> <from UTC> <until UTC> <snapshot name> <initials>
              e.g. approve snow_depth 2025-01-26T18:58:34Z 2025-09-28T18:03:32Z 2025-season JK
@@ -114,6 +117,14 @@ def main(argv: list[str]) -> int:
             print(__doc__)
             return 2
         run(Path(argv[2]))
+        return 0
+    if cmd == "demo":
+        from pathlib import Path
+        from .demo import build as build_demo
+        if len(argv) != 4:
+            print(__doc__)
+            return 2
+        print(f"demo: written to {build_demo(Path(argv[2]), Path(argv[3]))}")
         return 0
     if cmd == "build":
         from .build import build

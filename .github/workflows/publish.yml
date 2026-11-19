@@ -105,6 +105,13 @@ jobs:
           path: out/webcams
           key: webcams-${{ github.run_id }}
 
+      # Demo page at demo/: the real POW-O-METER files, made-up nearby
+      # stations and a drawn webcam picture. Nothing here can stop publishing.
+      - name: Add the demo page
+        continue-on-error: true
+        timeout-minutes: 5
+        run: python -m powometer demo site out
+
       - uses: actions/upload-pages-artifact@v5
         with:
           path: out
