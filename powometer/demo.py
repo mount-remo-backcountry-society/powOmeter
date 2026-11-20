@@ -46,8 +46,7 @@ CAM_STEP_H = 2
 CAM_BC_HOURS = range(8, 17)        # daylight frames only, like the real time lapse
 BC = timezone(timedelta(hours=-7))
 BANNER = ('<p class="banner"><strong>Demo page.</strong> The snow depth, temperature and humidity are real '
-          'POW-O-METER readings; the nearby stations and the webcam picture are made up. '
-          '<a href="../">The real station page</a></p>')
+          'POW-O-METER readings; the nearby stations and the webcam picture are made up.</p>')
 
 H = 3600.0
 
@@ -200,11 +199,10 @@ def webcams(folder: Path, now: datetime) -> dict:
 
 
 def page(index_html: str) -> str:
-    """The station page, marked as a demo; download links go to the real files."""
+    """The station page, marked as a demo; download links go to the real files.
+    It does not link to the real station page ("Station data" stays on the demo)."""
     html = index_html.replace("<title>POW-O-METER snow station</title>",
                               '<title>POW-O-METER demo</title>\n<meta name="robots" content="noindex">', 1)
-    html = html.replace('<a href="./" aria-current="page">Station data</a>',
-                        '<a href="../">Station data</a>', 1)
     html = html.replace("<h1>POW-O-METER</h1>", "<h1>POW-O-METER (demo)</h1>\n  " + BANNER, 1)
     return html.replace('href="v1/', 'href="../v1/')
 
