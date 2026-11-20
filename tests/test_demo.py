@@ -69,6 +69,7 @@ def test_page_says_demo_and_links_to_the_real_files(out):
     assert "POW-O-METER (demo)" in html and "made up" in html and 'name="robots" content="noindex"' in html
     assert 'href="../v1/best.csv"' in html and 'href="v1/' not in html
     assert 'href="../"' not in html                     # no link to the real station page
+    assert 'powWX' not in html                          # no forecast link (removed 2026-11-20)
 
 
 def test_nearby_files_match_what_the_page_reads(out):
